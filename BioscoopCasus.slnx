@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="BioscoopCasus.API/BioscoopCasus.API.csproj" />
+  <Project Path="BioscoopCasus.Models/BioscoopCasus.Models.csproj" />
+  <Project Path="BioscoopCasus.Web/BioscoopCasus.Web.csproj" />
+</Solution>
