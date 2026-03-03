@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "6Scgr3Be4rI=",
+  "dgSpecHash": "72ajC3t/X9w=",
   "success": true,
-  "projectFilePath": "/Users/giovannischroevers/RiderProjects/BioscoopCasus/BioscoopCasus.API/BioscoopCasus.API.csproj",
+  "projectFilePath": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj",
   "expectedPackageFiles": [
-    "/Users/giovannischroevers/.nuget/packages/microsoft.aspnetcore.openapi/10.0.2/microsoft.aspnetcore.openapi.10.0.2.nupkg.sha512",
-    "/Users/giovannischroevers/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512"
+    "C:\\Users\\raulv\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.2\\microsoft.aspnetcore.openapi.10.0.2.nupkg.sha512",
+    "C:\\Users\\raulv\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
   ],
   "logs": []
 }
