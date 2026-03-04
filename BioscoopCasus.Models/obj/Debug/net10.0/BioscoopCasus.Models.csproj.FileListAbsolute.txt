@@ -1,0 +1,12 @@
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\bin\Debug\net10.0\BioscoopCasus.Models.deps.json
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\bin\Debug\net10.0\BioscoopCasus.Models.dll
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\bin\Debug\net10.0\BioscoopCasus.Models.pdb
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\obj\Debug\net10.0\BioscoopCasus.Models.GeneratedMSBuildEditorConfig.editorconfig
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\obj\Debug\net10.0\BioscoopCasus.Models.AssemblyInfoInputs.cache
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\obj\Debug\net10.0\BioscoopCasus.Models.AssemblyInfo.cs
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\obj\Debug\net10.0\BioscoopCasus.Models.csproj.CoreCompileInputs.cache
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\obj\Debug\net10.0\BioscoopCasus.Models.sourcelink.json
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\obj\Debug\net10.0\BioscoopCasus.Models.dll
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\obj\Debug\net10.0\refint\BioscoopCasus.Models.dll
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\obj\Debug\net10.0\BioscoopCasus.Models.pdb
+C:\school\leerjaar 2\net\bioscoop-casus\BioscoopCasus.Models\obj\Debug\net10.0\ref\BioscoopCasus.Models.dll
