@@ -2406,19 +2406,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\giovi\\.nuget\\packages\\": {}
+    "C:\\Users\\raulv\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj",
+      "projectUniqueName": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj",
       "projectName": "BioscoopCasus.API",
-      "projectPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj",
-      "packagesPath": "C:\\Users\\giovi\\.nuget\\packages\\",
-      "outputPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.API\\obj\\",
+      "projectPath": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj",
+      "packagesPath": "C:\\Users\\raulv\\.nuget\\packages\\",
+      "outputPath": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.API\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\giovi\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\raulv\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -2430,8 +2430,8 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj": {
-              "projectPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj"
+            "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj": {
+              "projectPath": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj"
             }
           }
         }
@@ -2496,7 +2496,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Users\\giovi\\.dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
