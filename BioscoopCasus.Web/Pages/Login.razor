@@ -1,0 +1,67 @@
+@page "/login"
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+
+<h3>Admin Login</h3>
+
+<div class="row">
+    <div class="col-md-6 col-lg-4">
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @ErrorMessage
+            </div>
+        }
+
+        <EditForm Model="LoginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="LoginModel.Password" />
+                <ValidationMessage For="@(() => LoginModel.Password)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" disabled="@IsLoading">
+                @if (IsLoading)
+                {
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span role="status">Logging in...</span>
+                }
+                else
+                {
+                    <span>Login</span>
+                }
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    public class LoginViewModel
+    {
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private LoginViewModel LoginModel = new();
+    private string? ErrorMessage;
+    private bool IsLoading;
+
+    private async Task HandleLogin()
+    {
+        IsLoading = true;
+        ErrorMessage = null;
+
+        var dto = new LoginDto(LoginModel.Password);
+        var result = await AuthService.LoginAsync(dto);
+
+        if (result == null)
+        {
+            NavigationManager.NavigateTo("/management");
+        }
+        else
+        {
+            ErrorMessage = result;
+            IsLoading = false;
+        }
+    }
+}

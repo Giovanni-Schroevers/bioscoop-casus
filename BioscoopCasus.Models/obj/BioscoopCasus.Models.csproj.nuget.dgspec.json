@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/giovannischroevers/RiderProjects/BioscoopCasus/BioscoopCasus.Models/BioscoopCasus.Models.csproj": {}
+    "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj": {}
   },
   "projects": {
-    "/Users/giovannischroevers/RiderProjects/BioscoopCasus/BioscoopCasus.Models/BioscoopCasus.Models.csproj": {
+    "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/giovannischroevers/RiderProjects/BioscoopCasus/BioscoopCasus.Models/BioscoopCasus.Models.csproj",
+        "projectUniqueName": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj",
         "projectName": "BioscoopCasus.Models",
-        "projectPath": "/Users/giovannischroevers/RiderProjects/BioscoopCasus/BioscoopCasus.Models/BioscoopCasus.Models.csproj",
-        "packagesPath": "/Users/giovannischroevers/.nuget/packages/",
-        "outputPath": "/Users/giovannischroevers/RiderProjects/BioscoopCasus/BioscoopCasus.Models/obj/",
+        "projectPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj",
+        "packagesPath": "C:\\Users\\giovi\\.nuget\\packages\\",
+        "outputPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/giovannischroevers/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\giovi\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -59,7 +59,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/Users/giovannischroevers/.dotnet/sdk/10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Users\\giovi\\.dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
