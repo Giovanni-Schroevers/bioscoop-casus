@@ -1,0 +1,19 @@
+@page "/management"
+@attribute [Authorize]
+@inject AuthService AuthService
+
+<PageTitle>Management Dashboard</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Management Dashboard</h1>
+    <button class="btn btn-danger" @onclick="HandleLogout">Logout</button>
+</div>
+
+<p>Welcome to the protected admin area. Here you will manage your movies, rooms, and showtimes.</p>
+
+@code {
+    private async Task HandleLogout()
+    {
+        await AuthService.LogoutAsync();
+    }
+}

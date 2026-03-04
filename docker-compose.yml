@@ -1,0 +1,14 @@
+services:
+  database:
+    image: mysql:8.0
+    container_name: bioscoop_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: BioscoopCasus123!
+      MYSQL_DATABASE: BioscoopCasus
+    ports:
+      - "3306:3306"
+    volumes:
+      - bioscoop_mysql_data:/var/lib/mysql
+
+volumes:
+  bioscoop_mysql_data:

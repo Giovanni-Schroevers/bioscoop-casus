@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj": {}
+    "D:\\Avans\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj": {}
   },
   "projects": {
-    "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj": {
+    "D:\\Avans\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj",
+        "projectUniqueName": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj",
         "projectName": "BioscoopCasus.API",
-        "projectPath": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj",
-        "packagesPath": "C:\\Users\\raulv\\.nuget\\packages\\",
-        "outputPath": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.API\\obj\\",
+        "projectPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.API\\BioscoopCasus.API.csproj",
+        "packagesPath": "C:\\Users\\giovi\\.nuget\\packages\\",
+        "outputPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\raulv\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\giovi\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -26,8 +26,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj": {
-                "projectPath": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj"
+              "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj": {
+                "projectPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj"
               }
             }
           }
@@ -48,9 +48,29 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[10.0.3, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[10.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
+            "Pomelo.EntityFrameworkCore.MySql": {
+              "target": "Package",
+              "version": "[9.0.0, )"
             }
           },
           "imports": [
@@ -72,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Users\\giovi\\.dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
@@ -490,17 +510,17 @@
         }
       }
     },
-    "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj": {
+    "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj",
+        "projectUniqueName": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj",
         "projectName": "BioscoopCasus.Models",
-        "projectPath": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj",
-        "packagesPath": "C:\\Users\\raulv\\.nuget\\packages\\",
-        "outputPath": "C:\\school\\leerjaar 2\\net\\bioscoop-casus\\BioscoopCasus.Models\\obj\\",
+        "projectPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\BioscoopCasus.Models.csproj",
+        "packagesPath": "C:\\Users\\giovi\\.nuget\\packages\\",
+        "outputPath": "D:\\Avans\\bioscoop-casus\\BioscoopCasus.Models\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\raulv\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\giovi\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -545,7 +565,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Users\\giovi\\.dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
