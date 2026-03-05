@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace BioscoopCasus.Models.DTOs;
 
 public record ShowtimeResponseDto(
