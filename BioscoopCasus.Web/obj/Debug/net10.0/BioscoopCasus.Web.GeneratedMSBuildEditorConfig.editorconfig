@@ -55,3 +55,19 @@ build_metadata.AdditionalFiles.CssScope =
 [D:/Avans/bioscoop-casus/BioscoopCasus.Web/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Avans/bioscoop-casus/BioscoopCasus.Web/Components/FormButton.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGb3JtQnV0dG9uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-yg6kl5uo65
+
+[D:/Avans/bioscoop-casus/BioscoopCasus.Web/Components/TerminalButton.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xUZXJtaW5hbEJ1dHRvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-yah0yuqj9l
+
+[D:/Avans/bioscoop-casus/BioscoopCasus.Web/Components/TerminalModal.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xUZXJtaW5hbE1vZGFsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-epn4isa6mv
+
+[D:/Avans/bioscoop-casus/BioscoopCasus.Web/Layout/TerminalShell.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XFRlcm1pbmFsU2hlbGwucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-zi3oegzumq

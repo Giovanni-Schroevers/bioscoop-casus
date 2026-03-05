@@ -15,5 +15,8 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https:/
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<MovieService>();
+builder.Services.AddScoped<RoomService>();
+builder.Services.AddScoped<ShowtimeService>();
 
 await builder.Build().RunAsync();
