@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace BioscoopCasus.Models.DTOs;
 
 public record RowResponseDto(
