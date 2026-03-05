@@ -1,0 +1,70 @@
+@page "/films"
+@inject MoviesOverviewService MoviesOverviewService
+@using BioscoopCasus.Models.DTOs
+@using BioscoopCasus.Web.Services
+
+<h1>Films</h1>
+
+<select @onchange="OnDayChanged">
+    @foreach (var day in AvailableDays)
+    {
+        <option value="@day.ToString("yyyy-MM-dd")">@day.ToString("dddd dd MMMM")</option>
+    }
+</select>
+
+@if (Movies == null)
+{
+    <p>Loading...</p>
+}
+else if (!Movies.Any())
+{
+    <p>Geen films beschikbaar voor deze dag.</p>
+}
+else
+{
+    @foreach (var movie in Movies)
+    {
+        <div>
+            <h2>@movie.Title</h2>
+            <p>@movie.Genres</p>
+            <p>@movie.DurationMinutes minuten</p>
+            <p>
+                @foreach (var showtime in movie.Showtimes)
+                {
+                    <span>@showtime.StartTime.ToString("HH:mm")</span>
+                }
+            </p>
+        </div>
+    }
+}
+
+@code
+{
+    private List<MoviesOverviewDto>? Movies;
+    private List<DateTime> AvailableDays = [];
+    private DateTime SelectedDay;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var today = DateTime.Today;
+        var endOfWeek = today.AddDays(7 - (int)today.DayOfWeek);
+        
+        for (var d = today; d <= endOfWeek; d = d.AddDays(1))
+            AvailableDays.Add(d);
+
+        SelectedDay = today;
+        await LoadMovies();
+    }
+
+    private async Task OnDayChanged(ChangeEventArgs e)
+    {
+        SelectedDay = DateTime.Parse(e.Value!.ToString()!);
+        await LoadMovies();
+    }
+
+    private async Task LoadMovies()
+    {
+        Movies = await MoviesOverviewService.GetMoviesAsync(SelectedDay);
+    }
+}
+
