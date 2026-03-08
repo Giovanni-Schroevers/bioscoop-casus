@@ -22,7 +22,7 @@ namespace BioscoopCasus.API.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("BioscoopCasus.Models.Movie", b =>
+            modelBuilder.Entity("BioscoopCasus.API.Entities.Movie", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,7 +68,24 @@ namespace BioscoopCasus.API.Migrations
                     b.ToTable("Movies");
                 });
 
-            modelBuilder.Entity("BioscoopCasus.Models.Room", b =>
+            modelBuilder.Entity("BioscoopCasus.API.Entities.PinCard", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PinCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PinCards");
+                });
+
+            modelBuilder.Entity("BioscoopCasus.API.Entities.Room", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -97,7 +114,7 @@ namespace BioscoopCasus.API.Migrations
                     b.ToTable("Rooms");
                 });
 
-            modelBuilder.Entity("BioscoopCasus.Models.Row", b =>
+            modelBuilder.Entity("BioscoopCasus.API.Entities.Row", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -121,7 +138,7 @@ namespace BioscoopCasus.API.Migrations
                     b.ToTable("Rows");
                 });
 
-            modelBuilder.Entity("BioscoopCasus.Models.Showtime", b =>
+            modelBuilder.Entity("BioscoopCasus.API.Entities.Showtime", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -147,9 +164,9 @@ namespace BioscoopCasus.API.Migrations
                     b.ToTable("Showtimes");
                 });
 
-            modelBuilder.Entity("BioscoopCasus.Models.Row", b =>
+            modelBuilder.Entity("BioscoopCasus.API.Entities.Row", b =>
                 {
-                    b.HasOne("BioscoopCasus.Models.Room", "Room")
+                    b.HasOne("BioscoopCasus.API.Entities.Room", "Room")
                         .WithMany("Rows")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -158,15 +175,15 @@ namespace BioscoopCasus.API.Migrations
                     b.Navigation("Room");
                 });
 
-            modelBuilder.Entity("BioscoopCasus.Models.Showtime", b =>
+            modelBuilder.Entity("BioscoopCasus.API.Entities.Showtime", b =>
                 {
-                    b.HasOne("BioscoopCasus.Models.Movie", "Movie")
+                    b.HasOne("BioscoopCasus.API.Entities.Movie", "Movie")
                         .WithMany("Showtimes")
                         .HasForeignKey("MovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BioscoopCasus.Models.Room", "Room")
+                    b.HasOne("BioscoopCasus.API.Entities.Room", "Room")
                         .WithMany("Showtimes")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -177,12 +194,12 @@ namespace BioscoopCasus.API.Migrations
                     b.Navigation("Room");
                 });
 
-            modelBuilder.Entity("BioscoopCasus.Models.Movie", b =>
+            modelBuilder.Entity("BioscoopCasus.API.Entities.Movie", b =>
                 {
                     b.Navigation("Showtimes");
                 });
 
-            modelBuilder.Entity("BioscoopCasus.Models.Room", b =>
+            modelBuilder.Entity("BioscoopCasus.API.Entities.Room", b =>
                 {
                     b.Navigation("Rows");
 

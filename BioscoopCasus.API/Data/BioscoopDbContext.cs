@@ -14,6 +14,7 @@ public class BioscoopDbContext : DbContext
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Row> Rows { get; set; }
     public DbSet<Showtime> Showtimes { get; set; }
+    public DbSet<PinCard> PinCards { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

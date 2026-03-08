@@ -19,10 +19,13 @@ public static class BioscoopDbSeeder
         var movies = CreateMovies();
         var showtimes = CreateShowtimes(movies, rooms);
 
+        var pinCards = CreatePinCards();
+
         context.Rooms.AddRange(rooms);
         context.Rows.AddRange(rows);
         context.Movies.AddRange(movies);
         context.Showtimes.AddRange(showtimes);
+        context.PinCards.AddRange(pinCards);
 
         await context.SaveChangesAsync();
     }
@@ -189,22 +192,37 @@ public static class BioscoopDbSeeder
             var date = monday.AddDays(day);
 
             // Spread movies across rooms and time slots
-            int movieIndex = 0;
+            int roomOffset = 0;
             foreach (var room in rooms)
             {
-                foreach (var hour in timeSlots)
+                for (int slotIndex = 0; slotIndex < timeSlots.Length; slotIndex++)
                 {
-                    var movie = movies[movieIndex % movies.Count];
+                    var movie = movies[(roomOffset + slotIndex) % movies.Count];
                     showtimes.Add(new Showtime
                     {
                         Movie = movie,
                         Room = room,
-                        StartTime = date.AddHours(hour),
+                        StartTime = date.AddHours(timeSlots[slotIndex]),
                     });
-
-                    movieIndex++;
                 }
+                roomOffset++;
             }
         }
+    }
+
+    private static List<PinCard> CreatePinCards()
+    {
+        var random = new Random(42);
+        var pinCards = new List<PinCard>();
+
+        for (int i = 0; i < 20; i++)
+        {
+            pinCards.Add(new PinCard
+            {
+                PinCode = random.Next(0, 10000).ToString("D4")
+            });
+        }
+
+        return pinCards;
     }
 }
