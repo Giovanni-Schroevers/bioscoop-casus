@@ -53,9 +53,9 @@
     protected override async Task OnInitializedAsync()
     {
         var today = DateTime.Today;
-        var endOfWeek = today.AddDays(7 - (int)today.DayOfWeek);
-        
-        for (var d = today; d <= endOfWeek; d = d.AddDays(1))
+        var endDate = today.AddDays(7);
+
+        for (var d = today; d <= endDate; d = d.AddDays(1))
             AvailableDays.Add(d);
 
         SelectedDay = today;
