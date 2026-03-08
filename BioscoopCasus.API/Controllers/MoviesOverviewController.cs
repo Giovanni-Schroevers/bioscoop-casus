@@ -28,7 +28,8 @@ public class MoviesOverviewController : ControllerBase
                 s.StartTime.Date == filterDate &&
                 s.StartTime >= now && 
                 s.StartTime < endOfWeek))
-            .OrderBy(m => m.Title)
+            .OrderBy(m => m.Showtimes.Where(s => s.StartTime.Date == filterDate && s.StartTime >= now && s.StartTime < endOfWeek).Min(s => s.StartTime))
+            .ThenBy(m => m.Title)
             .ToListAsync();
         
     var result = movies.Select(m => new MoviesOverviewDto(
