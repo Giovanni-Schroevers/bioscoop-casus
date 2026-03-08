@@ -18,5 +18,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https:/
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ReservationService>();
+builder.Services.AddSingleton<QrCodeHelper>();
 
 await builder.Build().RunAsync();
