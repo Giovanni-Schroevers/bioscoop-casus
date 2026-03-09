@@ -7,19 +7,12 @@ using Microsoft.JSInterop;
 
 namespace BioscoopCasus.Web.Services;
 
-public class AuthService
+public class AuthService(HttpClient httpClient, AuthenticationStateProvider authenticationStateProvider, IJSRuntime jsRuntime)
 {
-    private readonly HttpClient _httpClient;
-    private readonly AuthenticationStateProvider _authenticationStateProvider;
-    private readonly IJSRuntime _jsRuntime;
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly AuthenticationStateProvider _authenticationStateProvider = authenticationStateProvider;
+    private readonly IJSRuntime _jsRuntime = jsRuntime;
     private const string AuthTokenKey = "authToken";
-
-    public AuthService(HttpClient httpClient, AuthenticationStateProvider authenticationStateProvider, IJSRuntime jsRuntime)
-    {
-        _httpClient = httpClient;
-        _authenticationStateProvider = authenticationStateProvider;
-        _jsRuntime = jsRuntime;
-    }
 
     public async Task<string?> LoginAsync(LoginDto loginRequest)
     {

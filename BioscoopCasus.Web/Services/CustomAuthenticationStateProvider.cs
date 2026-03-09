@@ -9,15 +9,10 @@ using Microsoft.JSInterop;
 
 namespace BioscoopCasus.Web.Services;
 
-public class CustomAuthenticationStateProvider : AuthenticationStateProvider
+public class CustomAuthenticationStateProvider(IJSRuntime jsRuntime) : AuthenticationStateProvider
 {
-    private readonly IJSRuntime _jsRuntime;
+    private readonly IJSRuntime _jsRuntime = jsRuntime;
     private const string AuthTokenKey = "authToken";
-
-    public CustomAuthenticationStateProvider(IJSRuntime jsRuntime)
-    {
-        _jsRuntime = jsRuntime;
-    }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {

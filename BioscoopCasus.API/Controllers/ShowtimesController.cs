@@ -71,6 +71,9 @@ public class ShowtimesController : ControllerBase
         if (!await _context.Rooms.AnyAsync(r => r.Id == dto.RoomId))
             return BadRequest("Invalid RoomId");
 
+        if (dto.StartTime < DateTime.Now)
+            return BadRequest("Showtime cannot be in the past");
+
         // Calculate end time (duration + 30 min cleaning buffer)
         var newEndTime = dto.StartTime.AddMinutes(movie.DurationMinutes + 30);
 
@@ -159,6 +162,11 @@ public class ShowtimesController : ControllerBase
                         (dto.StartTime <= s.StartTime && newEndTime >= processingEndTime));
             });
 
+            if (dto.StartTime < DateTime.Now)
+            {
+                return BadRequest($"StartTime for RoomId {dto.RoomId} cannot be in the past.");
+            }
+
             if (dbConflict || inMemoryConflict)
             {
                 return BadRequest($"Scheduling conflict detected for RoomId {dto.RoomId} at {dto.StartTime}.");
@@ -186,6 +194,58 @@ public class ShowtimesController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(responseDtos);
+    }
+
+    // PUT /api/showtimes/{id}
+    [HttpPut("{id}")]
+    [Authorize]
+    public async Task<ActionResult<ShowtimeResponseDto>> UpdateShowtime(int id, ShowtimeCreateDto dto)
+    {
+        var showtime = await _context.Showtimes.FindAsync(id);
+        if (showtime == null)
+        {
+            return NotFound("Show not found");
+        }
+        
+        var movie = await _context.Movies.FindAsync(dto.MovieId);
+        if (movie == null)
+            return BadRequest("Invalid MovieId");
+
+        if (!await _context.Rooms.AnyAsync(r => r.Id == dto.RoomId))
+            return BadRequest("Invalid RoomId");
+
+        if (dto.StartTime < DateTime.Now)
+            return BadRequest("Showtime cannot be in the past");
+
+        // Calculate end time (duration + 30 min cleaning buffer)
+        var newEndTime = dto.StartTime.AddMinutes(movie.DurationMinutes + 30);
+
+        // Check for double bookings excluding the current showtime
+        var hasConflict = await _context.Showtimes
+            .Include(s => s.Movie)
+            .AnyAsync(s => s.Id != id && s.RoomId == dto.RoomId &&
+                           ((dto.StartTime >= s.StartTime && dto.StartTime < s.StartTime.AddMinutes(s.Movie.DurationMinutes + 30)) ||
+                            (newEndTime > s.StartTime && newEndTime <= s.StartTime.AddMinutes(s.Movie.DurationMinutes + 30)) ||
+                            (dto.StartTime <= s.StartTime && newEndTime >= s.StartTime.AddMinutes(s.Movie.DurationMinutes + 30))));
+
+        if (hasConflict)
+        {
+            return BadRequest($"Room is already booked during this time slot.");
+        }
+
+        showtime.MovieId = dto.MovieId;
+        showtime.RoomId = dto.RoomId;
+        showtime.StartTime = dto.StartTime;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new ShowtimeResponseDto(
+            showtime.Id,
+            showtime.MovieId,
+            showtime.RoomId,
+            showtime.StartTime,
+            0
+        ));
     }
 
     // DELETE /api/showtimes/{id}

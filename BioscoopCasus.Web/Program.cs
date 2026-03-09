@@ -21,4 +21,23 @@ builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<SeatSelectionService>();
 builder.Services.AddSingleton<QrCodeHelper>();
 
+// Register the JWT handler
+builder.Services.AddTransient<JwtAuthorizationMessageHandler>();
+
+// Register services as Typed Clients with the JWT handler
+builder.Services.AddHttpClient<MovieService>(client => 
+    client.BaseAddress = new Uri("https://localhost:7181/"))
+    .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+
+builder.Services.AddHttpClient<RoomService>(client => 
+    client.BaseAddress = new Uri("https://localhost:7181/"))
+    .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+
+builder.Services.AddHttpClient<ShowtimeService>(client => 
+    client.BaseAddress = new Uri("https://localhost:7181/"))
+    .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+
+// Default HttpClient for AuthService (doesn't need the JWT handler for login)
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7181/") });
+
 await builder.Build().RunAsync();

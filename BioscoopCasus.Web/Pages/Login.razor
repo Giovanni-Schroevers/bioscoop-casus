@@ -2,39 +2,127 @@
 @inject AuthService AuthService
 @inject NavigationManager NavigationManager
 
-<h3>Admin Login</h3>
+<TerminalShell>
+    <div class="login-container">
+        <div class="terminal-header">
+            <h1>Admin Access</h1>
+            <p class="subtitle">Enter your password to manage the cinema.</p>
+        </div>
 
-<div class="row">
-    <div class="col-md-6 col-lg-4">
         @if (!string.IsNullOrEmpty(ErrorMessage))
         {
-            <div class="alert alert-danger" role="alert">
+            <div class="alert-fancy" role="alert">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
                 @ErrorMessage
             </div>
         }
 
         <EditForm Model="LoginModel" OnValidSubmit="HandleLogin">
             <DataAnnotationsValidator />
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <InputText id="password" type="password" class="form-control" @bind-Value="LoginModel.Password" />
-                <ValidationMessage For="@(() => LoginModel.Password)" />
+
+            <div class="form-group-fancy">
+                <label for="password" class="form-label-fancy">Password</label>
+                <div class="input-wrapper">
+                    <InputText id="password" type="password" class="terminal-input" placeholder="••••••••"
+                        @bind-Value="LoginModel.Password" />
+                </div>
+                <div class="validation-wrapper">
+                    <ValidationMessage For="@(() => LoginModel.Password)" />
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100" disabled="@IsLoading">
-                @if (IsLoading)
-                {
-                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                    <span role="status">Logging in...</span>
-                }
-                else
-                {
-                    <span>Login</span>
-                }
-            </button>
+            <FormButton Type="submit" IsPrimary="true" IsLoading="@IsLoading" LoadingText="Verifying..."
+                Text="Sign In" />
         </EditForm>
+
+        <div class="back-wrapper">
+            <a href="/" class="back-link">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round" class="back-icon">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to home
+            </a>
+        </div>
     </div>
-</div>
+</TerminalShell>
+
+<style>
+    .login-container {
+        max-width: 400px;
+        margin: 4rem auto;
+    }
+
+    .terminal-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .terminal-header h1 {
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: var(--text-muted);
+    }
+
+    .form-group-fancy {
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-fancy {
+        background: rgba(220, 38, 38, 0.1);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        color: #f87171;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+    }
+
+    .alert-icon {
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .back-wrapper {
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+    .back-link {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .back-icon {
+        margin-right: 0.25rem;
+    }
+
+    .back-link:hover {
+        color: var(--text-high);
+    }
+
+    .validation-wrapper .validation-message {
+        color: #f87171;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        list-style: none;
+        padding: 0;
+    }
+</style>
 
 @code {
     public class LoginViewModel

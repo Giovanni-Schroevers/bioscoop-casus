@@ -1,19 +1,830 @@
 @page "/management"
 @attribute [Authorize]
 @inject AuthService AuthService
+@inject MovieService MovieService
+@inject RoomService RoomService
+@inject ShowtimeService ShowtimeService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Management Dashboard</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Management Dashboard</h1>
-    <button class="btn btn-danger" @onclick="HandleLogout">Logout</button>
+<div class="management-container">
+    <div class="utility-bar">
+        <FormButton IsPrimary="false" Text="Log Out" OnClick="HandleLogout" CssClass="logout-btn" />
+    </div>
+
+    <header class="management-header">
+        <h1>Management Dashboard</h1>
+        <p class="subtitle">Manage your cinema, movies and showtimes.</p>
+    </header>
+
+    <div class="nav-grid">
+        <a href="/management/movies" class="nav-card">
+            <div class="card-icon">🎬</div>
+            <div class="card-info">
+                <h3>Movies</h3>
+                <p>Manage the movie collection</p>
+            </div>
+        </a>
+        <a href="/management/rooms" class="nav-card">
+            <div class="card-icon">🛋️</div>
+            <div class="card-info">
+                <h3>Rooms</h3>
+                <p>Configure the cinema rooms</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="timeline-section">
+        <div class="section-header">
+            <h2>Dagschema</h2>
+            <div class="header-actions">
+                <div class="date-picker-wrapper">
+                    <select class="date-select" @onchange="OnDateChanged">
+                        @foreach (var date in AvailableDates)
+                        {
+                            <option value="@date.ToString("yyyy-MM-dd")" selected="@(date.Date == SelectedDate.Date)">
+                                @(date.Date == DateTime.Today ? "Vandaag" : date.ToString("dddd d MMMM"))
+                            </option>
+                        }
+                    </select>
+                    <div class="date-select-arrow">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <FormButton IsPrimary="true" Text="Nieuwe Voorstelling" OnClick="OnAddShowClick" CssClass="add-show-btn" />
+            </div>
+        </div>
+
+        @if (IsLoading)
+        {
+            <div class="loading-state">
+                <span class="loading-spinner"></span>
+                <p>Schema laden...</p>
+            </div>
+        }
+        else
+        {
+            <div class="timeline-container">
+                <div class="timeline-header">
+                    @for (int i = 9; i <= 24; i += 3)
+                    {
+                        <div class="time-marker">@(i == 24 ? "00:00" : $"{i:D2}:00")</div>
+                    }
+                </div>
+
+                <div class="timeline-grid">
+                    @if (!Rooms.Any())
+                    {
+                        <div class="empty-state">Geen zalen gevonden.</div>
+                    }
+                    else
+                    {
+                        @foreach (var room in Rooms)
+                        {
+                            var roomShowtimes = Showtimes.Where(s => s.RoomId == room.Id).ToList();
+                            <div class="timeline-row">
+                                <div class="room-label">
+                                    <span class="room-num">Zaal @room.Number</span>
+                                    <span class="room-name">@room.Name</span>
+                                </div>
+                                <div class="slots-container" @onclick="(e) => OnTimelineClick(e, room)">
+                                    @foreach (var show in roomShowtimes)
+                                    {
+                                        var movie = Movies.FirstOrDefault(m => m.Id == show.MovieId);
+                                        if (movie != null)
+                                        {
+                                            var left = CalculatePosition(show.StartTime);
+                                            var width = CalculateWidth(movie.DurationMinutes);
+                                            var isFuture = show.StartTime > DateTime.Now;
+                                            <div class="show-slot @(show.StartTime < DateTime.Now ? "past" : "") @(isFuture ? "clickable" : "")"
+                                                style="left: @left%; width: @width%;"
+                                                title="@movie.Title (@show.StartTime.ToString("HH:mm"))" 
+                                                @onclick="() => OnShowClick(show)"
+                                                @onclick:stopPropagation="true">
+                                                @movie.Title
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (_showModal)
+    {
+        var movie = Movies.FirstOrDefault(m => m.Id == (_isCreating ? _selectedMovieId : (_selectedShowtime?.MovieId ?? 0)));
+        <TerminalModal Visible="_showModal" Title="@(_isCreating ? "Nieuwe Voorstelling" : (movie?.Title ?? "Voorstelling"))" OnClose="CloseModal">
+            <ChildContent>
+                @if (_showConfirmation)
+                {
+                    <div class="confirmation-view">
+                        <div class="warning-box">
+                            <div class="warning-header">
+                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                                    </path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                                <h3>Belangrijke waarschuwing!</h3>
+                            </div>
+                            <p>Het wijzigen of verwijderen van een geplande voorstelling kan conflicteren met reeds verkochte
+                                tickets. Gebruikers die al een ticket hebben gekocht, kunnen hierdoor gedupeerd worden.</p>
+                        </div>
+                        <p class="confirm-text">Weet u zeker dat u deze voorstelling wilt @(_isDeleting ? "verwijderen" :
+                                                "wijzigen")?</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="edit-view">
+                        <div class="form-group">
+                            <label>Starttijd</label>
+                            <input type="datetime-local" class="terminal-input" @bind="_editStartTime" />
+                        </div>
+                        <div class="form-group">
+                            <label>Zaal</label>
+                            <select class="terminal-input" @bind="_selectedRoomId">
+                                @foreach (var room in Rooms)
+                                {
+                                    <option value="@room.Id">Zaal @room.Number (@room.Name)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Film</label>
+                            @if (_isCreating)
+                            {
+                                <select class="terminal-input" @bind="_selectedMovieId">
+                                    <option value="0">Selecteer een film...</option>
+                                    @foreach (var movie in Movies)
+                                    {
+                                        <option value="@movie.Id">@movie.Title (@movie.DurationMinutes min)</option>
+                                    }
+                                </select>
+                            }
+                            else
+                            {
+                                <span class="value">@movie?.Title</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </ChildContent>
+            <Footer>
+                @if (_showConfirmation)
+                {
+                    <FormButton IsPrimary="false" Text="Terug" OnClick="() => _showConfirmation = false" />
+                    <FormButton IsPrimary="true" Text="Ik begrijp het, bevestig" OnClick="ExecuteConfirmedAction" />
+                }
+                else
+                {
+                    @if (!_isCreating)
+                    {
+                        <FormButton IsPrimary="false" Text="Verwijderen" OnClick="() => PromptConfirmation(true)"
+                            CssClass="delete-btn" />
+                    }
+                    <div style="flex-grow: 1"></div>
+                    <FormButton IsPrimary="true" Text="@(_isCreating ? "Toevoegen" : "Opslaan")" OnClick="() => HandleSaveClick()" />
+                }
+            </Footer>
+        </TerminalModal>
+    }
 </div>
 
-<p>Welcome to the protected admin area. Here you will manage your movies, rooms, and showtimes.</p>
+<style>
+    .management-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .utility-bar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 2rem;
+    }
+
+    .logout-btn {
+        width: auto !important;
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .management-header {
+        margin-bottom: 3rem;
+        text-align: left;
+    }
+
+    .management-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-high);
+    }
+
+    .subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    /* Navigation Grid */
+    .nav-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 4rem;
+    }
+
+    .nav-card {
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .nav-card:hover {
+        border-color: var(--primary-rose);
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .card-icon {
+        font-size: 2rem;
+        background: rgba(225, 29, 72, 0.1);
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+    }
+
+    .card-info h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: var(--text-high);
+    }
+
+    .card-info p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    /* Timeline Section */
+    .timeline-section {
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .add-show-btn {
+        width: auto !important;
+        padding: 0.6rem 1.5rem;
+        background: var(--primary-rose) !important;
+    }
+
+    /* Date Picker */
+    .date-picker-wrapper {
+        position: relative;
+        min-width: 220px;
+    }
+
+    .date-select {
+        appearance: none;
+        background: rgba(225, 29, 72, 0.1);
+        border: 1px solid rgba(225, 29, 72, 0.2);
+        color: var(--primary-rose);
+        padding: 0.6rem 2.8rem 0.6rem 1.4rem;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .date-select:hover {
+        background: rgba(225, 29, 72, 0.15);
+        border-color: var(--primary-rose);
+    }
+
+    .date-select:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.2);
+    }
+
+    .date-select-arrow {
+        position: absolute;
+        right: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--primary-rose);
+    }
+
+    /* Loading state */
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 0;
+        gap: 1.5rem;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--primary-rose);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    /* Timeline Scroll */
+    .timeline-container {
+        overflow-x: auto;
+        padding-bottom: 1.5rem;
+        margin: 0 -0.5rem;
+    }
+
+    .timeline-container::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .timeline-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+
+    .timeline-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 20px 1rem 160px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        min-width: 1200px;
+    }
+
+    .time-marker {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 600;
+        width: 0;
+        display: flex;
+        justify-content: center;
+        white-space: nowrap;
+    }
+
+    .timeline-grid {
+        min-width: 1200px;
+    }
+
+    .timeline-row {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .room-label {
+        width: 160px;
+        padding-right: 20px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .room-num {
+        font-weight: 700;
+        color: var(--text-high);
+        font-size: 1.1rem;
+    }
+
+    .room-name {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .slots-container {
+        flex-grow: 1;
+        position: relative;
+        height: 44px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+    }
+
+    .show-slot {
+        position: absolute;
+        height: 100%;
+        background: rgba(225, 29, 72, 0.15);
+        border: 1px solid rgba(225, 29, 72, 0.3);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        color: var(--text-high);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 10px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .show-slot.past {
+        opacity: 0.4;
+        background: rgba(255, 255, 255, 0.05);
+        border-color: transparent;
+        font-weight: 400;
+    }
+
+    .show-slot.clickable {
+        cursor: pointer;
+    }
+
+    .show-slot:hover {
+        background: rgba(225, 29, 72, 0.3);
+        border-color: var(--primary-rose);
+        z-index: 10;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);
+    }
+
+    /* Modal Form Styles */
+    .edit-view {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .terminal-input {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: var(--text-high);
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+
+    .terminal-input:focus {
+        outline: none;
+        border-color: var(--primary-rose);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
+    }
+
+    .terminal-input option {
+        background-color: #12151e;
+        color: var(--text-high);
+    }
+
+    .info-row {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .info-row .label {
+        color: var(--text-muted);
+        min-width: 60px;
+    }
+
+    .info-row .value {
+        color: var(--text-high);
+        font-weight: 500;
+    }
+
+    .confirmation-view {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .warning-box {
+        background: rgba(234, 179, 8, 0.1);
+        border: 1px solid rgba(234, 179, 8, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        color: #fbbf24;
+    }
+
+    .warning-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .warning-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .warning-box p {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: rgba(251, 191, 36, 0.9);
+    }
+
+    .confirm-text {
+        font-size: 1.1rem;
+        color: var(--text-high);
+        text-align: center;
+    }
+
+    .delete-btn {
+        background: rgba(225, 29, 72, 0.05) !important;
+        border-color: rgba(225, 29, 72, 0.2) !important;
+        color: var(--primary-rose) !important;
+    }
+
+    .delete-btn:hover {
+        background: rgba(225, 29, 72, 0.15) !important;
+        border-color: var(--primary-rose) !important;
+    }
+</style>
 
 @code {
+    private DateTime SelectedDate { get; set; } = DateTime.Today;
+    private List<DateTime> AvailableDates { get; set; } = new();
+    private List<MovieResponseDto> Movies { get; set; } = new();
+    private List<RoomResponseDto> Rooms { get; set; } = new();
+    private List<ShowtimeResponseDto> Showtimes { get; set; } = new();
+    private List<ShowtimeResponseDto> _allShowtimes = new();
+    private bool IsLoading { get; set; } = true;
+
+    // Modal state
+    private ShowtimeResponseDto? _selectedShowtime;
+    private int _selectedRoomId;
+    private int _selectedMovieId;
+    private bool _showModal;
+    private bool _showConfirmation;
+    private bool _isDeleting;
+    private bool _isCreating;
+    private DateTime _editStartTime;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadInitialData();
+    }
+
+    private async Task LoadInitialData()
+    {
+        IsLoading = true;
+        try
+        {
+            // Load base data in parallel
+            var moviesTask = MovieService.GetMoviesAsync();
+            var roomsTask = RoomService.GetRoomsAsync();
+            var showtimesTask = ShowtimeService.GetShowtimesAsync();
+
+            await Task.WhenAll(moviesTask, roomsTask, showtimesTask);
+
+            Movies = (await moviesTask).ToList();
+            Rooms = (await roomsTask).ToList();
+            _allShowtimes = (await showtimesTask).ToList();
+
+            UpdateAvailableDates();
+            FilterShowtimes();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void UpdateAvailableDates()
+    {
+        var dates = new List<DateTime>();
+        
+        // Always include Today + next 14 days
+        for (int i = 0; i < 14; i++)
+        {
+            dates.Add(DateTime.Today.AddDays(i));
+        }
+
+        // Add any additional dates that have shows but aren't in the next 14 days
+        var otherDatesWithShows = _allShowtimes
+            .Select(s => s.StartTime.Date)
+            .Where(d => d > DateTime.Today.AddDays(13))
+            .Distinct();
+
+        dates.AddRange(otherDatesWithShows);
+        AvailableDates = dates.OrderBy(d => d).ToList();
+    }
+
+    private void FilterShowtimes()
+    {
+        Showtimes = _allShowtimes.Where(s => s.StartTime.Date == SelectedDate.Date).ToList();
+    }
+
+    private void OnShowClick(ShowtimeResponseDto show)
+    {
+        if (show.StartTime < DateTime.Now) return;
+
+        _selectedShowtime = show;
+        _selectedRoomId = show.RoomId;
+        _selectedMovieId = show.MovieId;
+        _editStartTime = show.StartTime;
+        _showModal = true;
+        _showConfirmation = false;
+        _isDeleting = false;
+        _isCreating = false;
+    }
+
+    private void OnAddShowClick()
+    {
+        _selectedShowtime = null;
+        _selectedRoomId = Rooms.FirstOrDefault()?.Id ?? 0;
+        _selectedMovieId = Movies.FirstOrDefault()?.Id ?? 0;
+        _editStartTime = SelectedDate.Date.AddHours(12); // Default to noon
+        _showModal = true;
+        _showConfirmation = false;
+        _isDeleting = false;
+        _isCreating = true;
+    }
+
+    private void OnTimelineClick(MouseEventArgs e, RoomResponseDto room)
+    {
+        if (SelectedDate.Date < DateTime.Today) return;
+
+        // Roughly calculate hour from click position
+        // This relies on the timeline container being 1200px min-width normally,
+        // but we can use the offset.
+        
+        // Simple heuristic for now: 
+        // 09:00 to 00:00 is 15 hours.
+        // We'll use a more precise method if possible, but let's assume the container is clickable.
+        // In a real app we'd use getBoundingClientRect, but here let's just 
+        // set it to a reasonable default based on where they click.
+        
+        _selectedShowtime = null;
+        _selectedRoomId = room.Id;
+        _selectedMovieId = Movies.FirstOrDefault()?.Id ?? 0;
+        
+        // Estimate time (very rough fallback)
+        _editStartTime = SelectedDate.Date.AddHours(12); 
+        
+        _showModal = true;
+        _showConfirmation = false;
+        _isDeleting = false;
+        _isCreating = true;
+    }
+
+    private void CloseModal()
+    {
+        _showModal = false;
+        _selectedShowtime = null;
+    }
+
+    private void HandleSaveClick()
+    {
+        if (_isCreating)
+        {
+            _ = ExecuteConfirmedAction();
+        }
+        else
+        {
+            PromptConfirmation(false);
+        }
+    }
+
+    private void PromptConfirmation(bool isDeleting)
+    {
+        _isDeleting = isDeleting;
+        _showConfirmation = true;
+    }
+
+    private async Task ExecuteConfirmedAction()
+    {
+        bool success;
+        if (_isDeleting && _selectedShowtime != null)
+        {
+            success = await ShowtimeService.DeleteShowtimeAsync(_selectedShowtime.Id);
+        }
+        else if (_isCreating)
+        {
+            if (_selectedMovieId == 0) return;
+            var createDto = new ShowtimeCreateDto(
+                _selectedMovieId,
+                _selectedRoomId,
+                _editStartTime
+            );
+            success = await ShowtimeService.CreateShowtimeAsync(createDto);
+        }
+        else if (_selectedShowtime != null)
+        {
+            var updateDto = new ShowtimeCreateDto(
+                _selectedMovieId,
+                _selectedRoomId,
+                _editStartTime
+            );
+            success = await ShowtimeService.UpdateShowtimeAsync(_selectedShowtime.Id, updateDto);
+        }
+        else success = false;
+
+        if (success)
+        {
+            await LoadInitialData();
+            CloseModal();
+        }
+    }
+
+    private void OnDateChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var newDate))
+        {
+            SelectedDate = newDate;
+            FilterShowtimes();
+        }
+    }
+
+    private double CalculatePosition(DateTime startTime)
+    {
+        var totalMinutesInView = 15 * 60; // 09:00 to 00:00
+        var minutesSinceStart = (startTime.Hour * 60 + startTime.Minute) - (9 * 60);
+        if (minutesSinceStart < 0) minutesSinceStart = 0;
+        return (double)minutesSinceStart / totalMinutesInView * 100;
+    }
+
+    private double CalculateWidth(int durationMinutes)
+    {
+        var totalMinutesInView = 15 * 60;
+        return (double)durationMinutes / totalMinutesInView * 100;
+    }
+
     private async Task HandleLogout()
     {
         await AuthService.LogoutAsync();
+        NavigationManager.NavigateTo("/", forceLoad: true);
     }
 }
