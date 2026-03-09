@@ -54,6 +54,8 @@ builder.Services.AddDbContext<BioscoopDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 32)));
 });
 
+builder.Services.AddScoped<BioscoopCasus.API.Services.MailingService>();
+
 var app = builder.Build();
 
 // Apply migrations and seed data on startup

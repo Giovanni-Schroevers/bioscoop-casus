@@ -3,7 +3,7 @@ using System.Text;
 using BioscoopCasus.Models.DTOs;
 using QRCoder;
 
-namespace BioscoopCasus.Web.Services;
+namespace BioscoopCasus.Models.Helpers;
 
 public class QrCodeHelper
 {
@@ -58,6 +58,21 @@ public class QrCodeHelper
         var calculatedChecksum = CalculateChecksum(reservationId, showtimeId, roomId, seats);
 
         return string.Equals(calculatedChecksum, providedChecksum, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public int? ExtractReservationId(string qrCodeString)
+    {
+        if (string.IsNullOrWhiteSpace(qrCodeString))
+            return null;
+
+        var parts = qrCodeString.Split('-');
+        if (parts.Length < 1)
+            return null;
+
+        if (int.TryParse(parts[0], out var reservationId))
+            return reservationId;
+
+        return null;
     }
 
     private string CalculateChecksum(int reservationId, int showtimeId, int roomId, List<SeatDto> seats)

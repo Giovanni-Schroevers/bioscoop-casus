@@ -38,9 +38,11 @@ else
                         <div class="mb-3">
                             <strong>Stoelen:</strong>
                             <ul class="mb-0">
-                                @foreach (var seat in reservation.Seats)
+                                @foreach (var rowGroup in reservation.Seats.GroupBy(s => s.Row).OrderBy(g => g.Key))
                                 {
-                                    <li>Rij @seat.Row, Stoel @seat.SeatNumber</li>
+                                    <li>
+                                        Rij @rowGroup.Key: @string.Join(", ", rowGroup.OrderBy(s => s.SeatNumber).Select(s => $"Stoel {s.SeatNumber}"))
+                                    </li>
                                 }
                             </ul>
                         </div>

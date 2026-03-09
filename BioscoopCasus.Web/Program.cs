@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using BioscoopCasus.Models.Helpers;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using BioscoopCasus.Web;
