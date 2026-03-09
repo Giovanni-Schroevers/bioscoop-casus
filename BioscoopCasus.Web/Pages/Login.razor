@@ -5,8 +5,8 @@
 <TerminalShell>
     <div class="login-container">
         <div class="terminal-header">
-            <h1>Admin Toegang</h1>
-            <p class="subtitle">Voer uw wachtwoord in om de bioscoop te beheren.</p>
+            <h1>Admin Access</h1>
+            <p class="subtitle">Enter your password to manage the cinema.</p>
         </div>
 
         @if (!string.IsNullOrEmpty(ErrorMessage))
@@ -26,7 +26,7 @@
             <DataAnnotationsValidator />
 
             <div class="form-group-fancy">
-                <label for="password" class="form-label-fancy">Wachtwoord</label>
+                <label for="password" class="form-label-fancy">Password</label>
                 <div class="input-wrapper">
                     <InputText id="password" type="password" class="terminal-input" placeholder="••••••••"
                         @bind-Value="LoginModel.Password" />
@@ -36,8 +36,8 @@
                 </div>
             </div>
 
-            <FormButton Type="submit" IsPrimary="true" IsLoading="@IsLoading" LoadingText="Verifiëren..."
-                Text="Aanmelden" />
+            <FormButton Type="submit" IsPrimary="true" IsLoading="@IsLoading" LoadingText="Verifying..."
+                Text="Sign In" />
         </EditForm>
 
         <div class="back-wrapper">
@@ -47,7 +47,7 @@
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                Terug naar home
+                Back to home
             </a>
         </div>
     </div>

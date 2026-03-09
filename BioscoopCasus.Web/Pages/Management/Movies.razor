@@ -3,7 +3,7 @@
 @inject MovieService MovieService
 @inject NavigationManager NavigationManager
 
-<PageTitle>Filmbeheer - Management</PageTitle>
+<PageTitle>Movie Management</PageTitle>
 
 <div class="management-container">
     <div class="header-section">
@@ -15,13 +15,13 @@
             Dashboard
         </a>
         <div class="title-row">
-            <h1>Filmbeheer</h1>
-            <FormButton IsPrimary="true" Text="Nieuwe Film" OnClick="OnAddMovieClick" CssClass="add-movie-btn" />
+            <h1>Movie Management</h1>
+            <FormButton IsPrimary="true" Text="New Movie" OnClick="OnAddMovieClick" CssClass="add-movie-btn" />
         </div>
         
         <div class="search-bar">
             <div class="search-input-wrapper">
-                <input type="text" placeholder="Zoek op titel of beschrijving..." @bind="SearchTerm" @bind:event="oninput" class="terminal-input" />
+                <input type="text" placeholder="Search by title or description..." @bind="SearchTerm" @bind:event="oninput" class="terminal-input" />
             </div>
         </div>
     </div>
@@ -30,7 +30,7 @@
     {
         <div class="loading-state">
             <span class="loading-spinner"></span>
-            <p>Films laden...</p>
+            <p>Loading movies...</p>
         </div>
     }
     else
@@ -38,7 +38,7 @@
         <div class="movie-grid">
             @if (!FilteredMovies.Any())
             {
-                <div class="empty-state">Geen films gevonden die voldoen aan je zoekopdracht.</div>
+                <div class="empty-state">No movies found matching your search.</div>
             }
             else
             {
@@ -46,9 +46,9 @@
                 {
                     <div class="movie-card" @onclick="() => OnMovieClick(movie)">
                         <div class="card-poster">
-                            <img src="@movie.PosterUrl" alt="@movie.Title" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22450%22><rect fill=%22%2312151e%22 width=%22300%22 height=%22450%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22 font-size=%2216%22>Geen poster</text></svg>'" />
+                            <img src="@movie.PosterUrl" alt="@movie.Title" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22450%22><rect fill=%22%2312151e%22 width=%22300%22 height=%22450%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22 font-size=%2216%22>No poster</text></svg>'" />
                             <div class="card-overlay">
-                                <span class="edit-badge">Bewerken</span>
+                                <span class="edit-badge">Edit</span>
                             </div>
                         </div>
                         <div class="card-content">
@@ -68,14 +68,14 @@
 
 @if (ShowModal)
 {
-    <TerminalModal Visible="ShowModal" Title="@(IsCreating ? "Nieuwe Film" : "Bewerk Film")" OnClose="CloseModal">
+    <TerminalModal Visible="ShowModal" Title="@(IsCreating ? "New Movie" : "Edit Movie")" OnClose="CloseModal">
         <ChildContent>
             <div class="movie-form">
-                <TerminalInput Label="Titel" @bind-Value="EditMovie.Title" Placeholder="bijv. Inception" />
+                <TerminalInput Label="Title" @bind-Value="EditMovie.Title" Placeholder="e.g. Inception" />
                 
                 <div class="form-row">
-                    <TerminalInput Label="Genres" @bind-Value="EditMovie.Genres" Placeholder="bijv. Sci-Fi, Action" CssClass="flex-1" />
-                    <TerminalInput Label="Leeftijd" Type="select" @bind-Value="AgeRatingString" CssClass="flex-1">
+                    <TerminalInput Label="Genres" @bind-Value="EditMovie.Genres" Placeholder="e.g. Sci-Fi, Action" CssClass="flex-1" />
+                    <TerminalInput Label="Age Rating" Type="select" @bind-Value="AgeRatingString" CssClass="flex-1">
                         <option value="0">AL</option>
                         <option value="6">6+</option>
                         <option value="9">9+</option>
@@ -86,15 +86,15 @@
                 </div>
 
                 <div class="form-row">
-                    <TerminalInput Label="Duur (min)" Type="number" @bind-Value="DurationMinutesString" CssClass="flex-1" />
-                    <TerminalInput Label="Release Datum" Type="date" @bind-Value="ReleaseDateString" CssClass="flex-1" />
+                    <TerminalInput Label="Duration (min)" Type="number" @bind-Value="DurationMinutesString" CssClass="flex-1" />
+                    <TerminalInput Label="Release Date" Type="date" @bind-Value="ReleaseDateString" CssClass="flex-1" />
                 </div>
 
-                <TerminalInput Label="Beschrijving" Type="textarea" @bind-Value="EditMovie.Description" Rows="3" />
+                <TerminalInput Label="Description" Type="textarea" @bind-Value="EditMovie.Description" Rows="3" />
                 
                 <TerminalInput Label="Poster URL" @bind-Value="EditMovie.PosterUrl" />
                 
-                <TerminalInput Label="Acteurs" @bind-Value="EditMovie.Actors" />
+                <TerminalInput Label="Actors" @bind-Value="EditMovie.Actors" />
                 
                 <TerminalInput Label="Trailer URL" @bind-Value="EditMovie.TrailerUrl" CssClass="flex-1" />
             </div>
@@ -102,22 +102,22 @@
         <Footer>
             @if (!IsCreating)
             {
-                <FormButton IsPrimary="false" Text="Verwijderen" OnClick="() => ShowConfirmation = true" CssClass="delete-btn" />
+                <FormButton IsPrimary="false" Text="Delete" OnClick="() => ShowConfirmation = true" CssClass="delete-btn" />
             }
             <div style="flex-grow: 1"></div>
-            <FormButton IsPrimary="false" Text="Annuleren" OnClick="CloseModal" />
-            <FormButton IsPrimary="true" Text="@(IsCreating ? "Toevoegen" : "Opslaan")" OnClick="HandleSave" />
+            <FormButton IsPrimary="false" Text="Cancel" OnClick="CloseModal" />
+            <FormButton IsPrimary="true" Text="@(IsCreating ? "Add" : "Save")" OnClick="HandleSave" />
         </Footer>
     </TerminalModal>
 }
 
 <ConfirmationModal Visible="ShowConfirmation" 
-                   Title="Film Verwijderen" 
-                   ConfirmText="Verwijderen"
+                   Title="Delete Movie" 
+                   ConfirmText="Delete"
                    OnConfirm="HandleDelete" 
                    OnCancel="() => ShowConfirmation = false">
     <ChildContent>
-        <p>Weet je zeker dat je <strong>@SelectedMovie?.Title</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.</p>
+        <p>Are you sure you want to delete <strong>@SelectedMovie?.Title</strong>? This action cannot be undone.</p>
     </ChildContent>
 </ConfirmationModal>
 

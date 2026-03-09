@@ -16,7 +16,7 @@
             </div>
         </ChildContent>
         <Footer>
-            <FormButton IsPrimary="false" Text="Annuleren" OnClick="OnCancel" />
+            <FormButton IsPrimary="false" Text="Cancel" OnClick="OnCancel" />
             <FormButton IsPrimary="true" Text="@ConfirmText" OnClick="OnConfirm" />
         </Footer>
     </TerminalModal>
@@ -38,9 +38,9 @@
 
 @code {
     [Parameter] public bool Visible { get; set; }
-    [Parameter] public string Title { get; set; } = "Bevestigen";
-    [Parameter] public string Message { get; set; } = "Weet je dit zeker?";
-    [Parameter] public string ConfirmText { get; set; } = "Bevestigen";
+    [Parameter] public string Title { get; set; } = "Confirm";
+    [Parameter] public string Message { get; set; } = "Are you sure?";
+    [Parameter] public string ConfirmText { get; set; } = "Confirm";
     [Parameter] public EventCallback OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
