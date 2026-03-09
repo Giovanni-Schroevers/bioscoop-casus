@@ -4,6 +4,7 @@
 @inject MovieService MovieService
 @inject RoomService RoomService
 @inject ShowtimeService ShowtimeService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Management Dashboard</PageTitle>
 
@@ -824,5 +825,6 @@
     private async Task HandleLogout()
     {
         await AuthService.LogoutAsync();
+        NavigationManager.NavigateTo("/", forceLoad: true);
     }
 }
