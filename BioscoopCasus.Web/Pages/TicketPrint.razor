@@ -4,14 +4,32 @@
 
 <PageTitle>Ticket</PageTitle>
 
-@if (isLoading)
+@if (_isLoading)
 {
     // Show empty page while loading
 }
-else if (reservation is null)
+else if (_reservation is null)
 {
     <div class="alert alert-danger mt-5" role="alert">
         Reservation not found.
+    </div>
+}
+else if (_isExpired)
+{
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">Ticket niet meer beschikbaar</h4>
+                    <p>Dit ticket kan niet meer worden bekeken omdat de film al is begonnen.</p>
+                    <hr>
+                    <p class="mb-0">
+                        <strong>Film:</strong> @_reservation.MovieTitle<br>
+                        <strong>Starttijd:</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'om' HH:mm")
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 }
 else
@@ -24,21 +42,21 @@ else
                         <h2 class="card-title mb-4 text-center">Bioscoop Ticket</h2>
 
                         <div class="mb-3">
-                            <strong>Film:</strong> @reservation.MovieTitle
+                            <strong>Film:</strong> @_reservation.MovieTitle
                         </div>
 
                         <div class="mb-3">
-                            <strong>Zaal:</strong> @reservation.RoomName
+                            <strong>Zaal:</strong> @_reservation.RoomName
                         </div>
 
                         <div class="mb-3">
-                            <strong>Tijd:</strong> @reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'om' HH:mm")
+                            <strong>Tijd:</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'om' HH:mm")
                         </div>
 
                         <div class="mb-3">
                             <strong>Stoelen:</strong>
                             <ul class="mb-0">
-                                @foreach (var rowGroup in reservation.Seats.GroupBy(s => s.Row).OrderBy(g => g.Key))
+                                @foreach (var rowGroup in _reservation.Seats.GroupBy(s => s.Row).OrderBy(g => g.Key))
                                 {
                                     <li>
                                         Rij @rowGroup.Key: @string.Join(", ", rowGroup.OrderBy(s => s.SeatNumber).Select(s => $"Stoel {s.SeatNumber}"))
@@ -48,12 +66,12 @@ else
                         </div>
 
                         <div class="text-center my-4">
-                            <img src="data:image/png;base64,@qrCodeImage" alt="QR Code" class="img-fluid" style="max-width: 300px;" />
+                            <img src="data:image/png;base64,@_qrCodeImage" alt="QR Code" class="img-fluid" style="max-width: 300px;" />
                         </div>
 
                         <div class="text-center">
                             <p class="mb-0"><strong>Ticket Code:</strong></p>
-                            <p class="font-monospace">@qrCodeText</p>
+                            <p class="font-monospace">@_qrCodeText</p>
                         </div>
                     </div>
                 </div>
@@ -66,21 +84,29 @@ else
     [Parameter]
     public int ReservationId { get; set; }
 
-    private ReservationResponseDto? reservation;
-    private bool isLoading = true;
-    private string qrCodeText = string.Empty;
-    private string qrCodeImage = string.Empty;
+    private ReservationResponseDto? _reservation;
+    private bool _isLoading = true;
+    private bool _isExpired;
+    private string _qrCodeText = string.Empty;
+    private string _qrCodeImage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        reservation = await ReservationService.GetReservationAsync(ReservationId);
+        _reservation = await ReservationService.GetReservationAsync(ReservationId);
 
-        if (reservation is not null)
+        if (_reservation is null)
         {
-            qrCodeText = QrCodeHelper.GetQrCodeString(reservation);
-            qrCodeImage = QrCodeHelper.GetQrCodeImage(qrCodeText);
+            _isLoading = false;
+            return;
         }
 
-        isLoading = false;
+        if (_reservation.Showtime.StartTime <= DateTime.UtcNow)
+            _isExpired = true;
+        else
+        {
+            _qrCodeText = QrCodeHelper.GetQrCodeString(_reservation);
+            _qrCodeImage = QrCodeHelper.GetQrCodeImage(_qrCodeText);
+        }
+        _isLoading = false;
     }
 }

@@ -1,5 +1,6 @@
 using BioscoopCasus.API.Data;
 using BioscoopCasus.Models.DTOs;
+using BioscoopCasus.Models.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +8,7 @@ namespace BioscoopCasus.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ReservationsController(BioscoopDbContext context) : ControllerBase
+public class ReservationsController(BioscoopDbContext context, QrCodeHelper qrCodeHelper) : ControllerBase
 {
     // GET /api/reservations
     [HttpGet]
@@ -87,5 +88,33 @@ public class ReservationsController(BioscoopDbContext context) : ControllerBase
         );
 
         return Ok(response);
+    }
+
+    // POST /api/reservations/validate-qr
+    [HttpPost("validate-qr")]
+    public async Task<ActionResult<QrCodeValidationResponseDto>> ValidateQrCode([FromBody] QrCodeValidationRequestDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request.QrCode))
+            return BadRequest(new QrCodeValidationResponseDto(false, null, "QR code is required"));
+        
+        var qrCodeData = qrCodeHelper.ParseQrCode(request.QrCode);
+
+        if (qrCodeData is null)
+            return Ok(new QrCodeValidationResponseDto(false, null, "Invalid QR code format"));
+
+        if (!qrCodeHelper.VerifyChecksum(request.QrCode))
+            return Ok(new QrCodeValidationResponseDto(false, null, "Invalid QR code checksum"));
+
+        var reservation = await context.Reservations
+            .Include(r => r.Showtime)
+            .FirstOrDefaultAsync(r => qrCodeData.ReservationId != null && r.Id == qrCodeData.ReservationId.Value);
+
+        if (reservation is null)
+            return Ok(new QrCodeValidationResponseDto(false, null, "Reservation not found"));
+
+        if (reservation.Showtime.StartTime <= DateTime.UtcNow)
+            return Ok(new QrCodeValidationResponseDto(false, null, "Dit ticket kan niet meer worden bekeken omdat de film al is begonnen."));
+
+        return Ok(new QrCodeValidationResponseDto(true, reservation.Id, null));
     }
 }

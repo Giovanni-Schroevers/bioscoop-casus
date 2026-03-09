@@ -23,12 +23,16 @@ public class MailingController(BioscoopDbContext context, MailingService mailing
         if (string.IsNullOrWhiteSpace(dto.TicketCode))
             return BadRequest("Ticket code is required");
 
-        var reservationId = _qrCodeHelper.ExtractReservationId(dto.TicketCode);
-        if (reservationId is null)
+        var qrCodeData = _qrCodeHelper.ParseQrCode(dto.TicketCode);
+        if (qrCodeData is null)
             return BadRequest("Invalid ticket code format");
 
         if (!_qrCodeHelper.VerifyChecksum(dto.TicketCode))
             return BadRequest("Invalid ticket code checksum");
+
+        var reservationId = qrCodeData.ReservationId;
+        if (reservationId is null)
+            return BadRequest("Invalid ticket code format");
 
         var reservation = await context.Reservations
             .Include(r => r.Showtime)
@@ -37,7 +41,7 @@ public class MailingController(BioscoopDbContext context, MailingService mailing
                 .ThenInclude(s => s.Room)
             .Include(r => r.ShowtimeSeats)
                 .ThenInclude(ss => ss.Seat)
-            .FirstOrDefaultAsync(r => r.Id == reservationId.Value);
+            .FirstOrDefaultAsync(r => r.Id == reservationId);
 
         if (reservation is null)
             return NotFound("Reservation not found");
@@ -68,7 +72,7 @@ public class MailingController(BioscoopDbContext context, MailingService mailing
             await mailingService.SendReservationEmailAsync(dto.Email, reservationDto);
             return Ok(new TicketMailResponseDto(true));
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return StatusCode(500, new TicketMailResponseDto(false));
         }

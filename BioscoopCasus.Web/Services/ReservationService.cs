@@ -14,4 +14,15 @@ public class ReservationService(HttpClient httpClient)
 
         return await response.Content.ReadFromJsonAsync<ReservationResponseDto>();
     }
+
+    public async Task<QrCodeValidationResponseDto?> ValidateQrCodeAsync(string qrCode)
+    {
+        var request = new QrCodeValidationRequestDto(qrCode);
+        var response = await httpClient.PostAsJsonAsync("api/reservations/validate-qr", request);
+
+        if (!response.IsSuccessStatusCode)
+            return new QrCodeValidationResponseDto(false, null, "Er is een fout opgetreden bij het valideren van de QR code.");
+
+        return await response.Content.ReadFromJsonAsync<QrCodeValidationResponseDto>();
+    }
 }
