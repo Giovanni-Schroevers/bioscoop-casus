@@ -1,0 +1,46 @@
+<div class="terminal-input-group @CssClass">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <label class="terminal-label">@Label</label>
+    }
+    
+    @if (Type == "textarea")
+    {
+        <textarea class="terminal-input"
+                  placeholder="@Placeholder"
+                  rows="@Rows"
+                  value="@Value"
+                  @oninput="OnInputChanged"></textarea>
+    }
+    else if (Type == "select")
+    {
+        <select class="terminal-input" @onchange="OnInputChanged" value="@Value">
+            @ChildContent
+        </select>
+    }
+    else
+    {
+        <input type="@Type" 
+               class="terminal-input" 
+               placeholder="@Placeholder"
+               value="@Value"
+               @oninput="OnInputChanged" />
+    }
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Type { get; set; } = "text";
+    [Parameter] public string Placeholder { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string CssClass { get; set; } = "";
+    [Parameter] public int Rows { get; set; } = 3;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private async Task OnInputChanged(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString() ?? "";
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

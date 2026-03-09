@@ -32,32 +32,28 @@
                 <p>Configuratie van de bioscoopzalen</p>
             </div>
         </a>
-        <a href="/management/shows" class="nav-card">
-            <div class="card-icon">📅</div>
-            <div class="card-info">
-                <h3>Voorstellingen</h3>
-                <p>Planning en tijdsloten</p>
-            </div>
-        </a>
     </div>
 
     <div class="timeline-section">
         <div class="section-header">
             <h2>Dagschema</h2>
-            <div class="date-picker-wrapper">
-                <select class="date-select" @onchange="OnDateChanged">
-                    @foreach (var date in AvailableDates)
-                    {
-                        <option value="@date.ToString("yyyy-MM-dd")" selected="@(date.Date == SelectedDate.Date)">
-                            @(date.Date == DateTime.Today ? "Vandaag" : date.ToString("dddd d MMMM"))
-                        </option>
-                    }
-                </select>
-                <div class="date-select-arrow">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
+            <div class="header-actions">
+                <div class="date-picker-wrapper">
+                    <select class="date-select" @onchange="OnDateChanged">
+                        @foreach (var date in AvailableDates)
+                        {
+                            <option value="@date.ToString("yyyy-MM-dd")" selected="@(date.Date == SelectedDate.Date)">
+                                @(date.Date == DateTime.Today ? "Vandaag" : date.ToString("dddd d MMMM"))
+                            </option>
+                        }
+                    </select>
+                    <div class="date-select-arrow">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
                 </div>
+                <FormButton IsPrimary="true" Text="Nieuwe Voorstelling" OnClick="OnAddShowClick" CssClass="add-show-btn" />
             </div>
         </div>
 
@@ -93,7 +89,7 @@
                                     <span class="room-num">Zaal @room.Number</span>
                                     <span class="room-name">@room.Name</span>
                                 </div>
-                                <div class="slots-container">
+                                <div class="slots-container" @onclick="(e) => OnTimelineClick(e, room)">
                                     @foreach (var show in roomShowtimes)
                                     {
                                         var movie = Movies.FirstOrDefault(m => m.Id == show.MovieId);
@@ -104,7 +100,9 @@
                                             var isFuture = show.StartTime > DateTime.Now;
                                             <div class="show-slot @(show.StartTime < DateTime.Now ? "past" : "") @(isFuture ? "clickable" : "")"
                                                 style="left: @left%; width: @width%;"
-                                                title="@movie.Title (@show.StartTime.ToString("HH:mm"))" @onclick="() => OnShowClick(show)">
+                                                title="@movie.Title (@show.StartTime.ToString("HH:mm"))" 
+                                                @onclick="() => OnShowClick(show)"
+                                                @onclick:stopPropagation="true">
                                                 @movie.Title
                                             </div>
                                         }
@@ -118,10 +116,10 @@
         }
     </div>
 
-    @if (_selectedShowtime != null)
+    @if (_showModal)
     {
-        var movie = Movies.FirstOrDefault(m => m.Id == _selectedShowtime.MovieId);
-        <TerminalModal Visible="_showModal" Title="@(movie?.Title ?? "Voorstelling")" OnClose="CloseModal">
+        var movie = Movies.FirstOrDefault(m => m.Id == (_isCreating ? _selectedMovieId : (_selectedShowtime?.MovieId ?? 0)));
+        <TerminalModal Visible="_showModal" Title="@(_isCreating ? "Nieuwe Voorstelling" : (movie?.Title ?? "Voorstelling"))" OnClose="CloseModal">
             <ChildContent>
                 @if (_showConfirmation)
                 {
@@ -152,13 +150,31 @@
                             <label>Starttijd</label>
                             <input type="datetime-local" class="terminal-input" @bind="_editStartTime" />
                         </div>
-                        <div class="info-row">
-                            <span class="label">Zaal:</span>
-                            <span class="value">Zaal @Rooms.FirstOrDefault(r => r.Id == _selectedShowtime.RoomId)?.Number</span>
+                        <div class="form-group">
+                            <label>Zaal</label>
+                            <select class="terminal-input" @bind="_selectedRoomId">
+                                @foreach (var room in Rooms)
+                                {
+                                    <option value="@room.Id">Zaal @room.Number (@room.Name)</option>
+                                }
+                            </select>
                         </div>
-                        <div class="info-row">
-                            <span class="label">Film:</span>
-                            <span class="value">@movie?.Title</span>
+                        <div class="form-group">
+                            <label>Film</label>
+                            @if (_isCreating)
+                            {
+                                <select class="terminal-input" @bind="_selectedMovieId">
+                                    <option value="0">Selecteer een film...</option>
+                                    @foreach (var movie in Movies)
+                                    {
+                                        <option value="@movie.Id">@movie.Title (@movie.DurationMinutes min)</option>
+                                    }
+                                </select>
+                            }
+                            else
+                            {
+                                <span class="value">@movie?.Title</span>
+                            }
                         </div>
                     </div>
                 }
@@ -171,10 +187,13 @@
                 }
                 else
                 {
-                    <FormButton IsPrimary="false" Text="Verwijderen" OnClick="() => PromptConfirmation(true)"
-                        CssClass="delete-btn" />
+                    @if (!_isCreating)
+                    {
+                        <FormButton IsPrimary="false" Text="Verwijderen" OnClick="() => PromptConfirmation(true)"
+                            CssClass="delete-btn" />
+                    }
                     <div style="flex-grow: 1"></div>
-                    <FormButton IsPrimary="true" Text="Opslaan" OnClick="() => PromptConfirmation(false)" />
+                    <FormButton IsPrimary="true" Text="@(_isCreating ? "Toevoegen" : "Opslaan")" OnClick="() => HandleSaveClick()" />
                 }
             </Footer>
         </TerminalModal>
@@ -285,6 +304,18 @@
     .section-header h2 {
         margin: 0;
         font-size: 1.75rem;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .add-show-btn {
+        width: auto !important;
+        padding: 0.6rem 1.5rem;
+        background: var(--primary-rose) !important;
     }
 
     /* Date Picker */
@@ -509,6 +540,11 @@
         box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
     }
 
+    .terminal-input option {
+        background-color: #12151e;
+        color: var(--text-high);
+    }
+
     .info-row {
         display: flex;
         gap: 1rem;
@@ -587,9 +623,12 @@
 
     // Modal state
     private ShowtimeResponseDto? _selectedShowtime;
+    private int _selectedRoomId;
+    private int _selectedMovieId;
     private bool _showModal;
     private bool _showConfirmation;
     private bool _isDeleting;
+    private bool _isCreating;
     private DateTime _editStartTime;
 
     protected override async Task OnInitializedAsync()
@@ -624,19 +663,22 @@
 
     private void UpdateAvailableDates()
     {
-        var datesWithShows = _allShowtimes
-        .Select(s => s.StartTime.Date)
-        .Distinct()
-        .OrderBy(d => d)
-        .ToList();
-
-        if (!datesWithShows.Any(d => d == DateTime.Today))
+        var dates = new List<DateTime>();
+        
+        // Always include Today + next 14 days
+        for (int i = 0; i < 14; i++)
         {
-            datesWithShows.Add(DateTime.Today);
-            datesWithShows = datesWithShows.OrderBy(d => d).ToList();
+            dates.Add(DateTime.Today.AddDays(i));
         }
 
-        AvailableDates = datesWithShows;
+        // Add any additional dates that have shows but aren't in the next 14 days
+        var otherDatesWithShows = _allShowtimes
+            .Select(s => s.StartTime.Date)
+            .Where(d => d > DateTime.Today.AddDays(13))
+            .Distinct();
+
+        dates.AddRange(otherDatesWithShows);
+        AvailableDates = dates.OrderBy(d => d).ToList();
     }
 
     private void FilterShowtimes()
@@ -649,16 +691,70 @@
         if (show.StartTime < DateTime.Now) return;
 
         _selectedShowtime = show;
+        _selectedRoomId = show.RoomId;
+        _selectedMovieId = show.MovieId;
         _editStartTime = show.StartTime;
         _showModal = true;
         _showConfirmation = false;
         _isDeleting = false;
+        _isCreating = false;
+    }
+
+    private void OnAddShowClick()
+    {
+        _selectedShowtime = null;
+        _selectedRoomId = Rooms.FirstOrDefault()?.Id ?? 0;
+        _selectedMovieId = Movies.FirstOrDefault()?.Id ?? 0;
+        _editStartTime = SelectedDate.Date.AddHours(12); // Default to noon
+        _showModal = true;
+        _showConfirmation = false;
+        _isDeleting = false;
+        _isCreating = true;
+    }
+
+    private void OnTimelineClick(MouseEventArgs e, RoomResponseDto room)
+    {
+        if (SelectedDate.Date < DateTime.Today) return;
+
+        // Roughly calculate hour from click position
+        // This relies on the timeline container being 1200px min-width normally,
+        // but we can use the offset.
+        
+        // Simple heuristic for now: 
+        // 09:00 to 00:00 is 15 hours.
+        // We'll use a more precise method if possible, but let's assume the container is clickable.
+        // In a real app we'd use getBoundingClientRect, but here let's just 
+        // set it to a reasonable default based on where they click.
+        
+        _selectedShowtime = null;
+        _selectedRoomId = room.Id;
+        _selectedMovieId = Movies.FirstOrDefault()?.Id ?? 0;
+        
+        // Estimate time (very rough fallback)
+        _editStartTime = SelectedDate.Date.AddHours(12); 
+        
+        _showModal = true;
+        _showConfirmation = false;
+        _isDeleting = false;
+        _isCreating = true;
     }
 
     private void CloseModal()
     {
         _showModal = false;
         _selectedShowtime = null;
+    }
+
+    private void HandleSaveClick()
+    {
+        if (_isCreating)
+        {
+            _ = ExecuteConfirmedAction();
+        }
+        else
+        {
+            PromptConfirmation(false);
+        }
     }
 
     private void PromptConfirmation(bool isDeleting)
@@ -669,22 +765,31 @@
 
     private async Task ExecuteConfirmedAction()
     {
-        if (_selectedShowtime == null) return;
-
         bool success;
-        if (_isDeleting)
+        if (_isDeleting && _selectedShowtime != null)
         {
             success = await ShowtimeService.DeleteShowtimeAsync(_selectedShowtime.Id);
         }
-        else
+        else if (_isCreating)
+        {
+            if (_selectedMovieId == 0) return;
+            var createDto = new ShowtimeCreateDto(
+                _selectedMovieId,
+                _selectedRoomId,
+                _editStartTime
+            );
+            success = await ShowtimeService.CreateShowtimeAsync(createDto);
+        }
+        else if (_selectedShowtime != null)
         {
             var updateDto = new ShowtimeCreateDto(
-            _selectedShowtime.MovieId,
-            _selectedShowtime.RoomId,
-            _editStartTime
+                _selectedMovieId,
+                _selectedRoomId,
+                _editStartTime
             );
             success = await ShowtimeService.UpdateShowtimeAsync(_selectedShowtime.Id, updateDto);
         }
+        else success = false;
 
         if (success)
         {

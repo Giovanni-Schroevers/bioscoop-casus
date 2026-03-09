@@ -3,14 +3,9 @@ using System.Net.Http.Json;
 
 namespace BioscoopCasus.Web.Services;
 
-public class ShowtimeService
+public class ShowtimeService(HttpClient http)
 {
-    private readonly HttpClient _http;
-
-    public ShowtimeService(HttpClient http)
-    {
-        _http = http;
-    }
+    private readonly HttpClient _http = http;
 
     public async Task<IEnumerable<ShowtimeResponseDto>> GetShowtimesAsync(DateTime? date = null, int? movieId = null)
     {
@@ -34,6 +29,12 @@ public class ShowtimeService
 
         var result = await _http.GetFromJsonAsync<IEnumerable<ShowtimeResponseDto>>(url);
         return result ?? Enumerable.Empty<ShowtimeResponseDto>();
+    }
+
+    public async Task<bool> CreateShowtimeAsync(ShowtimeCreateDto dto)
+    {
+        var response = await _http.PostAsJsonAsync("api/showtimes", dto);
+        return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> UpdateShowtimeAsync(int id, ShowtimeCreateDto dto)

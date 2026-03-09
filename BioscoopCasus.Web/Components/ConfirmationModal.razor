@@ -1,0 +1,47 @@
+@if (Visible)
+{
+    <TerminalModal Visible="Visible" Title="@Title" OnClose="OnCancel">
+        <ChildContent>
+            <div class="confirmation-view">
+                <div class="warning-box">
+                    @if (ChildContent != null)
+                    {
+                        @ChildContent
+                    }
+                    else
+                    {
+                        <p>@Message</p>
+                    }
+                </div>
+            </div>
+        </ChildContent>
+        <Footer>
+            <FormButton IsPrimary="false" Text="Annuleren" OnClick="OnCancel" />
+            <FormButton IsPrimary="true" Text="@ConfirmText" OnClick="OnConfirm" />
+        </Footer>
+    </TerminalModal>
+}
+
+<style>
+    .warning-box {
+        background: rgba(234, 179, 8, 0.1);
+        border: 1px solid rgba(234, 179, 8, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        color: #fbbf24;
+    }
+    
+    .confirmation-view {
+        padding: 0.5rem 0;
+    }
+</style>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public string Title { get; set; } = "Bevestigen";
+    [Parameter] public string Message { get; set; } = "Weet je dit zeker?";
+    [Parameter] public string ConfirmText { get; set; } = "Bevestigen";
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,496 @@
+@page "/management/movies"
+@attribute [Authorize]
+@inject MovieService MovieService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Filmbeheer - Management</PageTitle>
+
+<div class="management-container">
+    <div class="header-section">
+        <a href="/management" class="back-link">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Dashboard
+        </a>
+        <div class="title-row">
+            <h1>Filmbeheer</h1>
+            <FormButton IsPrimary="true" Text="Nieuwe Film" OnClick="OnAddMovieClick" CssClass="add-movie-btn" />
+        </div>
+        
+        <div class="search-bar">
+            <div class="search-input-wrapper">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" class="search-icon">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" placeholder="Zoek op titel of beschrijving..." @bind="SearchTerm" @bind:event="oninput" class="terminal-input search-input" />
+            </div>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state">
+            <span class="loading-spinner"></span>
+            <p>Films laden...</p>
+        </div>
+    }
+    else
+    {
+        <div class="movie-grid">
+            @if (!FilteredMovies.Any())
+            {
+                <div class="empty-state">Geen films gevonden die voldoen aan je zoekopdracht.</div>
+            }
+            else
+            {
+                @foreach (var movie in FilteredMovies)
+                {
+                    <div class="movie-card" @onclick="() => OnMovieClick(movie)">
+                        <div class="card-poster">
+                            <img src="@movie.PosterUrl" alt="@movie.Title" onerror="this.src='/images/poster-placeholder.jpg'" />
+                            <div class="card-overlay">
+                                <span class="edit-badge">Bewerken</span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3>@movie.Title</h3>
+                            <div class="movie-meta">
+                                <span class="genre">@movie.Genres</span>
+                                <span class="duration">@movie.DurationMinutes min</span>
+                            </div>
+                            <p class="release-date">Release: @movie.ReleaseDate.ToString("d MMM yyyy")</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@if (ShowModal)
+{
+    <TerminalModal Visible="ShowModal" Title="@(IsCreating ? "Nieuwe Film" : "Bewerk Film")" OnClose="CloseModal">
+        <ChildContent>
+            <div class="movie-form">
+                <TerminalInput Label="Titel" @bind-Value="EditMovie.Title" Placeholder="bijv. Inception" />
+                
+                <div class="form-row">
+                    <TerminalInput Label="Genres" @bind-Value="EditMovie.Genres" Placeholder="bijv. Sci-Fi, Action" CssClass="flex-1" />
+                    <TerminalInput Label="Leeftijd" Type="select" @bind-Value="AgeRatingString" CssClass="flex-1">
+                        <option value="0">AL</option>
+                        <option value="6">6+</option>
+                        <option value="9">9+</option>
+                        <option value="12">12+</option>
+                        <option value="16">16+</option>
+                        <option value="18">18+</option>
+                    </TerminalInput>
+                </div>
+
+                <div class="form-row">
+                    <TerminalInput Label="Duur (min)" Type="number" @bind-Value="DurationMinutesString" CssClass="flex-1" />
+                    <TerminalInput Label="Release Datum" Type="date" @bind-Value="ReleaseDateString" CssClass="flex-1" />
+                </div>
+
+                <TerminalInput Label="Beschrijving" Type="textarea" @bind-Value="EditMovie.Description" Rows="3" />
+                
+                <TerminalInput Label="Poster URL" @bind-Value="EditMovie.PosterUrl" />
+
+                <div class="form-row">
+                    <TerminalInput Label="Acteurs" @bind-Value="EditMovie.Actors" CssClass="flex-1" />
+                    <TerminalInput Label="Trailer URL" @bind-Value="EditMovie.TrailerUrl" CssClass="flex-1" />
+                </div>
+            </div>
+        </ChildContent>
+        <Footer>
+            @if (!IsCreating)
+            {
+                <FormButton IsPrimary="false" Text="Verwijderen" OnClick="() => ShowConfirmation = true" CssClass="delete-btn" />
+            }
+            <div style="flex-grow: 1"></div>
+            <FormButton IsPrimary="false" Text="Annuleren" OnClick="CloseModal" />
+            <FormButton IsPrimary="true" Text="@(IsCreating ? "Toevoegen" : "Opslaan")" OnClick="HandleSave" />
+        </Footer>
+    </TerminalModal>
+}
+
+<ConfirmationModal Visible="ShowConfirmation" 
+                   Title="Film Verwijderen" 
+                   ConfirmText="Verwijderen"
+                   OnConfirm="HandleDelete" 
+                   OnCancel="() => ShowConfirmation = false">
+    <ChildContent>
+        <p>Weet je zeker dat je <strong>@SelectedMovie?.Title</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.</p>
+    </ChildContent>
+</ConfirmationModal>
+
+<style>
+    .management-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .header-section {
+        margin-bottom: 3rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: var(--primary-rose);
+    }
+
+    .title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .title-row h1 {
+        font-size: 2.5rem;
+        margin: 0;
+        color: var(--text-high);
+    }
+
+    .add-movie-btn {
+        width: auto !important;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .search-bar {
+        margin-bottom: 2rem;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        max-width: 500px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+
+    .search-input {
+        padding-left: 3.5rem !important;
+    }
+
+    /* Movie Grid */
+    .movie-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 2rem;
+    }
+
+    .movie-card {
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-rose);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-poster {
+        position: relative;
+        aspect-ratio: 2/3;
+        overflow: hidden;
+    }
+
+    .card-poster img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .movie-card:hover .card-poster img {
+        transform: scale(1.05);
+    }
+
+    .card-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(225, 29, 72, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .movie-card:hover .card-overlay {
+        opacity: 1;
+    }
+
+    .edit-badge {
+        background: var(--text-high);
+        color: var(--primary-rose);
+        padding: 0.5rem 1.25rem;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .card-content h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: var(--text-high);
+        line-height: 1.3;
+    }
+
+    .movie-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .genre {
+        color: var(--primary-rose);
+        font-weight: 600;
+    }
+
+    .release-date {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: auto;
+    }
+
+    /* Form Layout */
+    .movie-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .delete-btn {
+        background: rgba(225, 29, 72, 0.05) !important;
+        border-color: rgba(225, 29, 72, 0.2) !important;
+        color: var(--primary-rose) !important;
+    }
+
+    /* Loading state */
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 5rem 0;
+        gap: 1.5rem;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--primary-rose);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 5rem;
+        color: var(--text-muted);
+        background: var(--surface-glass);
+        border-radius: 12px;
+        font-style: italic;
+    }
+</style>
+
+@code {
+    private List<MovieResponseDto> AllMovies { get; set; } = new();
+    private string SearchTerm { get; set; } = "";
+    private bool IsLoading { get; set; } = true;
+    
+    // Modal state
+    private bool ShowModal { get; set; }
+    private bool ShowConfirmation { get; set; }
+    private bool IsCreating { get; set; }
+    private MovieResponseDto? SelectedMovie { get; set; }
+    private MovieForm EditMovie { get; set; } = new();
+
+    private class MovieForm
+    {
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string PosterUrl { get; set; } = "";
+        public string Actors { get; set; } = "";
+        public string TrailerUrl { get; set; } = "";
+        public string Genres { get; set; } = "";
+        public int AgeRating { get; set; }
+        public int DurationMinutes { get; set; } = 120;
+        public DateTime ReleaseDate { get; set; } = DateTime.Today;
+    }
+
+    private string AgeRatingString
+    {
+        get => EditMovie.AgeRating.ToString();
+        set => EditMovie.AgeRating = int.TryParse(value, out var v) ? v : 0;
+    }
+
+    private string DurationMinutesString
+    {
+        get => EditMovie.DurationMinutes.ToString();
+        set => EditMovie.DurationMinutes = int.TryParse(value, out var v) ? v : 120;
+    }
+
+    private string ReleaseDateString
+    {
+        get => EditMovie.ReleaseDate.ToString("yyyy-MM-dd");
+        set => EditMovie.ReleaseDate = DateTime.TryParse(value, out var v) ? v : DateTime.Today;
+    }
+
+    private IEnumerable<MovieResponseDto> FilteredMovies => AllMovies
+        .Where(m => string.IsNullOrWhiteSpace(SearchTerm) || 
+                   m.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) || 
+                   m.Description.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+        .OrderByDescending(m => m.ReleaseDate);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMovies();
+    }
+
+    private async Task LoadMovies()
+    {
+        IsLoading = true;
+        try
+        {
+            AllMovies = (await MovieService.GetMoviesAsync()).ToList();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void OnAddMovieClick()
+    {
+        IsCreating = true;
+        EditMovie = new MovieForm();
+        ShowModal = true;
+    }
+
+    private void OnMovieClick(MovieResponseDto movie)
+    {
+        IsCreating = false;
+        SelectedMovie = movie;
+        EditMovie = new MovieForm
+        {
+            Title = movie.Title,
+            Description = movie.Description,
+            PosterUrl = movie.PosterUrl,
+            Actors = movie.Actors,
+            TrailerUrl = movie.TrailerUrl,
+            Genres = movie.Genres,
+            AgeRating = movie.AgeRating,
+            DurationMinutes = movie.DurationMinutes,
+            ReleaseDate = movie.ReleaseDate
+        };
+        ShowModal = true;
+    }
+
+    private void CloseModal()
+    {
+        ShowModal = false;
+        SelectedMovie = null;
+    }
+
+    private async Task HandleSave()
+    {
+        if (string.IsNullOrWhiteSpace(EditMovie.Title)) return;
+
+        bool success;
+        if (IsCreating)
+        {
+            var createDto = new MovieCreateDto(
+                EditMovie.Title, EditMovie.Description, EditMovie.PosterUrl,
+                EditMovie.Actors, EditMovie.TrailerUrl, EditMovie.Genres,
+                EditMovie.AgeRating, EditMovie.DurationMinutes, EditMovie.ReleaseDate
+            );
+            success = await MovieService.CreateMovieAsync(createDto);
+        }
+        else
+        {
+            var updateDto = new MovieUpdateDto(
+                EditMovie.Title, EditMovie.Description, EditMovie.PosterUrl,
+                EditMovie.Actors, EditMovie.TrailerUrl, EditMovie.Genres,
+                EditMovie.AgeRating, EditMovie.DurationMinutes, EditMovie.ReleaseDate
+            );
+            success = await MovieService.UpdateMovieAsync(SelectedMovie!.Id, updateDto);
+        }
+
+        if (success)
+        {
+            await LoadMovies();
+            CloseModal();
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        if (SelectedMovie == null) return;
+
+        var success = await MovieService.DeleteMovieAsync(SelectedMovie.Id);
+        if (success)
+        {
+            await LoadMovies();
+            ShowConfirmation = false;
+            CloseModal();
+        }
+    }
+
+    private static Models.DTOs.MovieCreateDto CreateDefaultMovie() => new(
+        "", "", "", "", "", "", 0, 120, DateTime.Today
+    );
+}

@@ -197,6 +197,12 @@ public class ShowtimesController : ControllerBase
     [Authorize]
     public async Task<ActionResult<ShowtimeResponseDto>> UpdateShowtime(int id, ShowtimeCreateDto dto)
     {
+        var showtime = await _context.Showtimes.FindAsync(id);
+        if (showtime == null)
+        {
+            return NotFound("Show not found");
+        }
+        
         var movie = await _context.Movies.FindAsync(dto.MovieId);
         if (movie == null)
             return BadRequest("Invalid MovieId");

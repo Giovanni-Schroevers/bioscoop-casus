@@ -8,15 +8,28 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// Point the HttpClient to our backend API (running on port 5064 for HTTP to avoid SSL issues)
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7181/") });
-
 // Register authentication & authorization components
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<MovieService>();
-builder.Services.AddScoped<RoomService>();
-builder.Services.AddScoped<ShowtimeService>();
+
+// Register the JWT handler
+builder.Services.AddTransient<JwtAuthorizationMessageHandler>();
+
+// Register services as Typed Clients with the JWT handler
+builder.Services.AddHttpClient<MovieService>(client => 
+    client.BaseAddress = new Uri("https://localhost:7181/"))
+    .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+
+builder.Services.AddHttpClient<RoomService>(client => 
+    client.BaseAddress = new Uri("https://localhost:7181/"))
+    .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+
+builder.Services.AddHttpClient<ShowtimeService>(client => 
+    client.BaseAddress = new Uri("https://localhost:7181/"))
+    .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+
+// Default HttpClient for AuthService (doesn't need the JWT handler for login)
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7181/") });
 
 await builder.Build().RunAsync();
