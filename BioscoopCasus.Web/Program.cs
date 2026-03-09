@@ -11,10 +11,15 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5064/") });
+
 // Register authentication & authorization components
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ReservationService>();
+builder.Services.AddScoped<SeatSelectionService>();
+builder.Services.AddSingleton<QrCodeHelper>();
 
 // Register the JWT handler
 builder.Services.AddTransient<JwtAuthorizationMessageHandler>();

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace BioscoopCasus.API.Entities;
 
 public class Room
@@ -16,5 +14,6 @@ public class Room
 
     // Navigation properties
     public ICollection<Row> Rows { get; set; } = new List<Row>();
+    public ICollection<Seat> Seats { get; set; } = new List<Seat>();
     public ICollection<Showtime> Showtimes { get; set; } = new List<Showtime>();
 }
