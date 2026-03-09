@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace BioscoopCasus.API.Entities;
 
 public class Room

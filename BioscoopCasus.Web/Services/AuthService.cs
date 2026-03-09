@@ -1,4 +1,6 @@
+using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 using BioscoopCasus.Models.DTOs;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;

@@ -480,3 +480,34 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Rider / IntelliJ workspace files
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# Rider caches
+.idea/**/contentModel.xml
+.idea/**/modules.xml
+.idea/**/vcs.xml
+.idea/**/compiler.xml
+.idea/**/encodings.xml
+
+# Rider local run configurations
+.idea/**/runConfigurations/
+
+# Rider HTTP client requests
+.idea/httpRequests
+
+# Rider plugin settings
+.idea/**/aws.xml
+.idea/**/azureSettings.xml
+
+# Rider UI designer
+.idea/**/uiDesigner.xml

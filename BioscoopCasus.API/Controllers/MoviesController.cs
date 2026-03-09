@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using BioscoopCasus.API.Data;
 using BioscoopCasus.Models.DTOs;
 using BioscoopCasus.API.Entities;

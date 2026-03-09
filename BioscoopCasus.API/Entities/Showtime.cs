@@ -1,3 +1,5 @@
+using System;
+
 namespace BioscoopCasus.API.Entities;
 
 public class Showtime
