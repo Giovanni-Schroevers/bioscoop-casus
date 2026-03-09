@@ -1,0 +1,250 @@
+@page "/seat-reservation"
+@inject SeatSelectionService SeatSelectionService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Stoel Reserveren</PageTitle>
+
+<h2>Stoel Reserveren</h2>
+
+@if (Movies == null)
+{
+    <p>Films laden...</p>
+}
+else
+{
+    <h3>Kies een film:</h3>
+    @foreach (var movie in Movies)
+    {
+        <div @onclick="() => SelectMovie(movie)" style="cursor: pointer; border: 1px solid #ccc; padding: 10px; margin: 5px;">
+            <h4>@movie.Title</h4>
+            <p>@movie.Description</p>
+        </div>
+    }
+}
+
+@if (SelectedMovie != null && Showtimes != null)
+{
+    <h3>Kies een tijd voor @SelectedMovie.Title:</h3>
+    @foreach (var showtime in Showtimes)
+    {
+        <div @onclick="() => SelectShowtime(showtime)" style="cursor: pointer; border: 1px solid #ccc; padding: 10px; margin: 5px;">
+            <p>@showtime.StartTime.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+    }
+}
+
+@if (SelectedShowtime != null)
+{
+    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+        <h4>@SelectedMovie?.Title</h4>
+        <p>@SelectedShowtime.StartTime.ToString("dd/MM/yyyy HH:mm") - Zaal @SelectedShowtime.RoomId</p>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div>
+                <label style="margin-right: 10px;">Aantal personen:</label>
+                <input type="number" @bind="GroupSize" @bind:event="oninput" min="1" max="20" 
+                       style="width: 60px; padding: 5px;" />
+            </div>
+            <button @onclick="UpdateSuggestions" class="btn btn-primary btn-sm">Update Suggesties</button>
+        </div>
+    </div>
+}
+
+@if (AllSeats != null)
+{
+    <div style="margin: 20px 0;">
+        <h4>Stoel keuze</h4>
+        @if (SeatSelectionResult != null)
+        {
+            <div style="padding: 10px; margin: 10px 0; border-radius: 5px; 
+                        background: @(SeatSelectionResult.IsGroupedTogether ? "#d4edda" : "#fff3cd"); 
+                        color: @(SeatSelectionResult.IsGroupedTogether ? "#155724" : "#856404");">
+                <strong>@SeatSelectionResult.Message</strong>
+            </div>
+        }
+
+        <!-- Cinema Screen -->
+        <div style="background: linear-gradient(45deg, #333, #666); color: white; text-align: center; 
+                    padding: 20px; margin: 20px 0; border-radius: 8px 8px 60px 60px; 
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <div style="font-size: 18px; font-weight: bold;">SCHERM</div>
+        </div>
+
+        <!-- Seats Grid with Row Labels -->
+        <div style="max-width: 700px; margin: 0 auto;">
+            @for (int row = 1; row <= MaxRow; row++)
+            {
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <!-- Row Label -->
+                    <div style="width: 40px; text-align: center; font-weight: bold; color: #666;">
+                        Rij @row
+                    </div>
+                    
+                    <!-- Seats in this row -->
+                    <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+                        @for (int seat = 1; seat <= MaxSeat; seat++)
+                        {
+                            var seatInfo = AllSeats.FirstOrDefault(s => s.Row == row && s.SeatNumber == seat);
+                            var isSelected = SelectedSeatIds.Contains(seatInfo?.Id ?? 0);
+                            var seatClass = GetSeatClass(seatInfo, isSelected);
+
+                            <div @onclick="() => ToggleSeatSelection(seatInfo)"
+                                 style="@($"width: 28px; height: 28px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; {seatClass}")"
+                                 title="@(seatInfo != null ? $"Rij {row}, Stoel {seat}" : "Stoel niet beschikbaar")">
+                                @seat
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Legend -->
+        <div style="display: flex; justify-content: center; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 20px; height: 20px; background: #28a745; border-radius: 3px;"></div>
+                <span>Vrij</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 20px; height: 20px; background: #dc3545; border-radius: 3px;"></div>
+                <span>Bezet</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 20px; height: 20px; background: #ffc107; border: 1px solid #e0a800; border-radius: 3px;"></div>
+                <span>Geselecteerd</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="text-align: center; margin-top: 30px;">
+            <button @onclick="ConfirmReservation" 
+                    disabled="@(!SelectedSeatIds.Any())"
+                    class="btn btn-success btn-lg">
+                🎟️ Bevestig Reservering (@SelectedSeatIds.Count stoelen)
+            </button>
+        </div>
+    </div>
+}
+
+@if (ConfirmationResult != null)
+{
+    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-top: 20px;">
+        <h4>Succes!</h4>
+        <p>@ConfirmationResult.Message</p>
+        <p>Reservering ID: @ConfirmationResult.ReservationId</p>
+    </div>
+}
+
+@code {
+    private List<MovieResponseDto>? Movies;
+    private List<ShowtimeResponseDto>? Showtimes;
+    private List<SeatInfoDto>? AllSeats;
+    private SeatSelectionResponseDto? SeatSelectionResult;
+    private ReservationConfirmResponseDto? ConfirmationResult;
+
+    private MovieResponseDto? SelectedMovie;
+    private ShowtimeResponseDto? SelectedShowtime;
+    private int GroupSize = 1;
+    private HashSet<int> SelectedSeatIds = new();
+
+    private int MaxRow = 0;
+    private int MaxSeat = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMovies();
+    }
+
+    private async Task LoadMovies()
+    {
+        Movies = await SeatSelectionService.GetMoviesAsync();
+        StateHasChanged();
+    }
+
+    private void SelectMovie(MovieResponseDto movie)
+    {
+        SelectedMovie = movie;
+        Showtimes = null;
+        _ = LoadShowtimes();
+    }
+
+    private async Task LoadShowtimes()
+    {
+        if (SelectedMovie != null)
+        {
+            Showtimes = await SeatSelectionService.GetShowtimesForMovieAsync(SelectedMovie.Id);
+        }
+        StateHasChanged();
+    }
+
+    private async void SelectShowtime(ShowtimeResponseDto showtime)
+    {
+        SelectedShowtime = showtime;
+        GroupSize = 1;
+        
+        await LoadSeatsAndSuggestions();
+    }
+
+    private async Task LoadSeatsAndSuggestions()
+    {
+        if (SelectedShowtime == null) return;
+
+        AllSeats = await SeatSelectionService.GetAvailableSeatsAsync(SelectedShowtime.Id);
+        
+        SeatSelectionResult = await SeatSelectionService.SuggestSeatsAsync(SelectedShowtime.Id, GroupSize);
+
+        if (SeatSelectionResult != null)
+        {
+            SelectedSeatIds = new HashSet<int>(SeatSelectionResult.SuggestedSeats.Select(s => s.Id));
+        }
+
+        if (AllSeats != null && AllSeats.Any())
+        {
+            MaxRow = AllSeats.Max(s => s.Row);
+            MaxSeat = AllSeats.Max(s => s.SeatNumber);
+        }
+
+        StateHasChanged();
+    }
+
+    private void ToggleSeatSelection(SeatInfoDto? seat)
+    {
+        if (seat == null || !seat.IsAvailable) return;
+
+        if (SelectedSeatIds.Contains(seat.Id))
+        {
+            SelectedSeatIds.Remove(seat.Id);
+        }
+        else
+        {
+            SelectedSeatIds.Add(seat.Id);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task ConfirmReservation()
+    {
+        if (SelectedShowtime == null || !SelectedSeatIds.Any()) return;
+
+        ConfirmationResult = await SeatSelectionService.ConfirmReservationAsync(
+            SelectedShowtime.Id,
+            SelectedSeatIds.ToList());
+
+        StateHasChanged();
+    }
+
+    private async Task UpdateSuggestions()
+    {
+        await LoadSeatsAndSuggestions();
+    }
+
+    private string GetSeatClass(SeatInfoDto? seat, bool isSelected)
+    {
+        if (seat == null) return "background: #666;";
+
+        if (isSelected) return "background: #ffc107; border: 2px solid #e0a800;";
+
+        return seat.IsAvailable ? "background: #28a745;" : "background: #dc3545;";
+    }
+}
