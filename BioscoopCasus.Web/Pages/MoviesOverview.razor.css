@@ -1,3 +1,36 @@
+.return-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+    padding: 0.75rem 1rem;
+    margin: 0 auto 1.5rem auto;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.return-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(225, 29, 72, 0.35);
+    transform: translateY(-1px);
+}
+
+.return-button:focus {
+    outline: none;
+    border-color: #e11d48;
+    box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.12);
+}
+
+.return-button-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
 h1 {
     color: #f8fafc;
     margin-bottom: 1.5rem;
