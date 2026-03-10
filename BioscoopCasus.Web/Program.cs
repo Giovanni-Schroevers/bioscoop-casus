@@ -27,6 +27,7 @@ builder.Services.AddScoped<AuthService>();
 // App services
 builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<MoviesOverviewService>();
+builder.Services.AddScoped<FilmsOverviewService>();
 builder.Services.AddScoped<MovieInformationService>();
 builder.Services.AddScoped<TicketPricingService>();
 builder.Services.AddSingleton<QrCodeHelper>();

@@ -1,7 +1,9 @@
 @page "/movies"
 @inject MoviesOverviewService MoviesOverviewService
 @inject NavigationManager NavigationManager
+@using BioscoopCasus.Web.Layout
 
+<TerminalShell>
 <div class="movies-page">
     <button class="return-button" @onclick="@(() => NavigationManager.NavigateTo("/"))">
         <span class="return-button-icon">←</span>
@@ -53,6 +55,7 @@
     }
 
 </div>
+</TerminalShell>
 @code
 {
     private List<MoviesOverviewDto>? _movies;

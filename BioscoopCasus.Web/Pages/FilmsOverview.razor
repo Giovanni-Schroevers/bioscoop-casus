@@ -1,0 +1,69 @@
+@page "/films"
+@inject FilmsOverviewService FilmsOverviewService
+@inject NavigationManager NavigationManager
+@using BioscoopCasus.Web.Layout
+
+<PageTitle>Films</PageTitle>
+
+<TerminalShell>
+<div class="films-page">
+    <button class="return-button" @onclick="@(() => NavigationManager.NavigateTo("/"))">
+        <span class="return-button-icon">←</span>
+        <span>Terug naar home</span>
+    </button>
+
+    <h1>Aankomende voorstellingen</h1>
+
+    @if (_films == null)
+    {
+        <p class="empty-message">Loading...</p>
+    }
+    else if (!_films.Any())
+    {
+        <p class="empty-message">Geen aankomende voorstellingen gevonden.</p>
+    }
+    else
+    {
+        <div class="film-grid">
+            @foreach (var film in _films)
+            {
+                <div class="film-card clickable-card" @onclick="@(() => OpenTicketSale(film.MovieId, film.ShowtimeId))">
+                    <img src="@GetPosterUrl(film.PosterUrl)" alt="@film.Title" />
+                    <div class="film-card-info">
+                        <h3>@film.Title</h3>
+                        <p class="film-genres">@film.Genres</p>
+                        <p class="film-duration">@film.DurationMinutes minuten</p>
+                        <span class="film-showtime">@film.StartTime.ToString("dddd dd MMM, HH:mm")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+</TerminalShell>
+
+@code
+{
+    private List<FilmsOverviewDto>? _films;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _films = await FilmsOverviewService.GetFilmsAsync();
+    }
+
+    private void OpenTicketSale(int movieId, int showtimeId)
+    {
+        NavigationManager.NavigateTo($"/movies/{movieId}/ticketsale/{showtimeId}");
+    }
+
+    private static string GetPosterUrl(string posterUrl)
+    {
+        if (string.IsNullOrWhiteSpace(posterUrl) ||
+            (Uri.TryCreate(posterUrl, UriKind.Absolute, out var uri) &&
+             uri.Host.Contains("example.com", StringComparison.OrdinalIgnoreCase)))
+        {
+            return "https://placehold.co/200x250";
+        }
+        return posterUrl;
+    }
+}
