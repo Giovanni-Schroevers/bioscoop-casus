@@ -1,255 +1,388 @@
 @page "/seat-reservation"
+@page "/seat-reservation/{MovieId}/{ShowtimeId}/{TotalTickets:int}/{TotalPriceCents:int}"
 @inject SeatSelectionService SeatSelectionService
+@inject NavigationManager NavigationManager
 
-<h1>Seat Reservation</h1>
+<h1>Stoelkeuze</h1>
 
+@* Only show movie grid when navigated to standalone (no params passed) *@
+@if (!_cameFromTicketSale)
+{
 @if (Movies == null)
 {
-    <p>Loading movies...</p>
+<p>Loading movies...</p>
 }
 else
 {
-    <div class="movie-grid">
-        @foreach (var movie in Movies)
-        {
-            <div class="movie-card" @onclick="() => SelectMovie(movie)">
-                <img src="https://placehold.co/200x250" />
-                <h3>@movie.Title</h3>
-            </div>
-        }
+<div class="movie-grid">
+    @foreach (var movie in Movies)
+    {
+    <div class="movie-card" @onclick="() => SelectMovie(movie)">
+        <img src="https://placehold.co/200x250" />
+        <h3>@movie.Title</h3>
     </div>
+    }
+</div>
+}
 }
 
 @if (ConfirmationResult != null)
 {
-    <div class="success">
-        Reservation successful! ID: @ConfirmationResult.ReservationId
-    </div>
+<div class="success">
+    Reservering gelukt! ID: @ConfirmationResult.ReservationId
+</div>
 }
 
-<!-- SHOWTIME POPUP -->
+<!-- SHOWTIME POPUP (only in standalone mode) -->
 
 @if (ShowShowtimeModal)
 {
-    <div class="modal-overlay">
-        <div class="modal">
+<div class="modal-overlay">
+    <div class="modal">
 
-            <h2>Choose a time</h2>
+        <h2>Kies een tijd</h2>
 
-            @if (Showtimes == null)
-            {
-                <p>Loading...</p>
-            }
-            else
-            {
-                @foreach (var showtime in Showtimes)
-                {
-                    <div class="showtime"
-                         @onclick="() => SelectShowtime(showtime)">
-                        @showtime.StartTime.ToString("dd/MM HH:mm") - Room @showtime.RoomId
-                    </div>
-                }
-            }
-
-            <button @onclick="CloseShowtimeModal">Close</button>
-
+        @if (Showtimes == null)
+        {
+        <p>Loading...</p>
+        }
+        else
+        {
+        @foreach (var showtime in Showtimes)
+        {
+        <div class="showtime"
+             @onclick="() => SelectShowtime(showtime)">
+            @showtime.StartTime.ToString("dd/MM HH:mm") - Zaal @showtime.RoomId
         </div>
+        }
+        }
+
+        <button @onclick="CloseShowtimeModal">Sluiten</button>
+
     </div>
+</div>
 }
 
 <!-- GROUP SIZE POPUP -->
 
 @if (ShowGroupSizeModal)
 {
-    <div class="modal-overlay">
-        <div class="modal">
+<div class="modal-overlay">
+    <div class="modal">
 
-            <h2>Number of people</h2>
+        <h2>Aantal personen</h2>
 
-            <input type="number" min="1" max="20" @bind="GroupSize" />
+        @if (_cameFromTicketSale)
+        {
+        <p class="group-size-info">
+            Je hebt <strong>@GroupSize ticket(s)</strong> geselecteerd.
+            Kies <strong>@GroupSize stoel(en)</strong>.
+        </p>
+        }
 
-            <button @onclick="ConfirmGroupSize">Next</button>
+        <input type="number" min="1" max="20" @bind="GroupSize"
+               disabled="@_cameFromTicketSale" />
 
-        </div>
+        <button @onclick="ConfirmGroupSize">Verder</button>
+
     </div>
+</div>
 }
 
 <!-- SEAT POPUP -->
 
 @if (ShowSeatsModal)
 {
-    <div class="modal-overlay">
-        <div class="modal large">
+<div class="modal-overlay">
+    <div class="modal large">
 
-            <h2>Choose seats</h2>
-
-            @if (IsLoadingSeats)
+        <h2>Kies je stoelen</h2>
+        <p class="seats-subtitle">
+            Selecteer <strong>@GroupSize stoel(en)</strong>
+            @if (_selectedMovieTitle != null)
             {
-                <p>Loading seats...</p>
+            <span> voor <em>@_selectedMovieTitle</em></span>
             }
-            else if (AllSeats == null || !AllSeats.Any())
+            @if (_selectedShowtimeDisplay != null)
             {
-                <p>No seats available for this showtime.</p>
+            <span> — @_selectedShowtimeDisplay</span>
             }
-            else
+        </p>
+
+        @if (IsLoadingSeats)
+        {
+        <p>Stoelen laden...</p>
+        }
+        else if (AllSeats == null || !AllSeats.Any())
+        {
+        <p>Geen stoelen beschikbaar voor dit tijdstip.</p>
+        }
+        else
+        {
+        <div class="screen">SCHERM</div>
+
+        <div class="seats-legend">
+            <span class="legend-item"><span class="dot available"></span> Beschikbaar</span>
+            <span class="legend-item"><span class="dot occupied"></span> Bezet</span>
+            <span class="legend-item"><span class="dot selected"></span> Geselecteerd</span>
+        </div>
+
+        <div class="seats-grid">
+
+            @for (int row = 1; row <= MaxRow; row++)
             {
-                <div class="screen">SCREEN</div>
+            <div class="row">
 
-                <div class="seats-grid">
+                <div class="row-label">Rij @row</div>
 
-                    @for (int row = 1; row <= MaxRow; row++)
-                    {
-                        <div class="row">
+                @for (int seat = 1; seat <= MaxSeat; seat++)
+                {
+                var seatInfo = AllSeats.FirstOrDefault(
+                s => s.Row == row && s.SeatNumber == seat);
 
-                            <div class="row-label">Row @row</div>
+                var isSelected =
+                SelectedSeatIds.Contains(seatInfo?.Id ?? 0);
 
-                            @for (int seat = 1; seat <= MaxSeat; seat++)
-                            {
-                                var seatInfo = AllSeats.FirstOrDefault(
-                                s => s.Row == row && s.SeatNumber == seat);
+                var seatClass = GetSeatClass(seatInfo, isSelected);
 
-                                var isSelected =
-                                SelectedSeatIds.Contains(seatInfo?.Id ?? 0);
-
-                                var seatClass = GetSeatClass(seatInfo, isSelected);
-
-                                <div class="seat @seatClass"
-                                     @onclick="() => ToggleSeatSelection(seatInfo)">
-                                    @seat
-                                </div>
-                            }
-
-                        </div>
-                    }
-
+                <div class="seat @seatClass"
+                     title="Rij @row, Stoel @seat"
+                     @onclick="() => ToggleSeatSelection(seatInfo)">
+                    @seat
                 </div>
+                }
+
+            </div>
             }
-
-            <button disabled="@(!SelectedSeatIds.Any())"
-                    @onclick="ConfirmReservation">
-
-                Confirm (@SelectedSeatIds.Count)
-
-            </button>
 
         </div>
+
+        @if (_seatSelectionError != null)
+        {
+        <p class="seat-error">@_seatSelectionError</p>
+        }
+        }
+
+        <div class="modal-actions">
+            <button class="cancel-button" @onclick="() => ShowSeatsModal = false">
+                Annuleren
+            </button>
+            <button class="confirm-button"
+                    disabled="@(SelectedSeatIds.Count != GroupSize)"
+                    @onclick="ConfirmReservation">
+                Bevestigen (@SelectedSeatIds.Count / @GroupSize)
+            </button>
+        </div>
+
     </div>
+</div>
 }
 
 <style>
 
-body{
-background:#0b0e14;
-color:white;
-}
+    body{
+        background:#0b0e14;
+        color:white;
+    }
 
-.movie-grid{
-display:grid;
-grid-template-columns:repeat(5,1fr);
-gap:20px;
-margin-top:20px;
-}
+    .movie-grid{
+        display:grid;
+        grid-template-columns:repeat(5,1fr);
+        gap:20px;
+        margin-top:20px;
+    }
 
-.movie-card{
-background:#1a1f2b;
-padding:10px;
-border-radius:10px;
-cursor:pointer;
-text-align:center;
-}
+    .movie-card{
+        background:#1a1f2b;
+        padding:10px;
+        border-radius:10px;
+        cursor:pointer;
+        text-align:center;
+    }
 
-.movie-card:hover{
-background:#2b3242;
-}
+    .movie-card:hover{
+        background:#2b3242;
+    }
 
-.modal-overlay{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.8);
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:999;
-}
+    .modal-overlay{
+        position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,0.8);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index:999;
+    }
 
-.modal{
-background:#1e2533;
-padding:30px;
-border-radius:10px;
-min-width:400px;
-}
+    .modal{
+        background:#1e2533;
+        padding:30px;
+        border-radius:10px;
+        min-width:400px;
+    }
 
-.modal.large{
-width:800px;
-}
+    .modal.large{
+        width:800px;
+        max-height:90vh;
+        overflow-y:auto;
+    }
 
-.showtime{
-padding:10px;
-border-bottom:1px solid #444;
-cursor:pointer;
-}
+    .showtime{
+        padding:10px;
+        border-bottom:1px solid #444;
+        cursor:pointer;
+    }
 
-.showtime:hover{
-background:#2b3242;
-}
+    .showtime:hover{
+        background:#2b3242;
+    }
 
-.screen{
-text-align:center;
-margin-bottom:20px;
-padding:10px;
-background:#333;
-}
+    .screen{
+        text-align:center;
+        margin-bottom:16px;
+        padding:10px;
+        background:#333;
+        border-radius:4px;
+        letter-spacing:4px;
+        font-size:.85rem;
+        color:#aaa;
+    }
 
-.seats-grid{
-display:flex;
-flex-direction:column;
-gap:10px;
-}
+    .seats-subtitle{
+        margin-bottom:12px;
+        font-size:.95rem;
+        color:#ccc;
+    }
 
-.row{
-display:flex;
-gap:5px;
-align-items:center;
-}
+    .seats-legend{
+        display:flex;
+        gap:20px;
+        margin-bottom:16px;
+        font-size:.85rem;
+    }
 
-.row-label{
-width:60px;
-}
+    .legend-item{
+        display:flex;
+        align-items:center;
+        gap:6px;
+    }
 
-.seat{
-width:35px;
-height:35px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:5px;
-cursor:pointer;
-}
+    .dot{
+        width:14px;
+        height:14px;
+        border-radius:3px;
+        display:inline-block;
+    }
 
-.available{
-background:#28a745;
-}
+    .seats-grid{
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+    }
 
-.occupied{
-background:#dc3545;
-}
+    .row{
+        display:flex;
+        gap:5px;
+        align-items:center;
+    }
 
-.selected{
-background:#ffc107;
-}
+    .row-label{
+        width:60px;
+        font-size:.8rem;
+        color:#aaa;
+    }
 
-.success{
-margin-top:20px;
-background:#28a745;
-padding:15px;
-}
+    .seat{
+        width:35px;
+        height:35px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border-radius:5px;
+        cursor:pointer;
+        font-size:.8rem;
+        transition:opacity .15s;
+    }
+
+    .seat:hover{
+        opacity:.8;
+    }
+
+    .available{
+        background:#28a745;
+    }
+
+    .occupied{
+        background:#dc3545;
+        cursor:not-allowed;
+    }
+
+    .selected{
+        background:#ffc107;
+        color:#000;
+    }
+
+    .seat-error{
+        color:#ff6b6b;
+        margin-top:10px;
+        font-size:.9rem;
+    }
+
+    .group-size-info{
+        margin-bottom:12px;
+        color:#ccc;
+    }
+
+    .modal-actions{
+        display:flex;
+        gap:12px;
+        margin-top:20px;
+        justify-content:flex-end;
+    }
+
+    .cancel-button{
+        background:#444;
+        color:white;
+        border:none;
+        padding:10px 20px;
+        border-radius:6px;
+        cursor:pointer;
+    }
+
+    .confirm-button{
+        background:#e50914;
+        color:white;
+        border:none;
+        padding:10px 20px;
+        border-radius:6px;
+        cursor:pointer;
+        font-weight:bold;
+    }
+
+    .confirm-button:disabled{
+        opacity:.5;
+        cursor:not-allowed;
+    }
+
+    .success{
+        margin-top:20px;
+        background:#28a745;
+        padding:15px;
+        border-radius:6px;
+    }
 
 </style>
 
 @code {
+
+// Optional route parameters (set when navigating from MovieTicketSale)
+[Parameter] public string? MovieId { get; set; }
+[Parameter] public string? ShowtimeId { get; set; }
+[Parameter] public int TotalTickets { get; set; }
+[Parameter] public int TotalPriceCents { get; set; }
 
 List<MovieResponseDto>? Movies;
 
@@ -275,114 +408,176 @@ int GroupSize = 1;
 int MaxRow;
 int MaxSeat;
 
+string? _selectedMovieTitle;
+string? _selectedShowtimeDisplay;
+string? _seatSelectionError;
+
+// True when navigated here from the ticket sale flow
+bool _cameFromTicketSale => !string.IsNullOrEmpty(MovieId) && !string.IsNullOrEmpty(ShowtimeId);
+
 
 protected override async Task OnInitializedAsync()
 {
-    Movies = await SeatSelectionService.GetMoviesAsync();
+if (_cameFromTicketSale)
+{
+// Came from ticket sale: load showtimes for the given movie+showtime
+// so we can resolve the showtime object, then open group size modal.
+await LoadShowtimeFromParams();
 }
+else
+{
+// Standalone mode: show movie grid
+Movies = await SeatSelectionService.GetMoviesAsync();
+}
+}
+
+// Resolve the ShowtimeResponseDto from the URL params
+async Task LoadShowtimeFromParams()
+{
+try
+{ if (!int.TryParse(MovieId, out var movieIdInt)) return; 
+    var showtimes = await SeatSelectionService.GetShowtimesForMovieAsync(movieIdInt);
+if (showtimes != null)
+{
+SelectedShowtime = showtimes.FirstOrDefault(
+s => s.Id.ToString() == ShowtimeId);
+
+if (SelectedShowtime != null)
+_selectedShowtimeDisplay = SelectedShowtime.StartTime.ToString("dddd dd MMMM HH:mm");
+}
+
+// Try to get movie title for display
+var movies = await SeatSelectionService.GetMoviesAsync();
+SelectedMovie = movies?.FirstOrDefault(m => m.Id.ToString() == MovieId);
+_selectedMovieTitle = SelectedMovie?.Title;
+}
+catch (Exception ex)
+{
+Console.WriteLine($"Error loading showtime from params: {ex.Message}");
+}
+
+// Pre-fill group size from ticket count and open modal
+GroupSize = TotalTickets > 0 ? TotalTickets : 1;
+ShowGroupSizeModal = true;
+}
+
+
+// ── Standalone flow ────────────────────────────────────────────────────────
 
 async Task SelectMovie(MovieResponseDto movie)
 {
-    SelectedMovie = movie;
-
-    ShowShowtimeModal = true;
-
-    Showtimes =
-    await SeatSelectionService.GetShowtimesForMovieAsync(movie.Id);
+SelectedMovie = movie;
+_selectedMovieTitle = movie.Title;
+ShowShowtimeModal = true;
+Showtimes = await SeatSelectionService.GetShowtimesForMovieAsync(movie.Id);
 }
 
 void CloseShowtimeModal()
 {
-    ShowShowtimeModal = false;
+ShowShowtimeModal = false;
 }
 
 void SelectShowtime(ShowtimeResponseDto showtime)
 {
-    SelectedShowtime = showtime;
-
-    ShowShowtimeModal = false;
-
-    ShowGroupSizeModal = true;
+SelectedShowtime = showtime;
+_selectedShowtimeDisplay = showtime.StartTime.ToString("dddd dd MMMM HH:mm");
+ShowShowtimeModal = false;
+ShowGroupSizeModal = true;
 }
+
+
+// ── Shared flow ────────────────────────────────────────────────────────────
 
 async Task ConfirmGroupSize()
 {
-    // Show the seats modal immediately
-    ShowGroupSizeModal = false;
-    ShowSeatsModal = true;
-    
-    // Load seats in background
-    await LoadSeats();
+ShowGroupSizeModal = false;
+ShowSeatsModal = true;
+SelectedSeatIds.Clear();
+_seatSelectionError = null;
+await LoadSeats();
 }
 
 async Task LoadSeats()
 {
-    if (SelectedShowtime == null) return;
+if (SelectedShowtime == null) return;
 
-    IsLoadingSeats = true;
-    StateHasChanged();
+IsLoadingSeats = true;
+StateHasChanged();
 
-    try
-    {
-        AllSeats =
-        await SeatSelectionService.GetAvailableSeatsAsync(SelectedShowtime.Id);
+try
+{
+AllSeats =
+await SeatSelectionService.GetAvailableSeatsAsync(SelectedShowtime.Id);
 
-        if (AllSeats != null && AllSeats.Any())
-        {
-            SeatSelectionResult =
-            await SeatSelectionService.SuggestSeatsAsync(SelectedShowtime.Id, GroupSize);
+if (AllSeats != null && AllSeats.Any())
+{
+SeatSelectionResult =
+await SeatSelectionService.SuggestSeatsAsync(SelectedShowtime.Id, GroupSize);
 
-            if (SeatSelectionResult != null)
-            {
-                SelectedSeatIds =
-                new HashSet<int>(SeatSelectionResult.SuggestedSeats.Select(x => x.Id));
-            }
+if (SeatSelectionResult != null)
+{
+SelectedSeatIds =
+new HashSet<int>(SeatSelectionResult.SuggestedSeats.Select(x => x.Id));
+}
 
-            MaxRow = AllSeats.Max(x => x.Row);
-            MaxSeat = AllSeats.Max(x => x.SeatNumber);
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error loading seats: {ex.Message}");
-        AllSeats = null;
-    }
-    finally
-    {
-        IsLoadingSeats = false;
-        StateHasChanged();
-    }
+MaxRow = AllSeats.Max(x => x.Row);
+MaxSeat = AllSeats.Max(x => x.SeatNumber);
+}
+}
+catch (Exception ex)
+{
+Console.WriteLine($"Error loading seats: {ex.Message}");
+AllSeats = null;
+}
+finally
+{
+IsLoadingSeats = false;
+StateHasChanged();
+}
 }
 
 void ToggleSeatSelection(SeatInfoDto? seat)
 {
-    if (seat == null || !seat.IsAvailable) return;
+if (seat == null || !seat.IsAvailable) return;
 
-    if (SelectedSeatIds.Contains(seat.Id))
-        SelectedSeatIds.Remove(seat.Id);
-    else
-        SelectedSeatIds.Add(seat.Id);
+_seatSelectionError = null;
+
+if (SelectedSeatIds.Contains(seat.Id))
+{
+SelectedSeatIds.Remove(seat.Id);
+}
+else
+{
+if (SelectedSeatIds.Count >= GroupSize)
+{
+_seatSelectionError = $"Je kunt maximaal {GroupSize} stoel(en) kiezen.";
+return;
+}
+SelectedSeatIds.Add(seat.Id);
+}
 }
 
 async Task ConfirmReservation()
 {
-    if (SelectedShowtime == null) return;
+if (SelectedShowtime == null) return;
 
-    ConfirmationResult =
-    await SeatSelectionService.ConfirmReservationAsync(
-        SelectedShowtime.Id,
-        SelectedSeatIds.ToList());
+ConfirmationResult =
+await SeatSelectionService.ConfirmReservationAsync(
+SelectedShowtime.Id,
+SelectedSeatIds.ToList());
 
-    ShowSeatsModal = false;
+ShowSeatsModal = false;
+
+// Navigate to payment page, carrying the total price (in cents)
+var priceCents = _cameFromTicketSale ? TotalPriceCents : 0;
+NavigationManager.NavigateTo($"/pin/{priceCents}");
 }
 
 string GetSeatClass(SeatInfoDto? seat, bool selected)
 {
-    if (seat == null) return "";
-
-    if (selected) return "selected";
-
-    return seat.IsAvailable ? "available" : "occupied";
+if (seat == null) return "";
+if (selected) return "selected";
+return seat.IsAvailable ? "available" : "occupied";
 }
 
 }

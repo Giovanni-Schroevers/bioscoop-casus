@@ -57,6 +57,11 @@ builder.Services.AddHttpClient<SeatSelectionService>(client =>
     client.BaseAddress = new Uri("http://localhost:5064/");
 });
 
+builder.Services.AddHttpClient<PaymentService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5064/");
+});
+
 var host = builder.Build();
 
 // Initialize pricing configuration BEFORE the app runs

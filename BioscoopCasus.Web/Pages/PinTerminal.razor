@@ -1,40 +1,68 @@
-@page "/pin"    
+@page "/pin"
+@page "/pin/{TotalPriceCents:int}"
 @using BioscoopCasus.Web.Services
+@using System.Globalization
 @inject PaymentService PaymentService
+@inject NavigationManager NavigationManager
 
 <div class="pin-page">
     <h1>Betaling</h1>
 
-    <div class="payment-options">
-        <div class="pin-section">
-            <h2>PIN</h2>
+    @if (TotalPriceCents > 0)
+    {
+        <div class="amount-display">
+            <span class="amount-label">Te betalen</span>
+            <span class="amount-value">@TotalPriceFormatted</span>
+        </div>
+    }
 
-            <div class="pin-display">
-                @for (int i = 0; i < 4; i++)
-                {
-                    <span class="pin-dot">@(i < EnteredPin.Length ? "*" : "-")</span>
-                }
+    @if (!_paymentDone)
+    {
+        <div class="payment-options">
+            <div class="pin-section">
+                <h2>PIN</h2>
+
+                <div class="pin-display">
+                    @for (int i = 0; i < 4; i++)
+                    {
+                        <span class="pin-dot">@(i < EnteredPin.Length ? "*" : "-")</span>
+                    }
+                </div>
+
+                <div class="pin-pad">
+                    @for (int i = 1; i <= 9; i++)
+                    {
+                        var digit = i.ToString();
+                        <button class="pin-button" @onclick="() => AddDigit(digit)">@digit</button>
+                    }
+                    <button class="pin-button clear" @onclick="Clear">C</button>
+                    <button class="pin-button" @onclick="() => AddDigit('0'.ToString())">0</button>
+                    <button class="pin-button confirm" @onclick="Submit">OK</button>
+                </div>
+
             </div>
 
-            <div class="pin-pad">
-                @for (int i = 1; i <= 9; i++)
-                {
-                    var digit = i.ToString();
-                    <button class="pin-button" @onclick="() => AddDigit(digit)">@digit</button>
-                }
-                <button class="pin-button clear" @onclick="Clear">C</button>
-                <button class="pin-button" @onclick="() => AddDigit('0'.ToString())">0</button>
-                <button class="pin-button confirm" @onclick="Submit">OK</button>
+            <div class="qr-section">
+                <h2>QR Betaling</h2>
+                <p class="qr-info">Scan de QR-code om te betalen via iDEAL/Wero</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://localhost:5158/betalen" 
+                     alt="QR Code" />
             </div>
-
         </div>
-
-        <div class="qr-section">
-            <h2>QR Betaling</h2>
-            <p class="qr-info">Scan de QR-code om te betalen via iDEAL/Wero</p>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://localhost:5158/betalen" alt="QR Code" />
+    }
+    else
+    {
+        <div class="payment-success">
+            <div class="success-icon">✓</div>
+            <h2>Betaling geslaagd!</h2>
+            @if (TotalPriceCents > 0)
+            {
+                <p>@TotalPriceFormatted betaald.</p>
+            }
+            <p class="success-sub">Bedankt voor uw aankoop. Geniet van de film!</p>
+            <button class="home-button" @onclick="GoHome">Terug naar films</button>
         </div>
-    </div>
+    }
 
     @if (Message != null)
     {
@@ -42,10 +70,74 @@
     }
 </div>
 
+<style>
+.amount-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.amount-label {
+    font-size: .9rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.amount-value {
+    font-size: 2.4rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.payment-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 0;
+}
+
+.success-icon {
+    width: 72px;
+    height: 72px;
+    background: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+}
+
+.success-sub {
+    color: #aaa;
+    font-size: .95rem;
+}
+
+.home-button {
+    margin-top: 16px;
+    background: #e50914;
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+</style>
+
 @code {
+    [Parameter] public int TotalPriceCents { get; set; }
+
     private string EnteredPin = "";
     private string? Message;
     private bool IsSuccess;
+    private bool _paymentDone;
+
+    private string TotalPriceFormatted =>
+        (TotalPriceCents / 100m).ToString("C", new CultureInfo("nl-NL"));
 
     private void AddDigit(string digit)
     {
@@ -72,7 +164,21 @@
         }
 
         IsSuccess = await PaymentService.ValidatePinAsync(EnteredPin);
-        Message = IsSuccess ? "Betaling successvol" : "Ongeldige pincode";
         EnteredPin = "";
+
+        if (IsSuccess)
+        {
+            Message = null;
+            _paymentDone = true;
+        }
+        else
+        {
+            Message = "Ongeldige pincode, probeer opnieuw";
+        }
+    }
+
+    private void GoHome()
+    {
+        NavigationManager.NavigateTo("/movies");
     }
 }

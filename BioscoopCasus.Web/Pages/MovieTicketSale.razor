@@ -74,8 +74,13 @@ else
             <strong>@TotalPrice.ToString("C", new CultureInfo("nl-NL"))</strong>
         </div>
 
+        @if (_validationError != null)
+        {
+            <p class="error-message">@_validationError</p>
+        }
+
         <button class="buy-button" @onclick="BuyTickets">
-            Doorgaan naar betaling
+            Doorgaan naar stoelkeuze
         </button>
 
     </div>
@@ -94,6 +99,7 @@ else
     public string? ReturnUrl { get; set; }
 
 private bool _isLoading = true;
+private string? _validationError;
 
 private MovieResponseDto? _movieInfo;
 private DateTime _showtime;
@@ -238,14 +244,25 @@ private decimal TotalPrice
 
 private void BuyTickets()
 {
-    if (TotalTickets == 0)
-        return;
+    _validationError = null;
 
-    if (!_useVoucher || IsVoucherValid) return;
-    
-    Console.WriteLine("Voucher not valid for this showtime");
-    
-    // TODO: call reservation API
+    if (TotalTickets == 0)
+    {
+        _validationError = "Kies minimaal 1 ticket.";
+        return;
+    }
+
+    if (_useVoucher && !IsVoucherValid)
+    {
+        _validationError = "Bioscoopbon is niet geldig voor dit tijdstip.";
+        return;
+    }
+
+    // Encode total price as cents (integer) to safely pass through the URL
+    var totalPriceCents = (int)(TotalPrice * 100);
+
+    NavigationManager.NavigateTo(
+        $"/seat-reservation/{MovieId}/{ShowtimeId}/{TotalTickets}/{totalPriceCents}");
 }
 
 private int TotalTickets =>
@@ -255,4 +272,3 @@ private int TotalTickets =>
     _seniorTickets;
 
 }
-
