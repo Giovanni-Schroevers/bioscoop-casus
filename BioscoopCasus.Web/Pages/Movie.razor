@@ -1,0 +1,68 @@
+@page "/movie/{Id:int}"
+@inject MovieService MovieService
+
+<PageTitle>@(SelectedMovie is null ? "Movie" : SelectedMovie.Title)</PageTitle>
+
+<TerminalShell>
+    @if (IsLoading)
+    {
+        <p>Loading movie...</p>
+    }
+    else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <p>@ErrorMessage</p>
+    }
+    else if (SelectedMovie is null)
+    {
+        <p>Movie not found.</p>
+    }
+    else
+    {
+        <article class="movie-page">
+            <a href="/movies" class="back-link">Back to all movies</a>
+
+            <MovieShowtimeSchedule Showtimes="SelectedMovie.Showtimes" DaysAhead="7" />
+        </article>
+    }
+</TerminalShell>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private MovieResponseDto? SelectedMovie;
+    private bool IsLoading;
+    private string? ErrorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            SelectedMovie = await MovieService.GetMovieAsync(Id);
+        }
+        catch
+        {
+            ErrorMessage = "Something went wrong while fetching the movie.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}
+
+<style>
+    .movie-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .back-link {
+        color: var(--text-muted);
+        text-decoration: none;
+    }
+</style>
