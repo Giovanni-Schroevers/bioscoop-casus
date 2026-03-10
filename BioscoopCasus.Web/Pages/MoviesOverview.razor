@@ -1,5 +1,6 @@
 @page "/films"
 @inject MoviesOverviewService MoviesOverviewService
+@inject NavigationManager NavigationManager
 @using BioscoopCasus.Models.DTOs
 @using BioscoopCasus.Web.Services
 <div class="movies-page">
@@ -25,7 +26,7 @@
         <div class="movie-grid">
             @foreach (var movie in Movies)
             {
-                <div class="movie-card">
+                <div class="movie-card clickable-card" @onclick="@(() => OpenMovie(movie.Id))">
                     <img src="https://placehold.co/200x250" alt="@movie.Title" />
                     <div class="movie-card-info">
                         <h3>@movie.Title</h3>
@@ -71,6 +72,11 @@
     private async Task LoadMovies()
     {
         Movies = await MoviesOverviewService.GetMoviesAsync(SelectedDay);
+    }
+    
+    private void OpenMovie(int movieId)
+    {
+        NavigationManager.NavigateTo($"/films/{movieId}");
     }
 }
 
