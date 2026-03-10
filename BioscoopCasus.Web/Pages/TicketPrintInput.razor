@@ -31,7 +31,7 @@
 
             <div class="form-group-fancy">
                 <label for="qrCode" class="form-label-fancy">QR Code</label>
-                <InputTextArea id="qrCode" class="terminal-input" rows="4" @bind-Value="_qrCodeModel.QrCode" placeholder="Plak hier uw QR code..." />
+                <InputText id="qrCode" class="terminal-input" @bind-Value="_qrCodeModel.QrCode" placeholder="Plak hier uw QR code..." />
                 <div class="validation-wrapper">
                     <ValidationMessage For="@(() => _qrCodeModel.QrCode)" />
                 </div>
@@ -115,11 +115,6 @@
         margin-top: 0.5rem;
         list-style: none;
         padding: 0;
-    }
-
-    .terminal-input {
-        resize: vertical;
-        min-height: 100px;
     }
 </style>
 
