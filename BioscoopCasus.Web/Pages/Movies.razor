@@ -1,0 +1,53 @@
+@page "/movies"
+@inject MovieService MovieService
+
+<PageTitle>Movies</PageTitle>
+
+<TerminalShell>
+    <h1>All movies</h1>
+
+    @if (IsLoading)
+    {
+        <p>Loading movies...</p>
+    }
+    else if (!AllMovies.Any())
+    {
+        <p>There are no movies available right now.</p>
+    }
+    else
+    {
+        <div class="movie-grid">
+            @foreach (var movie in AllMovies)
+            {
+                @movie.Title
+                <a href="/movie/@movie.Id">View showtimes</a>
+            }
+        </div>
+    }
+</TerminalShell>
+
+@code {
+    private List<MovieResponseDto> AllMovies = [];
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            AllMovies = (await MovieService.GetMoviesAsync()).ToList();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}
+
+<style>
+    .movie-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-top: 1.25rem;
+    }
+</style>

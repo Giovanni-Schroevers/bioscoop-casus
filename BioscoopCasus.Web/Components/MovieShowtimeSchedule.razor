@@ -1,0 +1,92 @@
+@using System.Globalization
+
+<section class="schedule">
+    <h2>Playing in the coming days</h2>
+
+    @if (!GroupedShowtimes.Any())
+    {
+        <p class="empty-message">No showtimes scheduled in the next @DaysAhead days.</p>
+    }
+    else
+    {
+        @foreach (var day in GroupedShowtimes)
+        {
+            <div class="day-block">
+                <h3>@day.Date.ToString("dddd d MMMM", CultureInfo.CurrentCulture)</h3>
+                <div class="times">
+                    @foreach (var showtime in day.Showtimes)
+                    {
+                        <span class="time-pill">
+                            @showtime.StartTime.ToString("HH:mm") - Room @showtime.RoomId
+                        </span>
+                    }
+                </div>
+            </div>
+        }
+    }
+</section>
+
+@code {
+    [Parameter]
+    public IEnumerable<ShowtimeResponseDto>? Showtimes { get; set; }
+
+    [Parameter]
+    public int DaysAhead { get; set; } = 7;
+
+    private IReadOnlyList<ShowtimeDayGroup> GroupedShowtimes =>
+        (Showtimes ?? Enumerable.Empty<ShowtimeResponseDto>())
+            .Where(s => s.StartTime >= DateTime.Now && s.StartTime < DateTime.Now.AddDays(DaysAhead))
+            .OrderBy(s => s.StartTime)
+            .GroupBy(s => s.StartTime.Date)
+            .Select(g => new ShowtimeDayGroup(g.Key, g.ToList()))
+            .ToList();
+
+    private record ShowtimeDayGroup(DateTime Date, List<ShowtimeResponseDto> Showtimes);
+}
+
+<style>
+    .schedule {
+        margin-top: 2rem;
+        padding: 1.25rem;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .schedule h2 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    .empty-message {
+        margin: 0;
+        color: var(--text-muted);
+    }
+
+    .day-block + .day-block {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .day-block h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+        text-transform: capitalize;
+    }
+
+    .times {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .time-pill {
+        display: inline-block;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        border: 1px solid rgba(225, 29, 72, 0.35);
+        background: rgba(225, 29, 72, 0.08);
+        font-size: 0.9rem;
+    }
+</style>
