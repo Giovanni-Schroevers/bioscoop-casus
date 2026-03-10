@@ -5,6 +5,7 @@
 @inject RoomService RoomService
 @inject ShowtimeService ShowtimeService
 @inject NavigationManager NavigationManager
+@using BioscoopCasus.Web.Components
 
 <PageTitle>Management Dashboard</PageTitle>
 
@@ -166,9 +167,9 @@
                             {
                                 <select class="terminal-input" @bind="_selectedMovieId">
                                     <option value="0">Selecteer een film...</option>
-                                    @foreach (var movie in Movies)
+                                    @foreach (var terminalMovie in Movies)
                                     {
-                                        <option value="@movie.Id">@movie.Title (@movie.DurationMinutes min)</option>
+                                        <option value="@terminalMovie.Id">@terminalMovie.Title (@terminalMovie.DurationMinutes min)</option>
                                     }
                                 </select>
                             }
