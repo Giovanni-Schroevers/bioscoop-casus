@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using BioscoopCasus.Web.Components
 
 <PageTitle>Home</PageTitle>
@@ -25,6 +25,11 @@
         <TerminalButton Href="/seat-reservation" Text="Reserve a seat" IsPrimary="true" />
     </div>
 
+    <div class="column">
+        <h3>Print Ticket</h3>
+        <TerminalButton Href="/ticketprint" Text="Print je ticket uit" IsPrimary="true" />
+    </div>
+
     <div class="admin-login-wrapper">
         <TerminalButton Href="/login" IsPrimary="false" CssClass="admin-btn">
             <ChildContent>
@@ -37,8 +42,6 @@
             </ChildContent>
         </TerminalButton>
     </div>
-    
-    <a href="/ticketprint" class="btn btn-primary me-2">Print je ticket uit</a>
 </TerminalShell>
 
 <style>

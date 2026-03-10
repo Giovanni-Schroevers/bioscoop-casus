@@ -1,52 +1,127 @@
 @page "/TicketPrint"
 @using System.ComponentModel.DataAnnotations
+@using BioscoopCasus.Web.Components
 @inject ReservationService ReservationService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Ticket Invoeren</PageTitle>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow">
-                <div class="card-body p-4">
-                    <h2 class="card-title mb-4 text-center">Bioscoop Ticket</h2>
-                    <p class="text-muted text-center mb-4">Voer uw QR code in om uw ticket te bekijken</p>
-
-                    @if (!string.IsNullOrEmpty(_errorMessage))
-                    {
-                        <div class="alert alert-danger" role="alert">
-                            @_errorMessage
-                        </div>
-                    }
-
-                    <EditForm Model="_qrCodeModel" OnValidSubmit="HandleSubmit">
-                        <DataAnnotationsValidator />
-                        <div class="mb-3">
-                            <label for="qrCode" class="form-label">QR Code</label>
-                            <InputTextArea id="qrCode" class="form-control" rows="4" @bind-Value="_qrCodeModel.QrCode" placeholder="Plak hier uw QR code..." />
-                            <ValidationMessage For="@(() => _qrCodeModel.QrCode)" />
-                            <small class="form-text text-muted">Scan uw QR code of plak de code uit uw email</small>
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg" disabled="@_isLoading">
-                                @if (_isLoading)
-                                {
-                                    <span>Valideren...</span>
-                                }
-                                else
-                                {
-                                    <span>Bevestigen</span>
-                                }
-                            </button>
-                        </div>
-                    </EditForm>
-                </div>
-            </div>
+<div class="ticket-input-container">
+    <div class="ticket-card">
+        <div class="ticket-header">
+            <h2>Bioscoop Ticket</h2>
+            <p class="subtitle">Voer uw QR code in om uw ticket te bekijken</p>
         </div>
+
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="alert-fancy" role="alert">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                @_errorMessage
+            </div>
+        }
+
+        <EditForm Model="_qrCodeModel" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-group-fancy">
+                <label for="qrCode" class="form-label-fancy">QR Code</label>
+                <InputTextArea id="qrCode" class="terminal-input" rows="4" @bind-Value="_qrCodeModel.QrCode" placeholder="Plak hier uw QR code..." />
+                <div class="validation-wrapper">
+                    <ValidationMessage For="@(() => _qrCodeModel.QrCode)" />
+                </div>
+                <small class="form-hint">Scan uw QR code of plak de code uit uw email</small>
+            </div>
+
+            <FormButton Type="submit" IsPrimary="true" IsLoading="@_isLoading" LoadingText="Valideren..." Text="Bevestigen" />
+        </EditForm>
     </div>
 </div>
+
+<style>
+    .ticket-input-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .ticket-card {
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        max-width: 500px;
+        width: 100%;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .ticket-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .ticket-header h2 {
+        color: var(--text-high);
+        margin: 0 0 0.5rem 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+    .subtitle {
+        color: var(--text-muted);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .form-group-fancy {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-hint {
+        display: block;
+        margin-top: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .alert-fancy {
+        background: rgba(220, 38, 38, 0.1);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        color: #f87171;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+    }
+
+    .alert-icon {
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .validation-wrapper .validation-message {
+        color: #f87171;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        list-style: none;
+        padding: 0;
+    }
+
+    .terminal-input {
+        resize: vertical;
+        min-height: 100px;
+    }
+</style>
 
 @code {
     public class QrCodeInputModel
