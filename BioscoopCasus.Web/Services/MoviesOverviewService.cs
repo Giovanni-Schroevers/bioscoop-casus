@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using BioscoopCasus.Models.DTOs;
-using BioscoopCasus.Models.DTOs;
 
 namespace BioscoopCasus.Web.Services;
 

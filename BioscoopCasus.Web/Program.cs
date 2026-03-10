@@ -12,12 +12,12 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5064/") });
-
 // Register authentication & authorization components
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<MoviesOverviewService>();
+builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<ReservationService>();
 builder.Services.AddHttpClient<SeatSelectionService>(client => 
     client.BaseAddress = new Uri("http://localhost:5064/"));
@@ -30,19 +30,19 @@ builder.Services.AddSingleton<QrCodeHelper>();
 builder.Services.AddTransient<JwtAuthorizationMessageHandler>();
 
 // Register services as Typed Clients with the JWT handler
-builder.Services.AddHttpClient<MovieService>(client => 
-    client.BaseAddress = new Uri("https://localhost:7181/"))
+builder.Services.AddHttpClient<MovieService>(client =>
+    client.BaseAddress = new Uri("http://localhost:5064/"))
     .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
 
-builder.Services.AddHttpClient<RoomService>(client => 
-    client.BaseAddress = new Uri("https://localhost:7181/"))
+builder.Services.AddHttpClient<RoomService>(client =>
+    client.BaseAddress = new Uri("http://localhost:5064/"))
     .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
 
-builder.Services.AddHttpClient<ShowtimeService>(client => 
-    client.BaseAddress = new Uri("https://localhost:7181/"))
+builder.Services.AddHttpClient<ShowtimeService>(client =>
+    client.BaseAddress = new Uri("http://localhost:5064/"))
     .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
 
-// Default HttpClient for AuthService (doesn't need the JWT handler for login)
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7181/") });
+// Default HttpClient for services that don't use the JWT handler
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5064/") });
 
 await builder.Build().RunAsync();

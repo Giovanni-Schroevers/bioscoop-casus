@@ -15,6 +15,7 @@ public class BioscoopDbContext : DbContext
     public DbSet<Row> Rows { get; set; }
     public DbSet<Seat> Seats { get; set; }
     public DbSet<Showtime> Showtimes { get; set; }
+    public DbSet<PinCard> PinCards { get; set; }
     public DbSet<ShowtimeSeat> ShowtimeSeats { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
 

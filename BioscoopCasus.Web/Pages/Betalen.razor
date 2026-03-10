@@ -1,0 +1,23 @@
+@page "/betalen"
+
+<div class="betalen-page">
+    @if (!IsPaid)
+    {
+        <h1>Betaling</h1>
+        <p class="betalen-info">iDEAL/Wero betaling simulatie</p>
+        <button class="betalen-button" @onclick="Pay">Betaal nu</button>
+    }
+    else
+    {
+        <h1>Betaling Geslaagd</h1>
+        <p class="betalen-info">Venster mag gesloten worden</p>
+    }
+</div>
+@code {
+    private bool IsPaid;
+
+    private void Pay()
+    {
+        IsPaid = true;
+    }
+}
