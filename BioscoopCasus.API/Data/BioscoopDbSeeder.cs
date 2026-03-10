@@ -18,6 +18,7 @@ public static class BioscoopDbSeeder
         var rows = CreateRows(rooms);
         var movies = CreateMovies();
         var showtimes = CreateShowtimes(movies, rooms);
+        var seats = CreateSeats(rooms);
 
         var pinCards = CreatePinCards();
 
@@ -26,6 +27,7 @@ public static class BioscoopDbSeeder
         context.Movies.AddRange(movies);
         context.Showtimes.AddRange(showtimes);
         context.PinCards.AddRange(pinCards);
+        context.Seats.AddRange(seats);
 
         await context.SaveChangesAsync();
     }
@@ -224,5 +226,31 @@ public static class BioscoopDbSeeder
         }
 
         return pinCards;
+    }
+
+    private static List<Seat> CreateSeats(List<Room> rooms)
+    {
+        var seats = new List<Seat>();
+
+        foreach (var room in rooms)
+        {
+            foreach (var roomRow in room.Rows)
+            {
+                var seatCount = roomRow.SeatCount;
+                for (int i = 1; i <= seatCount; i++)
+                {
+                    var seat = new Seat
+                    {
+                        Room = room,
+                        Row = roomRow.RowNumber,
+                        SeatNumber = i
+                    };
+
+                    seats.Add(seat);
+                }
+            }
+        }
+
+        return seats;
     }
 }

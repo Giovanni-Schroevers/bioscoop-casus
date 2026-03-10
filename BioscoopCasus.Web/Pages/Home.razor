@@ -2,9 +2,68 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<TerminalShell>
+    <div class="terminal-header">
+        <h1>Polo's Cinema Paradise Breda</h1>
+    </div>
 
-<div class="mt-4">
-    <p>Welcome to the Bioscoop Casus application frontend.</p>
-    <a href="/login" class="btn btn-outline-primary">Admin Login</a>
-</div>
+    <div class="column">
+        <h3>Upcoming Showings</h3>
+        <p class="placeholder-text">No shows found...</p>
+        <TerminalButton Href="/films" Text="All Showings" IsPrimary="true" />
+    </div>
+
+    <div class="column">
+        <h3>Latest Movies</h3>
+        <p class="placeholder-text">No movies found...</p>
+        <TerminalButton Href="/movies" Text="All Movies" IsPrimary="true" />
+    </div>
+    
+    <a href="/seat-reservation" class="btn btn-primary me-2">Reserveer een Stoel</a>
+
+    <div class="admin-login-wrapper">
+        <TerminalButton Href="/login" IsPrimary="false" CssClass="admin-btn">
+            <ChildContent>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+            </ChildContent>
+        </TerminalButton>
+    </div>
+</TerminalShell>
+
+<style>
+    .terminal-header {
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    .placeholder-text {
+        color: var(--text-muted);
+        font-style: italic;
+        padding: 1rem 0;
+    }
+
+    .column {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .admin-login-wrapper {
+        position: absolute;
+        bottom: 2rem;
+        right: 2rem;
+    }
+
+    .admin-btn {
+        min-height: 3.5rem !important;
+        width: 3.5rem !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+    }
+</style>

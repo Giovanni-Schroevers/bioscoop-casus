@@ -2,327 +2,362 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BioscoopCasus.API.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace BioscoopCasus.API.Services;
 
 public class SeatSelectionResult
 {
-    public List<(int RowNumber, int SeatNumber)> Seats { get; set; } = new();
+    public List<Seat> SelectedSeats { get; set; } = new();
     public string Message { get; set; } = string.Empty;
     public bool IsGroupedTogether { get; set; }
-    public List<List<(int RowNumber, int SeatNumber)>> GroupedSeats { get; set; } = new();
+    public List<List<Seat>> GroupedSeats { get; set; } = new();
+    public double TotalScore { get; set; }
 }
-
 public static class SeatSelectionService
 {
+    private const double RowDistanceWeight = 2.0;
+    private const double SeatDistanceWeight = 1.0;
+    private const double OrphanSeatPenalty = 3.0;
+    private const double FrontRowPenalty = 4.0;
+    private const double ExtremeSidePenalty = 2.0;
+    private const int FrontRowThreshold = 3;
+    private const double ExtremeSideThreshold = 0.80;
+    private const double SplitGroupPenalty = 5.0;
     
-    private const double RowDistanceWeight     = 2.0;
-    private const double OrphanSeatPenalty     = 3.0;
-    private const double FrontRowPenalty       = 4.0;
-    private const double ExtremeSidePenalty    = 2.0;
-    private const int    FrontRowThreshold     = 3;
-    private const double ExtremeSideThreshold  = 0.80;
-
     public static SeatSelectionResult SelectBestSeats(
-        Room room,
+        Showtime showtime,
         int groupSize,
-        HashSet<(int RowNumber, int SeatNumber)> occupiedSeats)
+        IQueryable<ShowtimeSeat> showtimeSeats)
     {
         var result = new SeatSelectionResult();
-        var rows   = room.Rows.OrderBy(r => r.RowNumber).ToList();
 
-        if (!rows.Any())
+        var occupiedSeatIds = showtimeSeats
+            .Where(ss => ss.ReservationId.HasValue)
+            .Select(ss => ss.SeatId)
+            .ToHashSet();
+
+        var availableSeats = showtime.Room.Seats
+            .Where(s => !occupiedSeatIds.Contains(s.Id))
+            .OrderBy(s => s.Row)
+            .ThenBy(s => s.SeatNumber)
+            .ToList();
+
+        if (availableSeats.Count < groupSize)
         {
-            result.Message = "No seats available in this room.";
+            result.Message = $"Not enough seats available. Required: {groupSize}, Available: {availableSeats.Count}";
             return result;
         }
 
-        int    totalRows    = rows.Count;
-        int    middleRow    = (totalRows + 1) / 2;
-        int    maxSeatCount = rows.Max(r => r.SeatCount);
-        int    middleSeat   = (maxSeatCount + 1) / 2;
-        double splitPenalty = (totalRows * RowDistanceWeight + maxSeatCount) * groupSize * 4.0 + 1.0;
+        int totalRows = showtime.Room.Rows.Count;
+        int maxSeatsPerRow = showtime.Room.Rows.Max(r => r.SeatCount);
+        int middleRow = (totalRows + 1) / 2;
+        int middleSeat = (maxSeatsPerRow + 1) / 2;
 
-        var rowMeta     = BuildRowMetadata(rows, occupiedSeats, groupSize, middleRow, middleSeat, totalRows);
-        var candidates  = rowMeta.Candidates;
-        var lowerBounds = BuildLowerBoundTable(rowMeta.SortedSeatScores, groupSize);
+        var allocation = FindOptimalAllocation(availableSeats, groupSize, totalRows, middleRow, maxSeatsPerRow, middleSeat);
 
-        var allocation = SolveWithStrictPriority(candidates, lowerBounds, groupSize, splitPenalty);
-
-        if (allocation is null)
+        if (allocation == null || allocation.Count == 0)
         {
-            result.Message = "Not enough seats available.";
+            result.Message = "Could not find suitable seat configuration.";
             return result;
         }
 
-        result.GroupedSeats      = allocation.Select(b => b.ToSeats()).ToList();
-        result.Seats             = result.GroupedSeats.SelectMany(g => g).ToList();
+        result.GroupedSeats = allocation;
+        result.SelectedSeats = allocation.SelectMany(g => g).ToList();
         result.IsGroupedTogether = allocation.Count == 1;
-        result.Message           = allocation.Count == 1
-            ? "You can sit together."
-            : GenerateSplitMessage(allocation.Select(b => b.Size).ToList());
+        result.TotalScore = CalculateGroupScore(allocation, totalRows, middleRow, maxSeatsPerRow, middleSeat);
+        result.Message = allocation.Count == 1
+            ? "Great! You can sit together."
+            : $"Best option: Split into {allocation.Count} group(s) - {string.Join(", ", allocation.Select(g => g.Count))} seats";
 
         return result;
     }
-
-    private static List<BlockCandidate>? SolveWithStrictPriority(
-        List<BlockCandidate> candidates,
-        double[] lowerBounds,
+    
+    private static List<List<Seat>>? FindOptimalAllocation(
+        List<Seat> availableSeats,
         int groupSize,
-        double splitPenalty)
+        int totalRows,
+        int middleRow,
+        int maxSeatsPerRow,
+        int middleSeat)
     {
-        foreach (var partition in GeneratePartitions(groupSize))
-        {
-            var solver = new BranchBoundSolver(candidates, lowerBounds, splitPenalty, partition.Count);
-            var result = solver.Solve(partition);
-            if (result is not null)
-                return result;
-        }
-        return null;
+        var seatsByRow = availableSeats.GroupBy(s => s.Row).ToList();
+
+        var singleBlockAllocation = FindContiguousBlock(availableSeats, groupSize, totalRows, middleRow, maxSeatsPerRow, middleSeat);
+        if (singleBlockAllocation != null)
+            return new List<List<Seat>> { singleBlockAllocation };
+
+        var splitAllocation = FindOptimalSplit(availableSeats, groupSize, totalRows, middleRow, maxSeatsPerRow, middleSeat);
+        return splitAllocation ?? new List<List<Seat>>();
     }
 
-    private sealed class BranchBoundSolver
+    private static List<Seat>? FindContiguousBlock(
+        List<Seat> availableSeats,
+        int groupSize,
+        int totalRows,
+        int middleRow,
+        int maxSeatsPerRow,
+        int middleSeat)
     {
-        private readonly List<BlockCandidate> _candidates;
-        private readonly double[]             _lowerBounds;
-        private readonly double               _splitPenalty;
-        private readonly int                  _numGroups;
+        var seatsByRow = availableSeats.GroupBy(s => s.Row).ToDictionary(g => g.Key, g => g.OrderBy(s => s.SeatNumber).ToList());
 
-        private List<BlockCandidate>? _bestSelection;
-        private double                _bestCost = double.MaxValue;
+        SeatBlock? bestBlock = null;
+        double bestScore = double.MaxValue;
 
-        private readonly List<BlockCandidate> _current  = new();
-        private readonly HashSet<int>         _usedRows = new();
-
-        public BranchBoundSolver(
-            List<BlockCandidate> candidates,
-            double[]             lowerBounds,
-            double               splitPenalty,
-            int                  numGroups)
+        foreach (var rowGroup in seatsByRow)
         {
-            _candidates   = candidates;
-            _lowerBounds  = lowerBounds;
-            _splitPenalty = splitPenalty;
-            _numGroups    = numGroups;
-        }
+            int row = rowGroup.Key;
+            var rowSeats = rowGroup.Value;
 
-        public List<BlockCandidate>? Solve(List<int> partition)
-        {
-            var sortedPartition = partition.OrderByDescending(s => s).ToList();
-            Search(0, sortedPartition, 0, 0.0);
-            return _bestSelection;
-        }
-
-        private void Search(int candidateIdx, List<int> remainingSizes, int groupIdx, double costSoFar)
-        {
-            if (groupIdx == remainingSizes.Count)
+            for (int i = 0; i <= rowSeats.Count - groupSize; i++)
             {
-                if (costSoFar < _bestCost)
+                bool isContiguous = true;
+                for (int j = i; j < i + groupSize - 1; j++)
                 {
-                    _bestCost      = costSoFar;
-                    _bestSelection = new List<BlockCandidate>(_current);
-                }
-                return;
-            }
-
-            int neededSize     = remainingSizes[groupIdx];
-            int remainingPeople = remainingSizes.Skip(groupIdx + 1).Sum();
-            double basePenalty = groupIdx > 0 ? _splitPenalty : 0.0;
-
-            for (int i = candidateIdx; i < _candidates.Count; i++)
-            {
-                var block = _candidates[i];
-
-                if (block.Size != neededSize)
-                    continue;
-
-                if (_usedRows.Contains(block.RowNumber))
-                    continue;
-
-                double newCost = costSoFar + basePenalty + block.Score;
-
-                if (newCost >= _bestCost)
-                    break;
-
-                double lb = remainingPeople > 0 ? _lowerBounds[remainingPeople - 1] : 0.0;
-                if (newCost + lb + (_numGroups - groupIdx - 1) * _splitPenalty >= _bestCost)
-                    continue;
-
-                _current.Add(block);
-                _usedRows.Add(block.RowNumber);
-                Search(i + 1, remainingSizes, groupIdx + 1, newCost);
-                _usedRows.Remove(block.RowNumber);
-                _current.RemoveAt(_current.Count - 1);
-            }
-        }
-    }
-
-    private static IEnumerable<List<int>> GeneratePartitions(int groupSize)
-    {
-        for (int numParts = 1; numParts <= groupSize; numParts++)
-        {
-            foreach (var p in FixedPartsPartitions(groupSize, numParts, groupSize / numParts + 1))
-                yield return p;
-        }
-    }
-
-    private static IEnumerable<List<int>> FixedPartsPartitions(int remaining, int partsLeft, int maxPart)
-    {
-        if (partsLeft == 1)
-        {
-            if (remaining >= 1 && remaining <= maxPart)
-                yield return new List<int> { remaining };
-            yield break;
-        }
-
-        for (int part = Math.Min(remaining - partsLeft + 1, maxPart); part >= (int)Math.Ceiling(remaining / (double)partsLeft); part--)
-        {
-            foreach (var rest in FixedPartsPartitions(remaining - part, partsLeft - 1, part))
-            {
-                var partition = new List<int>(rest.Count + 1) { part };
-                partition.AddRange(rest);
-                yield return partition;
-            }
-        }
-    }
-
-    private sealed record BlockCandidate(int RowNumber, int StartSeat, int Size, double Score)
-    {
-        public List<(int RowNumber, int SeatNumber)> ToSeats() =>
-            Enumerable.Range(StartSeat, Size).Select(s => (RowNumber, s)).ToList();
-    }
-
-    private sealed record RowMetadata(List<BlockCandidate> Candidates, double[] SortedSeatScores);
-
-    private static RowMetadata BuildRowMetadata(
-        List<Row>                                    rows,
-        HashSet<(int RowNumber, int SeatNumber)>     occupiedSeats,
-        int                                          groupSize,
-        int                                          middleRow,
-        int                                          middleSeat,
-        int                                          totalRows)
-    {
-        var candidates     = new List<BlockCandidate>();
-        var allSeatScores  = new List<double>();
-
-        foreach (var row in rows)
-        {
-            var available = GetAvailableSeats(row, occupiedSeats);
-            if (!available.Any()) continue;
-
-            foreach (var seat in available)
-                allSeatScores.Add(RawSeatScore(row.RowNumber, seat, middleRow, middleSeat));
-
-            var bestPerSize = new Dictionary<int, (int startSeat, double score)>();
-
-            for (int i = 0; i < available.Count; i++)
-            {
-                double seatScoreSum = 0.0;
-
-                for (int j = i; j < available.Count; j++)
-                {
-                    if (j > i && available[j] != available[j - 1] + 1)
+                    if (rowSeats[j + 1].SeatNumber != rowSeats[j].SeatNumber + 1)
+                    {
+                        isContiguous = false;
                         break;
+                    }
+                }
 
-                    int size = j - i + 1;
-                    if (size > groupSize) break;
+                if (!isContiguous) continue;
 
-                    seatScoreSum += Math.Abs(available[j] - middleSeat);
+                var block = new List<Seat>();
+                for (int j = i; j < i + groupSize; j++)
+                    block.Add(rowSeats[j]);
 
-                    double blockScore = seatScoreSum
-                        + Math.Abs(row.RowNumber - middleRow) * RowDistanceWeight * size
-                        + OrphanPenalty(available, i, j, row.SeatCount)
-                        + FrontPenalty(row.RowNumber, middleRow, size)
-                        + SidePenalty(available[i], available[j], row.SeatCount, size);
-
-                    if (!bestPerSize.TryGetValue(size, out var existing) || blockScore < existing.score)
-                        bestPerSize[size] = (available[i], blockScore);
+                double score = CalculateBlockScore(block, totalRows, middleRow, maxSeatsPerRow, middleSeat, isSplit: false);
+                
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    bestBlock = new SeatBlock { Seats = block, Score = score };
                 }
             }
-
-            foreach (var (size, (startSeat, score)) in bestPerSize)
-                candidates.Add(new BlockCandidate(row.RowNumber, startSeat, size, score));
         }
 
-        var sortedScores = allSeatScores.OrderBy(s => s).ToArray();
-        return new RowMetadata(candidates.OrderBy(c => c.Score).ToList(), sortedScores);
+        return bestBlock?.Seats;
+    }
+    
+    private static List<List<Seat>>? FindOptimalSplit(
+        List<Seat> availableSeats,
+        int groupSize,
+        int totalRows,
+        int middleRow,
+        int maxSeatsPerRow,
+        int middleSeat)
+    {
+        var partitions = GeneratePartitions(groupSize);
+        var seatsByRow = availableSeats.GroupBy(s => s.Row).ToDictionary(g => g.Key, g => g.OrderBy(s => s.SeatNumber).ToList());
+
+        List<List<Seat>>? bestAllocation = null;
+        double bestTotalScore = double.MaxValue;
+
+        foreach (var partition in partitions)
+        {
+            var allocation = new List<List<Seat>>();
+            var usedSeats = new HashSet<int>();
+            var sortedPartition = partition.OrderByDescending(p => p).ToList();
+            double totalScore = 0;
+            bool valid = true;
+
+            foreach (int size in sortedPartition)
+            {
+                var block = FindBestBlockOfSize(seatsByRow, size, usedSeats, totalRows, middleRow, maxSeatsPerRow, middleSeat);
+                
+                if (block == null)
+                {
+                    valid = false;
+                    break;
+                }
+
+                allocation.Add(block);
+                foreach (var seat in block)
+                    usedSeats.Add(seat.Id);
+
+                totalScore += CalculateBlockScore(block, totalRows, middleRow, maxSeatsPerRow, middleSeat, isSplit: true);
+            }
+
+            if (!valid) continue;
+
+            totalScore += SplitGroupPenalty * (partition.Count - 1);
+
+            if (totalScore < bestTotalScore)
+            {
+                bestTotalScore = totalScore;
+                bestAllocation = allocation;
+            }
+        }
+
+        return bestAllocation;
     }
 
-    private static double RawSeatScore(int row, int seat, int middleRow, int middleSeat) =>
-        Math.Abs(row - middleRow) * RowDistanceWeight + Math.Abs(seat - middleSeat);
-
-    private static double OrphanPenalty(List<int> available, int blockStart, int blockEnd, int totalSeats)
+    private static List<Seat>? FindBestBlockOfSize(
+        Dictionary<int, List<Seat>> seatsByRow,
+        int size,
+        HashSet<int> usedSeats,
+        int totalRows,
+        int middleRow,
+        int maxSeatsPerRow,
+        int middleSeat)
     {
-        double penalty = 0.0;
+        SeatBlock? bestBlock = null;
+        double bestScore = double.MaxValue;
 
-        int leftNeighbour = available[blockStart] - 1;
-        if (leftNeighbour >= 1 && !available.Contains(leftNeighbour - 1) && available.Contains(leftNeighbour))
+        foreach (var rowGroup in seatsByRow)
+        {
+            int row = rowGroup.Key;
+            var rowSeats = rowGroup.Value.Where(s => !usedSeats.Contains(s.Id)).OrderBy(s => s.SeatNumber).ToList();
+
+            for (int i = 0; i <= rowSeats.Count - size; i++)
+            {
+                bool isContiguous = true;
+                for (int j = i; j < i + size - 1; j++)
+                {
+                    if (rowSeats[j + 1].SeatNumber != rowSeats[j].SeatNumber + 1)
+                    {
+                        isContiguous = false;
+                        break;
+                    }
+                }
+
+                if (!isContiguous) continue;
+
+                var block = new List<Seat>();
+                for (int j = i; j < i + size; j++)
+                    block.Add(rowSeats[j]);
+
+                double score = CalculateBlockScore(block, totalRows, middleRow, maxSeatsPerRow, middleSeat, isSplit: true);
+                
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    bestBlock = new SeatBlock { Seats = block, Score = score };
+                }
+            }
+        }
+
+        return bestBlock?.Seats;
+    }
+    
+    private static double CalculateBlockScore(
+        List<Seat> block,
+        int totalRows,
+        int middleRow,
+        int maxSeatsPerRow,
+        int middleSeat,
+        bool isSplit)
+    {
+        if (block.Count == 0) return double.MaxValue;
+
+        var seat = block[0];
+        double rowDistance = Math.Abs(seat.Row - middleRow) * RowDistanceWeight;
+        
+        double seatDistance = 0;
+        foreach (var s in block)
+            seatDistance += Math.Abs(s.SeatNumber - middleSeat) * SeatDistanceWeight;
+
+        double orphanPenalty = CalculateOrphanPenalty(block, maxSeatsPerRow);
+        double frontPenalty = IsFrontRow(seat.Row, middleRow) ? FrontRowPenalty * block.Count : 0;
+        double sidePenalty = CalculateSidePenalty(block, maxSeatsPerRow);
+        
+        double score = rowDistance + seatDistance + orphanPenalty + frontPenalty + sidePenalty;
+
+        if (isSplit)
+            score += SplitGroupPenalty / block.Count;
+
+        return score;
+    }
+
+    private static double CalculateOrphanPenalty(List<Seat> block, int maxSeatsPerRow)
+    {
+        if (block.Count == 0) return 0;
+
+        var firstSeat = block[0];
+        var lastSeat = block[block.Count - 1];
+        double penalty = 0;
+
+        if (firstSeat.SeatNumber == 1)
+            penalty += 0;
+        else if (firstSeat.SeatNumber - 1 > 0 && block.All(s => s.SeatNumber != firstSeat.SeatNumber - 1))
             penalty += OrphanSeatPenalty;
 
-        int rightNeighbour = available[blockEnd] + 1;
-        if (rightNeighbour <= totalSeats && !available.Contains(rightNeighbour + 1) && available.Contains(rightNeighbour))
+        if (lastSeat.SeatNumber == maxSeatsPerRow)
+            penalty += 0;
+        else if (lastSeat.SeatNumber + 1 <= maxSeatsPerRow && block.All(s => s.SeatNumber != lastSeat.SeatNumber + 1))
             penalty += OrphanSeatPenalty;
 
         return penalty;
     }
 
-    private static double FrontPenalty(int rowNumber, int middleRow, int groupSize)
+    private static double CalculateSidePenalty(List<Seat> block, int maxSeatsPerRow)
     {
-        bool isFrontRow = rowNumber <= FrontRowThreshold || rowNumber < middleRow / 2;
-        return isFrontRow ? FrontRowPenalty * groupSize : 0.0;
-    }
+        var firstSeat = block[0].SeatNumber;
+        var lastSeat = block[block.Count - 1].SeatNumber;
 
-    private static double SidePenalty(int firstSeat, int lastSeat, int totalSeats, int groupSize)
-    {
-        double leftRatio  = firstSeat / (double)totalSeats;
-        double rightRatio = lastSeat  / (double)totalSeats;
+        double leftRatio = firstSeat / (double)maxSeatsPerRow;
+        double rightRatio = lastSeat / (double)maxSeatsPerRow;
 
-        bool isExtremeLeft  = leftRatio  < (1.0 - ExtremeSideThreshold);
+        bool isExtremeLeft = leftRatio < (1.0 - ExtremeSideThreshold);
         bool isExtremeRight = rightRatio > ExtremeSideThreshold;
 
-        return (isExtremeLeft || isExtremeRight) ? ExtremeSidePenalty * groupSize : 0.0;
+        return (isExtremeLeft || isExtremeRight) ? ExtremeSidePenalty * block.Count : 0;
     }
 
-    private static double[] BuildLowerBoundTable(double[] sortedScores, int maxN)
+    private static bool IsFrontRow(int row, int middleRow)
     {
-        int    count  = Math.Min(maxN, sortedScores.Length);
-        var    table  = new double[count];
-        double running = 0.0;
+        return row <= FrontRowThreshold || row < middleRow / 2.0;
+    }
 
-        for (int i = 0; i < count; i++)
+    private static List<List<int>> GeneratePartitions(int n)
+    {
+        var partitions = new List<List<int>>();
+        GeneratePartitionsHelper(n, n, new List<int>(), partitions);
+        return partitions.OrderBy(p => p.Count).ToList();
+    }
+
+    private static void GeneratePartitionsHelper(int target, int max, List<int> current, List<List<int>> result)
+    {
+        if (target == 0)
         {
-            running  += sortedScores[i];
-            table[i]  = running;
+            result.Add(new List<int>(current));
+            return;
         }
-        return table;
+
+        for (int i = Math.Min(max, target); i >= 1; i--)
+        {
+            current.Add(i);
+            GeneratePartitionsHelper(target - i, i, current, result);
+            current.RemoveAt(current.Count - 1);
+        }
     }
 
-    private static List<int> GetAvailableSeats(
-        Row                                          row,
-        HashSet<(int RowNumber, int SeatNumber)>     occupiedSeats)
+    private static double CalculateGroupScore(
+        List<List<Seat>> allocation,
+        int totalRows,
+        int middleRow,
+        int maxSeatsPerRow,
+        int middleSeat)
     {
-        var list = new List<int>(row.SeatCount);
-        for (int seat = 1; seat <= row.SeatCount; seat++)
-            if (!occupiedSeats.Contains((row.RowNumber, seat)))
-                list.Add(seat);
-        return list;
+        double totalScore = 0;
+        foreach (var block in allocation)
+        {
+            totalScore += CalculateBlockScore(block, totalRows, middleRow, maxSeatsPerRow, middleSeat, allocation.Count > 1);
+        }
+        return totalScore;
     }
 
-    private static string GenerateSplitMessage(List<int> groupSizes)
+    private sealed class SeatBlock
     {
-        var descriptions = groupSizes
-            .GroupBy(g => g)
-            .OrderByDescending(g => g.Key)
-            .Select(g => g.Count() == 1 ? $"{g.Key}" : $"{g.Key} ({g.Count()}x)");
-
-        return $"You cannot sit all together. Best available option is groups of {string.Join(", ", descriptions)}.";
+        public List<Seat> Seats { get; set; } = new();
+        public double Score { get; set; }
     }
 
-    public static int CalculateSeatScore(int rowNumber, int seatNumber, int totalRows, int seatsPerRow)
+    public static int CalculateSeatScore(int row, int seatNumber, int totalRows, int seatsPerRow)
     {
-        int middleRow  = (totalRows  + 1) / 2;
+        int middleRow = (totalRows + 1) / 2;
         int middleSeat = (seatsPerRow + 1) / 2;
-        return (int)(Math.Abs(rowNumber  - middleRow)  * RowDistanceWeight
-                   + Math.Abs(seatNumber - middleSeat));
+        return (int)(Math.Abs(row - middleRow) * RowDistanceWeight + Math.Abs(seatNumber - middleSeat));
     }
 }

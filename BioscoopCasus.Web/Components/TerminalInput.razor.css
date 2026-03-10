@@ -1,0 +1,54 @@
+.terminal-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.terminal-label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.terminal-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-high);
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.terminal-input:focus {
+    outline: none;
+    border-color: var(--primary-rose);
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.terminal-input option {
+    background-color: #12151e;
+    color: var(--text-high);
+}
+
+textarea.terminal-input {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-2 {
+    flex: 2;
+}
+
+.flex-3 {
+    flex: 3;
+}

@@ -1,0 +1,12 @@
+<div class="terminal-container">
+    <div class="terminal-screen">
+        <div class="terminal-content">
+            @ChildContent
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
