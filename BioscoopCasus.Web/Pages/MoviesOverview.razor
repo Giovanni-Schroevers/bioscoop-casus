@@ -1,4 +1,4 @@
-@page "/films"
+@page "/movies"
 @inject MoviesOverviewService MoviesOverviewService
 @inject NavigationManager NavigationManager
 
@@ -80,7 +80,7 @@
     
     private void OpenMovie(int movieId)
     {
-        NavigationManager.NavigateTo($"/films/{movieId}");
+        NavigationManager.NavigateTo($"/movies/{movieId}");
     }
     
     private void OpenTicketSale(int movieId, int showtimeId)
