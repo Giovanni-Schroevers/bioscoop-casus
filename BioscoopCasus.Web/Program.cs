@@ -22,6 +22,7 @@ builder.Services.AddScoped<ReservationService>();
 builder.Services.AddHttpClient<SeatSelectionService>(client => 
     client.BaseAddress = new Uri("http://localhost:5064/"));
 builder.Services.AddScoped<MoviesOverviewService>();
+builder.Services.AddScoped<FilmsOverviewService>();
 builder.Services.AddScoped<MovieInformationService>();
 builder.Services.AddScoped<TicketPricingService>();
 builder.Services.AddSingleton<QrCodeHelper>();
