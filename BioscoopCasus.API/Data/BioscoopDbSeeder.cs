@@ -18,7 +18,8 @@ public static class BioscoopDbSeeder
         var rows = CreateRows(rooms);
         var movies = CreateMovies();
         var showtimes = CreateShowtimes(movies, rooms);
-        var seats = CreateSeats(rooms);
+        var seats = CreateSeats(rows);
+        var showtimeSeats = CreateShowtimeSeats(showtimes, seats);
 
         var pinCards = CreatePinCards();
 
@@ -28,6 +29,7 @@ public static class BioscoopDbSeeder
         context.Showtimes.AddRange(showtimes);
         context.PinCards.AddRange(pinCards);
         context.Seats.AddRange(seats);
+        context.ShowtimeSeats.AddRange(showtimeSeats);
 
         await context.SaveChangesAsync();
     }
@@ -227,30 +229,51 @@ public static class BioscoopDbSeeder
 
         return pinCards;
     }
-
-    private static List<Seat> CreateSeats(List<Room> rooms)
+    
+    private static List<Seat> CreateSeats(List<Row> rows)
     {
         var seats = new List<Seat>();
 
-        foreach (var room in rooms)
+        foreach (var row in rows)
         {
-            foreach (var roomRow in room.Rows)
+            var seatCount = row.SeatCount;
+            for (int i = 1; i <= seatCount; i++)
             {
-                var seatCount = roomRow.SeatCount;
-                for (int i = 1; i <= seatCount; i++)
+                var seat = new Seat
                 {
-                    var seat = new Seat
-                    {
-                        Room = room,
-                        Row = roomRow.RowNumber,
-                        SeatNumber = i
-                    };
-
-                    seats.Add(seat);
-                }
+                    Room = row.Room,
+                    Row = row.RowNumber,
+                    SeatNumber = i
+                };
+                
+                seats.Add(seat);
             }
         }
 
         return seats;
+    }
+    
+    private static List<ShowtimeSeat> CreateShowtimeSeats(List<Showtime> showtimes, List<Seat> seats)
+    {
+        var showtimeSeats = new List<ShowtimeSeat>();
+
+        foreach (var showtime in showtimes)
+        {
+            foreach (var seat in seats)
+            {
+                if (seat.Room.Number != showtime.Room.Number)
+                    continue;
+
+                var showtimeSeat = new ShowtimeSeat
+                {
+                    Seat = seat,
+                    Showtime = showtime
+                };
+                
+                showtimeSeats.Add(showtimeSeat);
+            }
+        }
+
+        return showtimeSeats;
     }
 }
