@@ -24,8 +24,8 @@ public class MailingService(IConfiguration configuration)
 
         using var message = new MailMessage
         {
-            From = new MailAddress(_username, "Bioscoop"),
-            Subject = $"Uw ticket voor {reservation.MovieTitle}",
+            From = new MailAddress(_username, "Cinema"),
+            Subject = $"Your ticket for {reservation.MovieTitle}",
             Body = htmlContent,
             IsBodyHtml = true
         };
@@ -56,18 +56,18 @@ public class MailingService(IConfiguration configuration)
         var seatsByRow = reservation.Seats
             .GroupBy(s => s.Row)
             .OrderBy(g => g.Key)
-            .Select(g => $"Rij {g.Key}: {string.Join(", ", g.OrderBy(s => s.SeatNumber).Select(s => $"Stoel {s.SeatNumber}"))}")
+            .Select(g => $"Row {g.Key}: {string.Join(", ", g.OrderBy(s => s.SeatNumber).Select(s => $"Seat {s.SeatNumber}"))}")
             .ToList();
         var seatsList = string.Join("<br>", seatsByRow);
-        var showtimeFormatted = reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'om' HH:mm");
+        var showtimeFormatted = reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'at' HH:mm");
 
         return $@"
 <!DOCTYPE html>
-<html lang=""nl"">
+<html lang=""en"">
 <head>
     <meta charset=""UTF-8"">
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-    <title>Bioscoop Ticket</title>
+    <title>Movie Ticket</title>
     <style>
         body {{
             font-family: Arial, sans-serif;
@@ -171,42 +171,42 @@ public class MailingService(IConfiguration configuration)
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>🎬 Bioscoop Ticket</h1>
+            <h1>🎬 Movie Ticket</h1>
         </div>
 
         <div class=""info-section"">
-            <h2>Film Informatie</h2>
+            <h2>Movie Information</h2>
             <div class=""info-row"">
-                <span class=""info-label"">Film:</span>
+                <span class=""info-label"">Movie:</span>
                 <span class=""info-value"">{EscapeHtml(reservation.MovieTitle)}</span>
             </div>
             <div class=""info-row"">
-                <span class=""info-label"">Zaal:</span>
+                <span class=""info-label"">Room:</span>
                 <span class=""info-value"">{EscapeHtml(reservation.RoomName)}</span>
             </div>
             <div class=""info-row"">
-                <span class=""info-label"">Tijd:</span>
+                <span class=""info-label"">Time:</span>
                 <span class=""info-value"">{showtimeFormatted}</span>
             </div>
             <div class=""info-row"">
-                <span class=""info-label"">Stoelen:</span>
+                <span class=""info-label"">Seats:</span>
                 <span class=""info-value"">{seatsList}</span>
             </div>
         </div>
 
         <div class=""qr-section"">
-            <h2 style=""margin-top: 0;"">Uw QR Code</h2>
+            <h2 style=""margin-top: 0;"">Your QR Code</h2>
             <img src=""cid:{qrCodeContentId}"" alt=""QR Code"" class=""qr-code"" />
-            <div class=""ticket-code"">Reservering nummer: {reservation.Id}</div>
+            <div class=""ticket-code"">Reservation number: {reservation.Id}</div>
         </div>
 
         <div class=""button-container"">
-            <a href=""{EscapeHtml(ticketPrintUrl)}"" class=""button"">Bekijk & Print Ticket</a>
+            <a href=""{EscapeHtml(ticketPrintUrl)}"" class=""button"">View & Print Ticket</a>
         </div>
 
         <div class=""footer"">
-            <p>Bedankt voor uw reservering!</p>
-            <p>Neem deze QR code mee naar de bioscoop voor toegang.</p>
+            <p>Thank you for your reservation!</p>
+            <p>Bring this QR code to the cinema for access.</p>
         </div>
     </div>
 </body>

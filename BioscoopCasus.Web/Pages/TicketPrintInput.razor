@@ -4,13 +4,13 @@
 @inject ReservationService ReservationService
 @inject NavigationManager NavigationManager
 
-<PageTitle>Ticket Invoeren</PageTitle>
+<PageTitle>Enter Ticket</PageTitle>
 
 <div class="ticket-input-container">
     <div class="ticket-card">
         <div class="ticket-header">
-            <h2>Bioscoop Ticket</h2>
-            <p class="subtitle">Voer uw QR code in om uw ticket te bekijken</p>
+            <h2>Cinema Ticket</h2>
+            <p class="subtitle">Enter your QR code to view your ticket</p>
         </div>
 
         @if (!string.IsNullOrEmpty(_errorMessage))
@@ -31,14 +31,14 @@
 
             <div class="form-group-fancy">
                 <label for="qrCode" class="form-label-fancy">QR Code</label>
-                <InputTextArea id="qrCode" class="terminal-input" rows="4" @bind-Value="_qrCodeModel.QrCode" placeholder="Plak hier uw QR code..." />
+                <InputText id="qrCode" class="terminal-input" @bind-Value="_qrCodeModel.QrCode" placeholder="Paste your QR code here..." />
                 <div class="validation-wrapper">
                     <ValidationMessage For="@(() => _qrCodeModel.QrCode)" />
                 </div>
-                <small class="form-hint">Scan uw QR code of plak de code uit uw email</small>
+                <small class="form-hint">Scan your QR code or paste the code from your email</small>
             </div>
 
-            <FormButton Type="submit" IsPrimary="true" IsLoading="@_isLoading" LoadingText="Valideren..." Text="Bevestigen" />
+            <FormButton Type="submit" IsPrimary="true" IsLoading="@_isLoading" LoadingText="Validating..." Text="Confirm" />
         </EditForm>
     </div>
 </div>
@@ -116,18 +116,13 @@
         list-style: none;
         padding: 0;
     }
-
-    .terminal-input {
-        resize: vertical;
-        min-height: 100px;
-    }
 </style>
 
 @code {
     public class QrCodeInputModel
     {
-        [Required(ErrorMessage = "QR code is verplicht")]
-        [MinLength(10, ErrorMessage = "QR code is te kort")]
+        [Required(ErrorMessage = "QR code is required")]
+        [MinLength(10, ErrorMessage = "QR code is too short")]
         public string QrCode { get; set; } = string.Empty;
     }
 
@@ -151,7 +146,7 @@
 
         if (!result.IsValid)
         {
-            _errorMessage = result.ErrorMessage ?? "Ongeldige QR code.";
+            _errorMessage = result.ErrorMessage ?? "Invalid QR code.";
             _isLoading = false;
             return;
         }
@@ -160,7 +155,7 @@
             NavigationManager.NavigateTo($"/TicketPrint/{result.ReservationId.Value}");
         else
         {
-            _errorMessage = "Geen reservering gevonden.";
+            _errorMessage = "No reservation found.";
             _isLoading = false;
         }
     }

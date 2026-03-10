@@ -38,12 +38,12 @@ public static class BioscoopDbSeeder
     {
         return
         [
-            new Room { Number = 1, Name = "Zaal 1", Has3D = true,  IsWheelchairAccessible = true },
-            new Room { Number = 2, Name = "Zaal 2", Has3D = true,  IsWheelchairAccessible = true },
-            new Room { Number = 3, Name = "Zaal 3", Has3D = false, IsWheelchairAccessible = true },
-            new Room { Number = 4, Name = "Zaal 4", Has3D = false, IsWheelchairAccessible = true },
-            new Room { Number = 5, Name = "Zaal 5", Has3D = false, IsWheelchairAccessible = false },
-            new Room { Number = 6, Name = "Zaal 6", Has3D = false, IsWheelchairAccessible = false },
+            new Room { Number = 1, Name = "Room 1", Has3D = true,  IsWheelchairAccessible = true },
+            new Room { Number = 2, Name = "Room 2", Has3D = true,  IsWheelchairAccessible = true },
+            new Room { Number = 3, Name = "Room 3", Has3D = false, IsWheelchairAccessible = true },
+            new Room { Number = 4, Name = "Room 4", Has3D = false, IsWheelchairAccessible = true },
+            new Room { Number = 5, Name = "Room 5", Has3D = false, IsWheelchairAccessible = false },
+            new Room { Number = 6, Name = "Room 6", Has3D = false, IsWheelchairAccessible = false },
         ];
     }
 
