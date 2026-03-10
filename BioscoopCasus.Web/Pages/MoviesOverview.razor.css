@@ -1,0 +1,99 @@
+h1 {
+    color: #f8fafc;
+    margin-bottom: 1.5rem;
+}
+
+.movies-page {
+    background-color: #0b0e14;
+    min-height: 100vh;
+    padding: 3rem;
+}
+
+.day-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #f8fafc;
+    padding: 0.75rem 1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    cursor: pointer;
+}
+
+.day-select:focus {
+    outline: none;
+    border-color: #e11d48;
+    box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1);
+}
+
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.5rem;
+}
+
+.movie-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.movie-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.movie-card-info {
+    padding: 1.25rem;
+}
+
+.movie-card-info h3 {
+    color: #f8fafc;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.movie-genres {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin: 0 0 0.25rem 0;
+}
+
+.movie-duration {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin: 0 0 1rem 0;
+}
+
+.showtimes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.showtime {
+    background-color: #e11d48;
+    color: white;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.empty-message {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+.clickable-card {
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.clickable-card:hover {
+    transform: translateY(-3px);
+    border-color: #e11d48;
+}

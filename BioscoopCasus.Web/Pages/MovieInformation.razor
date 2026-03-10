@@ -1,0 +1,180 @@
+﻿@page "/films/{movieId}"
+
+<PageTitle>@(_movieInfo?.Title ?? "Film")</PageTitle>
+
+@inject MovieInformationService MovieInformationService
+@inject NavigationManager NavigationManager
+
+<div class="movies-page">
+<div class="movie-details-wrapper">
+    <button class="return-button" @onclick="GoBackToOverview">
+        <span class="return-button-icon">←</span>
+        <span>Terug naar films</span>
+    </button>
+    @if (_isLoading)
+    {
+        <p class="empty-message">Loading...</p>
+    }
+    else if (_movieInfo == null)
+    {
+        <p class="empty-message">
+            Movie information could not be found. Please try again later.
+        </p>
+    }
+    else
+    {
+        <div class="movie-details-card">
+            <div class="movie-details-poster">
+                <img src="@PosterUrl" alt="@_movieInfo.Title"/>
+            </div>
+
+            <div class="movie-details-content">
+                <h1>@_movieInfo.Title</h1>
+
+                <div class="movie-meta">
+                    <span class="meta-badge">@_movieInfo.Genres</span>
+                    <span class="meta-badge">@_movieInfo.DurationMinutes minuten</span>
+                    <span class="meta-badge">Leeftijd: @_movieInfo.AgeRating+</span>
+                </div>
+
+                <div class="movie-section">
+                    <h3>Beschrijving</h3>
+                    <p>@_movieInfo.Description</p>
+                </div>
+
+                <div class="movie-section">
+                    <h3>Acteurs</h3>
+                    <p>@_movieInfo.Actors</p>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(_movieInfo.TrailerUrl))
+                {
+                    <div class="movie-section">
+                        <h3>Trailer</h3>
+
+                        @if (TrailerEmbedUrl != null)
+                        {
+                            <div class="trailer-container">
+                                <iframe
+                                    src="@TrailerEmbedUrl"
+                                    title="Movie Trailer"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                        }
+                        else
+                        {
+                            <a class="trailer-link"
+                               href="@_movieInfo.TrailerUrl"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                Bekijk de trailer
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    </div>
+</div>
+
+@code
+{
+    [Parameter]
+    public string MovieId { get; set; } = string.Empty;
+
+    private MovieResponseDto? _movieInfo;
+    private bool _isLoading = true;
+    
+    private string PosterUrl
+    {
+        get
+        {
+            // Return placeholder if PosterUrl is null or contains example.com
+            if (string.IsNullOrWhiteSpace(_movieInfo?.PosterUrl) || 
+                (Uri.TryCreate(_movieInfo.PosterUrl, UriKind.Absolute, out var uri)
+                 && uri.Host.Contains("example.com", StringComparison.OrdinalIgnoreCase)))
+            {
+                return "https://placehold.co/300x450";
+            }
+
+            return _movieInfo.PosterUrl;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMovieInformation();
+    }
+
+    private async Task LoadMovieInformation()
+    {
+        // Get the information of a specific movie and if nothing is returned within 
+        // X amount of ms set _movieInfo to null
+        try
+        {
+            var movieTask = MovieInformationService.GetMovieInformationAsync(MovieId);
+            var timeoutTask = Task.Delay(5000);
+
+            var completedTask = await Task.WhenAny(movieTask, timeoutTask);
+
+            if (completedTask == movieTask)
+            {
+                _movieInfo = await movieTask;
+            }
+        }
+        catch
+        {
+            _movieInfo = null;
+        }
+
+        _isLoading = false;
+    }
+    
+    private void GoBackToOverview()
+    {
+        NavigationManager.NavigateTo("/films");
+    }
+    
+    private string? TrailerEmbedUrl
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_movieInfo?.TrailerUrl))
+                return null;
+
+            try
+            {
+                var uri = new Uri(_movieInfo.TrailerUrl);
+                const string videoEmbedSettings = "autoplay=1&mute=1&controls=0&modestbranding=1&rel=0";
+
+                // youtube.com/watch?v={videoId}
+                if (uri.Host.Contains("youtube.com"))
+                {
+                    var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                    var videoId = query["v"];
+                    
+
+                    if (!string.IsNullOrWhiteSpace(videoId))
+                        return $"https://www.youtube.com/embed/{videoId}?{videoEmbedSettings}";
+                }
+
+                // youtu.be/{videoId}
+                if (uri.Host.Contains("youtu.be"))
+                {
+                    var videoId = uri.AbsolutePath.Trim('/');
+                    if (!string.IsNullOrWhiteSpace(videoId))
+                        return $"https://www.youtube.com/embed/{videoId}?{videoEmbedSettings}";
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+
+            return null;
+        }
+    }
+}
