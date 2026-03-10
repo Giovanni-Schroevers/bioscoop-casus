@@ -9,7 +9,7 @@ public class TicketPricingService
 
     public async Task InitializeAsync(HttpClient httpClient)
     {
-        var json = await httpClient.GetStringAsync("https://localhost:7181/api/ticketPricing");
+        var json = await httpClient.GetStringAsync("api/ticketPricing");
 
         var options = new JsonSerializerOptions();
         options.PropertyNameCaseInsensitive = true;
