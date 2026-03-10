@@ -75,15 +75,50 @@ h1 {
 }
 
 .showtime {
-    background-color: #e11d48;
+    background: rgba(225,29,72,0.9);
     color: white;
-    padding: 0.4rem 0.75rem;
+    padding: 0.45rem 0.8rem;
     border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition:
+            transform 0.12s ease,
+            background 0.12s ease,
+            box-shadow 0.12s ease;
+}
+
+.showtime:hover {
+    background: #f43f5e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(225,29,72,0.35);
+}
+
+.showtime:active {
+    transform: translateY(0);
+}
+
+.showtime-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 0.4rem;
 }
 
 .empty-message {
     color: #94a3b8;
     font-size: 1.1rem;
+}
+
+.movie-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.movie-card.clickable-card:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.2);
 }

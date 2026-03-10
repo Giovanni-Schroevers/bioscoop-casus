@@ -24,4 +24,8 @@
       <ProjectReference Include="..\BioscoopCasus.Models\BioscoopCasus.Models.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\" />
+    </ItemGroup>
+
 </Project>

@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using BioscoopCasus.Models.Helpers;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using BioscoopCasus.Web;
@@ -18,7 +19,11 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<MoviesOverviewService>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<ReservationService>();
-builder.Services.AddScoped<SeatSelectionService>();
+builder.Services.AddHttpClient<SeatSelectionService>(client => 
+    client.BaseAddress = new Uri("http://localhost:5064/"));
+builder.Services.AddScoped<MoviesOverviewService>();
+builder.Services.AddScoped<MovieInformationService>();
+builder.Services.AddScoped<TicketPricingService>();
 builder.Services.AddSingleton<QrCodeHelper>();
 
 // Register the JWT handler

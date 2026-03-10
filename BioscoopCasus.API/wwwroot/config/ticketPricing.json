@@ -1,0 +1,22 @@
+﻿{
+  "basePrice": {
+    "normal": 8.50,
+    "longMovie": 9.00,
+    "longMovieThresholdMinutes": 120
+  },
+  "discounts": {
+    "child": 1.50,
+    "student": 1.50,
+    "senior": 1.50
+  },
+  "surcharges": {
+    "threeD": 2.50
+  },
+  "rules": {
+    "childMaxAge": 11,
+    "childBeforeHour": 18,
+    "studentValidDays": [1,2,3,4],
+    "seniorValidDays": [1,2,3,4],
+    "voucherValidDays": [1,2,3,4]
+  }
+}

@@ -1,40 +1,45 @@
-@page "/films"
+@page "/movies"
 @inject MoviesOverviewService MoviesOverviewService
-@using BioscoopCasus.Models.DTOs
-@using BioscoopCasus.Web.Services
+@inject NavigationManager NavigationManager
+
 <div class="movies-page">
     <h1>Films</h1>
 
     <select class="day-select" @onchange="OnDayChanged">
-        @foreach (var day in AvailableDays)
+        @foreach (var day in _availableDays)
         {
             <option value="@day.ToString("yyyy-MM-dd")">@day.ToString("dddd dd MMMM")</option>
         }
     </select>
 
-    @if (Movies == null)
+    @if (_movies == null)
     {
         <p class="empty-message">Loading...</p>
     }
-    else if (!Movies.Any())
+    else if (!_movies.Any())
     {
         <p class="empty-message">Geen films beschikbaar voor deze dag.</p>
     }
     else
     {
         <div class="movie-grid">
-            @foreach (var movie in Movies)
+            @foreach (var movie in _movies)
             {
-                <div class="movie-card">
+                <div class="movie-card clickable-card" @onclick="@(() => OpenMovie(movie.Id))">
                     <img src="https://placehold.co/200x250" alt="@movie.Title" />
                     <div class="movie-card-info">
                         <h3>@movie.Title</h3>
                         <p class="movie-genres">@movie.Genres</p>
                         <p class="movie-duration">@movie.DurationMinutes minuten</p>
+                        <p class="showtime-label">Tijden</p>
                         <div class="showtimes">
                             @foreach (var showtime in movie.Showtimes)
                             {
-                                <span class="showtime">@showtime.StartTime.ToString("HH:mm")</span>
+                                <span class="showtime"
+                                      @onclick="() => OpenTicketSale(movie.Id, showtime.Id)"
+                                      @onclick:stopPropagation>
+                                    @showtime.StartTime.ToString("HH:mm")
+                                </span>
                             }
                         </div>
                     </div>
@@ -46,9 +51,9 @@
 </div>
 @code
 {
-    private List<MoviesOverviewDto>? Movies;
-    private List<DateTime> AvailableDays = [];
-    private DateTime SelectedDay;
+    private List<MoviesOverviewDto>? _movies;
+    private List<DateTime> _availableDays = [];
+    private DateTime _selectedDay;
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,21 +61,31 @@
         var endDate = today.AddDays(7);
 
         for (var d = today; d <= endDate; d = d.AddDays(1))
-            AvailableDays.Add(d);
+            _availableDays.Add(d);
 
-        SelectedDay = today;
+        _selectedDay = today;
         await LoadMovies();
     }
 
     private async Task OnDayChanged(ChangeEventArgs e)
     {
-        SelectedDay = DateTime.Parse(e.Value!.ToString()!);
+        _selectedDay = DateTime.Parse(e.Value!.ToString()!);
         await LoadMovies();
     }
 
     private async Task LoadMovies()
     {
-        Movies = await MoviesOverviewService.GetMoviesAsync(SelectedDay);
+        _movies = await MoviesOverviewService.GetMoviesAsync(_selectedDay);
+    }
+    
+    private void OpenMovie(int movieId)
+    {
+        NavigationManager.NavigateTo($"/movies/{movieId}");
+    }
+    
+    private void OpenTicketSale(int movieId, int showtimeId)
+    {
+        NavigationManager.NavigateTo($"/movies/{movieId.ToString()}/ticketsale/{showtimeId.ToString()}");
     }
 }
 
