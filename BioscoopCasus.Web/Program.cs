@@ -18,7 +18,8 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ReservationService>();
-builder.Services.AddScoped<SeatSelectionService>();
+builder.Services.AddHttpClient<SeatSelectionService>(client => 
+    client.BaseAddress = new Uri("http://localhost:5064/"));
 builder.Services.AddScoped<MoviesOverviewService>();
 builder.Services.AddScoped<MovieInformationService>();
 builder.Services.AddScoped<TicketPricingService>();
