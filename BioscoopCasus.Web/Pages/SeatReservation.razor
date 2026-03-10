@@ -2,18 +2,18 @@
 @inject SeatSelectionService SeatSelectionService
 @inject NavigationManager NavigationManager
 
-<PageTitle>Stoel Reserveren</PageTitle>
+<PageTitle>Seat Reservation</PageTitle>
 
 <div class="seat-reservation-page">
-    <h1>Stoel Reserveren</h1>
+    <h1>Seat Reservation</h1>
 
     @if (Movies == null)
     {
-        <p class="loading">Films laden...</p>
+        <p class="loading">Loading movies...</p>
     }
     else if (!Movies.Any())
     {
-        <p class="empty-message">Geen films beschikbaar.</p>
+        <p class="empty-message">No movies available.</p>
     }
     else
     {
@@ -34,14 +34,14 @@
     @if (ConfirmationResult != null)
     {
         <div class="success-message">
-            <h4>Succes!</h4>
+            <h4>Success!</h4>
             <p>@ConfirmationResult.Message</p>
-            <p>Reservering ID: @ConfirmationResult.ReservationId</p>
+            <p>Reservation ID: @ConfirmationResult.ReservationId</p>
         </div>
     }
 </div>
 
-<TerminalModal Visible="ShowShowtimeModal" Title="Kies een tijd" OnClose="CloseShowtimeModal">
+<TerminalModal Visible="ShowShowtimeModal" Title="Choose a time" OnClose="CloseShowtimeModal">
     <ChildContent>
         @if (Showtimes != null && Showtimes.Any())
         {
@@ -49,31 +49,31 @@
                 @foreach (var showtime in Showtimes)
                 {
                     <div class="showtime-item" @onclick="() => SelectShowtime(showtime)">
-                        <p>@showtime.StartTime.ToString("dd/MM/yyyy HH:mm") - Zaal @showtime.RoomId</p>
+                        <p>@showtime.StartTime.ToString("dd/MM/yyyy HH:mm") - Room @showtime.RoomId</p>
                     </div>
                 }
             </div>
         }
         else
         {
-            <p>Geen tijden beschikbaar.</p>
+            <p>No times available.</p>
         }
     </ChildContent>
 </TerminalModal>
 
-<TerminalModal Visible="ShowGroupSizeModal" Title="Aantal personen" OnClose="CloseGroupSizeModal">
+<TerminalModal Visible="ShowGroupSizeModal" Title="Number of people" OnClose="CloseGroupSizeModal">
     <ChildContent>
         <div class="group-size-input">
-            <label>Aantal personen:</label>
+            <label>Number of people:</label>
             <input type="number" @bind="GroupSize" @bind:event="oninput" min="1" max="20" />
         </div>
     </ChildContent>
     <Footer>
-        <FormButton IsPrimary="true" Text="Volgende" OnClick="ConfirmGroupSize" />
+        <FormButton IsPrimary="true" Text="Next" OnClick="ConfirmGroupSize" />
     </Footer>
 </TerminalModal>
 
-<TerminalModal Visible="ShowSeatsModal" Title="Kies stoelen" OnClose="CloseSeatsModal">
+<TerminalModal Visible="ShowSeatsModal" Title="Choose seats" OnClose="CloseSeatsModal">
     <ChildContent>
         @if (SeatSelectionResult != null)
         {
@@ -84,7 +84,7 @@
 
         <!-- Cinema Screen -->
         <div class="cinema-screen">
-            <div>SCHERM</div>
+            <div>SCREEN</div>
         </div>
 
         @if (AllSeats != null)
@@ -93,7 +93,7 @@
                 @for (int row = 1; row <= MaxRow; row++)
                 {
                     <div class="row">
-                        <div class="row-label">Rij @row</div>
+                        <div class="row-label">Row @row</div>
                         <div class="seats">
                             @for (int seat = 1; seat <= MaxSeat; seat++)
                             {
@@ -103,7 +103,7 @@
 
                                 <div @onclick="() => ToggleSeatSelection(seatInfo)"
                                      class="seat @seatClass"
-                                     title="@(seatInfo != null ? $"Rij {row}, Stoel {seat}" : "Stoel niet beschikbaar")">
+                                     title="@(seatInfo != null ? $"Row {row}, Seat {seat}" : "Seat not available")">
                                     @seat
                                 </div>
                             }
@@ -115,15 +115,15 @@
             <div class="legend">
                 <div class="legend-item">
                     <div class="seat available"></div>
-                    <span>Vrij</span>
+                    <span>Available</span>
                 </div>
                 <div class="legend-item">
                     <div class="seat occupied"></div>
-                    <span>Bezet</span>
+                    <span>Occupied</span>
                 </div>
                 <div class="legend-item">
                     <div class="seat selected"></div>
-                    <span>Geselecteerd</span>
+                    <span>Selected</span>
                 </div>
             </div>
         }
@@ -396,5 +396,5 @@
         return seat.IsAvailable ? "available" : "occupied";
     }
 
-    private string ConfirmButtonText => $"Bevestig Reservering ({SelectedSeatIds.Count} stoelen)";
+    private string ConfirmButtonText => $"Confirm Reservation ({SelectedSeatIds.Count} seats)";
 }
