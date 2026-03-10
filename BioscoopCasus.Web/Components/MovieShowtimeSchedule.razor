@@ -16,9 +16,9 @@
                 <div class="times">
                     @foreach (var showtime in day.Showtimes)
                     {
-                        <span class="time-pill">
+                        <a class="time-pill" href="/movies/@MovieId/ticketsale/@showtime.Id">
                             @showtime.StartTime.ToString("HH:mm") - Room @showtime.RoomId
-                        </span>
+                        </a>
                     }
                 </div>
             </div>
@@ -29,6 +29,9 @@
 @code {
     [Parameter]
     public IEnumerable<ShowtimeResponseDto>? Showtimes { get; set; }
+    
+    [Parameter]
+    public string MovieId { get; set; }
 
     [Parameter]
     public int DaysAhead { get; set; } = 7;
@@ -88,5 +91,7 @@
         border: 1px solid rgba(225, 29, 72, 0.35);
         background: rgba(225, 29, 72, 0.08);
         font-size: 0.9rem;
+        color: var(--text-high);
+        text-decoration: none;
     }
 </style>

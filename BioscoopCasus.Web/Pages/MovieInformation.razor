@@ -1,4 +1,5 @@
 ﻿@page "/movies/{movieId}"
+@using BioscoopCasus.Web.Components
 
 <PageTitle>@(_movieInfo?.Title ?? "Film")</PageTitle>
 
@@ -75,7 +76,7 @@
                     </div>
                 }
                 
-                <MovieShowtimeSchedule Showtimes="_movieInfo.Showtimes" DaysAhead="7" />
+                <MovieShowtimeSchedule Showtimes="_movieInfo.Showtimes" MovieId="@MovieId" DaysAhead="7" />
             </div>
         </div>
     }

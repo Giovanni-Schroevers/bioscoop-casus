@@ -1,0 +1,78 @@
+@page "/pin"    
+@using BioscoopCasus.Web.Services
+@inject PaymentService PaymentService
+
+<div class="pin-page">
+    <h1>Betaling</h1>
+
+    <div class="payment-options">
+        <div class="pin-section">
+            <h2>PIN</h2>
+
+            <div class="pin-display">
+                @for (int i = 0; i < 4; i++)
+                {
+                    <span class="pin-dot">@(i < EnteredPin.Length ? "*" : "-")</span>
+                }
+            </div>
+
+            <div class="pin-pad">
+                @for (int i = 1; i <= 9; i++)
+                {
+                    var digit = i.ToString();
+                    <button class="pin-button" @onclick="() => AddDigit(digit)">@digit</button>
+                }
+                <button class="pin-button clear" @onclick="Clear">C</button>
+                <button class="pin-button" @onclick="() => AddDigit('0'.ToString())">0</button>
+                <button class="pin-button confirm" @onclick="Submit">OK</button>
+            </div>
+
+        </div>
+
+        <div class="qr-section">
+            <h2>QR Betaling</h2>
+            <p class="qr-info">Scan de QR-code om te betalen via iDEAL/Wero</p>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://localhost:5158/betalen" alt="QR Code" />
+        </div>
+    </div>
+
+    @if (Message != null)
+    {
+        <p class="pin-message @(IsSuccess ? "success" : "error")">@Message</p>
+    }
+</div>
+
+@code {
+    private string EnteredPin = "";
+    private string? Message;
+    private bool IsSuccess;
+
+    private void AddDigit(string digit)
+    {
+        if (EnteredPin.Length < 4)
+        {
+            EnteredPin += digit;
+            Message = null;
+        }
+    }
+
+    private void Clear()
+    {
+        EnteredPin = "";
+        Message = null;
+    }
+
+    private async Task Submit()
+    {
+        if (EnteredPin.Length != 4)
+        {
+            Message = "Voer 4 cijfers in";
+            IsSuccess = false;
+            return;
+        }
+
+        IsSuccess = await PaymentService.ValidatePinAsync(EnteredPin);
+        Message = IsSuccess ? "Betaling successvol" : "Ongeldige pincode";
+        EnteredPin = "";
+    }
+}
