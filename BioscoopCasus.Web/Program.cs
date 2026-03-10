@@ -21,6 +21,7 @@ builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<SeatSelectionService>();
 builder.Services.AddScoped<MoviesOverviewService>();
 builder.Services.AddScoped<MovieInformationService>();
+builder.Services.AddScoped<TicketPricingService>();
 builder.Services.AddSingleton<QrCodeHelper>();
 
 // Register the JWT handler
