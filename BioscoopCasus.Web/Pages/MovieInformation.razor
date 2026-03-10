@@ -1,4 +1,4 @@
-﻿@page "/films/{movieId}"
+﻿@page "/movies/{movieId}"
 
 <PageTitle>@(_movieInfo?.Title ?? "Film")</PageTitle>
 
@@ -135,7 +135,7 @@
     
     private void GoBackToOverview()
     {
-        NavigationManager.NavigateTo("/films");
+        NavigationManager.NavigateTo("/movies");
     }
     
     private string? TrailerEmbedUrl

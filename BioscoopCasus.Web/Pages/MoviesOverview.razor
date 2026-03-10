@@ -1,4 +1,4 @@
-@page "/films"
+@page "/movies"
 @inject MoviesOverviewService MoviesOverviewService
 @inject NavigationManager NavigationManager
 @using BioscoopCasus.Models.DTOs
@@ -76,7 +76,7 @@
     
     private void OpenMovie(int movieId)
     {
-        NavigationManager.NavigateTo($"/films/{movieId}");
+        NavigationManager.NavigateTo($"/movies/{movieId}");
     }
 }
 
