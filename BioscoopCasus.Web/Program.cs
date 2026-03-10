@@ -19,5 +19,6 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<MoviesOverviewService>();
+builder.Services.AddScoped<MovieInformationService>();
 
 await builder.Build().RunAsync();
