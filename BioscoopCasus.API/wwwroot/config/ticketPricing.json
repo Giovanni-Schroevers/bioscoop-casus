@@ -2,7 +2,7 @@
   "basePrice": {
     "normal": 8.50,
     "longMovie": 9.00,
-    "longMovieThresholdMinutes": 120
+    "longMovieThresholdMinutes": 130
   },
   "discounts": {
     "child": 1.50,

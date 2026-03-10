@@ -9,10 +9,15 @@ public class TicketPricingService
 
     public async Task InitializeAsync(HttpClient httpClient)
     {
-        var json = await httpClient.GetStringAsync("ticketPricing");
-        var config = JsonSerializer.Deserialize<TicketPricingConfig>(json);
+        var json = await httpClient.GetStringAsync("https://localhost:7181/api/ticketPricing");
 
-        _pricingConfig = config ?? throw new InvalidOperationException("Ticket pricing configuration could not be loaded.");
+        var options = new JsonSerializerOptions();
+        options.PropertyNameCaseInsensitive = true;
+
+        var config = JsonSerializer.Deserialize<TicketPricingConfig>(json, options);
+
+        _pricingConfig = config ?? throw new InvalidOperationException(
+            "Ticket pricing configuration could not be loaded.");
     }
 
     public decimal GetBasePrice(int durationMinutes)
