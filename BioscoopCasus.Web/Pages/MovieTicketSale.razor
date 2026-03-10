@@ -1,4 +1,5 @@
 ﻿@page "/movies/{MovieId}/ticketsale/{ShowtimeId}"
+@page "/movies/{MovieId}/ticketsale/{ShowtimeId}/{ReturnUrl}"
 @using System.Globalization
 
 @inject NavigationManager NavigationManager
@@ -87,8 +88,10 @@ else
 
 [Parameter] 
     public string MovieId { get; set; } = string.Empty;
-[Parameter] 
+[Parameter]
     public string ShowtimeId { get; set; }  = string.Empty;
+[Parameter]
+    public string? ReturnUrl { get; set; }
 
 private bool _isLoading = true;
 
@@ -118,7 +121,7 @@ protected override async Task OnInitializedAsync()
 
 private void GoBackToOverview()
 {
-    NavigationManager.NavigateTo("/movies");
+    NavigationManager.NavigateTo(ReturnUrl ?? "/movies");
 }
 
 private async Task LoadMovieInformation()
