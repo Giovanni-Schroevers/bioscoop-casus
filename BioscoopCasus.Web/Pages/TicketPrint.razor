@@ -20,12 +20,12 @@ else if (_isExpired)
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
                 <div class="alert alert-warning" role="alert">
-                    <h4 class="alert-heading">Ticket niet meer beschikbaar</h4>
-                    <p>Dit ticket kan niet meer worden bekeken omdat de film al is begonnen.</p>
+                    <h4 class="alert-heading">Ticket no longer available</h4>
+                    <p>This ticket can no longer be viewed because the movie has already started.</p>
                     <hr>
                     <p class="mb-0">
-                        <strong>Film:</strong> @_reservation.MovieTitle<br>
-                        <strong>Starttijd:</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'om' HH:mm")
+                        <strong>Movie:</strong> @_reservation.MovieTitle<br>
+                        <strong>Start time:</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'at' HH:mm")
                     </p>
                 </div>
             </div>
@@ -39,27 +39,27 @@ else
             <div class="col-md-8 col-lg-6">
                 <div class="card shadow">
                     <div class="card-body p-4">
-                        <h2 class="card-title mb-4 text-center">Bioscoop Ticket</h2>
+                        <h2 class="card-title mb-4 text-center">Cinema Ticket</h2>
 
                         <div class="mb-3">
-                            <strong>Film:</strong> @_reservation.MovieTitle
+                            <strong>Movie:</strong> @_reservation.MovieTitle
                         </div>
 
                         <div class="mb-3">
-                            <strong>Zaal:</strong> @_reservation.RoomName
+                            <strong>Room:</strong> @_reservation.RoomName
                         </div>
 
                         <div class="mb-3">
-                            <strong>Tijd:</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'om' HH:mm")
+                            <strong>Time:</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'at' HH:mm")
                         </div>
 
                         <div class="mb-3">
-                            <strong>Stoelen:</strong>
+                            <strong>Seats:</strong>
                             <ul class="mb-0">
                                 @foreach (var rowGroup in _reservation.Seats.GroupBy(s => s.Row).OrderBy(g => g.Key))
                                 {
                                     <li>
-                                        Rij @rowGroup.Key: @string.Join(", ", rowGroup.OrderBy(s => s.SeatNumber).Select(s => $"Stoel {s.SeatNumber}"))
+                                        Row @rowGroup.Key: @string.Join(", ", rowGroup.OrderBy(s => s.SeatNumber).Select(s => $"Seat {s.SeatNumber}"))
                                     </li>
                                 }
                             </ul>

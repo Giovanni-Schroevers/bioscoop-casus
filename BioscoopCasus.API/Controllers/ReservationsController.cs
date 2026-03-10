@@ -113,7 +113,7 @@ public class ReservationsController(BioscoopDbContext context, QrCodeHelper qrCo
             return Ok(new QrCodeValidationResponseDto(false, null, "Reservation not found"));
 
         if (reservation.Showtime.StartTime <= DateTime.UtcNow)
-            return Ok(new QrCodeValidationResponseDto(false, null, "Dit ticket kan niet meer worden bekeken omdat de film al is begonnen."));
+            return Ok(new QrCodeValidationResponseDto(false, null, "This ticket can no longer be viewed because the movie has already started."));
 
         return Ok(new QrCodeValidationResponseDto(true, reservation.Id, null));
     }
