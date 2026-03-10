@@ -1,0 +1,92 @@
+@page "/TicketPrint"
+@using System.ComponentModel.DataAnnotations
+@inject ReservationService ReservationService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Ticket Invoeren</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4 text-center">Bioscoop Ticket</h2>
+                    <p class="text-muted text-center mb-4">Voer uw QR code in om uw ticket te bekijken</p>
+
+                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @_errorMessage
+                        </div>
+                    }
+
+                    <EditForm Model="_qrCodeModel" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="qrCode" class="form-label">QR Code</label>
+                            <InputTextArea id="qrCode" class="form-control" rows="4" @bind-Value="_qrCodeModel.QrCode" placeholder="Plak hier uw QR code..." />
+                            <ValidationMessage For="@(() => _qrCodeModel.QrCode)" />
+                            <small class="form-text text-muted">Scan uw QR code of plak de code uit uw email</small>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" disabled="@_isLoading">
+                                @if (_isLoading)
+                                {
+                                    <span>Valideren...</span>
+                                }
+                                else
+                                {
+                                    <span>Bevestigen</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public class QrCodeInputModel
+    {
+        [Required(ErrorMessage = "QR code is verplicht")]
+        [MinLength(10, ErrorMessage = "QR code is te kort")]
+        public string QrCode { get; set; } = string.Empty;
+    }
+
+    private readonly QrCodeInputModel _qrCodeModel = new();
+    private string? _errorMessage;
+    private bool _isLoading;
+
+    private async Task HandleSubmit()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        var result = await ReservationService.ValidateQrCodeAsync(_qrCodeModel.QrCode.Trim());
+
+        if (result is null)
+        {
+            _errorMessage = "Er is een fout opgetreden bij het valideren van de QR code.";
+            _isLoading = false;
+            return;
+        }
+
+        if (!result.IsValid)
+        {
+            _errorMessage = result.ErrorMessage ?? "Ongeldige QR code.";
+            _isLoading = false;
+            return;
+        }
+
+        if (result.ReservationId.HasValue)
+            NavigationManager.NavigateTo($"/TicketPrint/{result.ReservationId.Value}");
+        else
+        {
+            _errorMessage = "Geen reservering gevonden.";
+            _isLoading = false;
+        }
+    }
+}
