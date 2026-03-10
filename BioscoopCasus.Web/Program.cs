@@ -11,7 +11,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-var apiBase = new Uri("https://localhost:7181/");
+var apiBase = new Uri("http://localhost:5064/");
 
 // Default HttpClient used by most services
 builder.Services.AddScoped(sp => new HttpClient
