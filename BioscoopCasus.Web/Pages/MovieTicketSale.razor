@@ -1,6 +1,7 @@
-﻿@page "/movies/{MovieId}/ticketsale/{ShowtimeId}"
+@page "/movies/{MovieId}/ticketsale/{ShowtimeId}"
 @page "/movies/{MovieId}/ticketsale/{ShowtimeId}/{ReturnUrl}"
 @using System.Globalization
+@inject IStringLocalizer<SharedResource> L
 
 @inject NavigationManager NavigationManager
 @inject MovieInformationService MovieInformationService
@@ -9,18 +10,18 @@
 <div class="movies-page">
 <div class="movie-details-wrapper">
     <button class="return-button" @onclick="GoBackToOverview">
-        <span class="return-button-icon">←</span>
-        <span>Terug naar films</span>
+        <span class="return-button-icon">&larr;</span>
+        <span>@L["BackToMovies"]</span>
     </button>
-<h1>Tickets kopen</h1>
+<h1>@L["BuyTicketsTitle"]</h1>
 
 @if (_isLoading)
 {
-    <p class="empty-message">Loading...</p>
+    <p class="empty-message">@L["Loading"]</p>
 }
 else if (_movieInfo == null)
 {
-    <p class="empty-message">Film informatie kon niet worden geladen.</p>
+    <p class="empty-message">@L["MovieInfoLoadFailed"]</p>
 }
 else
 {
@@ -28,50 +29,50 @@ else
 
         <div class="movie-info">
             <h2>@_movieInfo.Title</h2>
-            <p>@_showtime.ToString("dddd dd MMMM HH:mm")</p>
+            <p>@_showtime.ToString("dddd dd MMMM HH:mm", CultureInfo.CurrentCulture)</p>
         </div>
 
         <div class="ticket-section">
             <div class="ticket-row">
-                <span>Normaal</span>
+                <span>@L["TicketTypeNormal"]</span>
                 <input type="number" min="0" @bind="_normalTickets" @bind:event="oninput" />
-                <span>@((_normalTickets * NormalPrice).ToString("C", new CultureInfo("nl-NL")))</span>
+                <span>@((_normalTickets * NormalPrice).ToString("C", CultureInfo.CurrentCulture))</span>
             </div>
 
             <div class="ticket-row">
-                <span>Kind</span>
+                <span>@L["TicketTypeChild"]</span>
                 <input type="number" min="0" @bind="_childTickets" @bind:event="oninput" />
-                <span>@((_childTickets * ChildPrice).ToString("C", new CultureInfo("nl-NL")))</span>
+                <span>@((_childTickets * ChildPrice).ToString("C", CultureInfo.CurrentCulture))</span>
             </div>
 
             <div class="ticket-row">
-                <span>Student</span>
+                <span>@L["TicketTypeStudent"]</span>
                 <input type="number" min="0" @bind="_studentTickets" @bind:event="oninput" />
-                <span>@((_studentTickets * StudentPrice).ToString("C", new CultureInfo("nl-NL")))</span>
+                <span>@((_studentTickets * StudentPrice).ToString("C", CultureInfo.CurrentCulture))</span>
             </div>
 
             <div class="ticket-row">
-                <span>65+</span>
+                <span>@L["TicketTypeSenior"]</span>
                 <input type="number" min="0" @bind="_seniorTickets" @bind:event="oninput" />
-                <span>@((_seniorTickets * SeniorPrice).ToString("C", new CultureInfo("nl-NL")))</span>
+                <span>@((_seniorTickets * SeniorPrice).ToString("C", CultureInfo.CurrentCulture))</span>
             </div>
         </div>
 
         <div class="voucher-section">
             <label>
                 <input type="checkbox" @bind="_useVoucher"/>
-                Nationale Bioscoopbon gebruiken
+                @L["UseVoucher"]
             </label>
 
             @if (_useVoucher)
             {
-                <input class="voucher-input" placeholder="Voucher code"/>
+                <input class="voucher-input" placeholder="@L["VoucherCodePlaceholder"]"/>
             }
         </div>
 
         <div class="total-section">
-            <span>Totaal</span>
-            <strong>@TotalPrice.ToString("C", new CultureInfo("nl-NL"))</strong>
+            <span>@L["Total"]</span>
+            <strong>@TotalPrice.ToString("C", CultureInfo.CurrentCulture)</strong>
         </div>
 
         @if (_validationError != null)
@@ -80,7 +81,7 @@ else
         }
 
         <button class="buy-button" @onclick="BuyTickets">
-            Doorgaan naar stoelkeuze
+            @L["ContinueToSeatSelection"]
         </button>
 
     </div>
@@ -248,13 +249,13 @@ private void BuyTickets()
 
     if (TotalTickets == 0)
     {
-        _validationError = "Kies minimaal 1 ticket.";
+        _validationError = L["ValidationSelectAtLeastOneTicket"];
         return;
     }
 
     if (_useVoucher && !IsVoucherValid)
     {
-        _validationError = "Bioscoopbon is niet geldig voor dit tijdstip.";
+        _validationError = L["ValidationVoucherInvalidTime"];
         return;
     }
 

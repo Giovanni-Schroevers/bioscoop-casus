@@ -2,8 +2,9 @@
 @attribute [Authorize]
 @inject RoomService RoomService
 @using BioscoopCasus.Web.Components
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Room Management</PageTitle>
+<PageTitle>@L["RoomManagementTitle"]</PageTitle>
 
 <div class="management-container">
     <div class="header-section">
@@ -12,20 +13,20 @@
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Dashboard
+            @L["Dashboard"]
         </a>
         <div class="title-row">
-            <h1>Room Management</h1>
-            <FormButton IsPrimary="true" Text="New Room" OnClick="OnAddRoomClick" CssClass="add-room-btn" />
+            <h1>@L["RoomManagementTitle"]</h1>
+            <FormButton IsPrimary="true" Text="@L["NewRoom"]" OnClick="OnAddRoomClick" CssClass="add-room-btn" />
         </div>
-        <p class="subtitle">Manage the configuration of your cinema rooms.</p>
+        <p class="subtitle">@L["RoomsSubtitle"]</p>
     </div>
 
     @if (IsLoading)
     {
         <div class="loading-state">
             <span class="loading-spinner"></span>
-            <p>Loading rooms...</p>
+            <p>@L["LoadingRooms"]</p>
         </div>
     }
     else
@@ -33,7 +34,7 @@
         <div class="rooms-list">
             @if (!AllRooms.Any())
             {
-                <div class="empty-state">No rooms configured.</div>
+                <div class="empty-state">@L["NoRoomsConfigured"]</div>
             }
             else
             {
@@ -46,20 +47,20 @@
                         <div class="room-info">
                             <h3>@room.Name</h3>
                             <div class="room-stats">
-                                <span class="stat">@room.Rows.Count Rows</span>
-                                <span class="stat">@room.Rows.Sum(r => r.SeatCount) Seats</span>
+                                <span class="stat">@room.Rows.Count @L["RowsLabel"]</span>
+                                <span class="stat">@room.Rows.Sum(r => r.SeatCount) @L["SeatsLabel"]</span>
                                 @if (room.Has3D)
                                 {
                                     <span class="badge badge-3d">3D</span>
                                 }
                                 @if (room.IsWheelchairAccessible)
                                 {
-                                    <span class="badge badge-wheelchair">♿</span>
+                                    <span class="badge badge-wheelchair">&#9855;</span>
                                 }
                             </div>
                         </div>
                         <div class="room-actions">
-                            <span class="edit-link">Edit</span>
+                            <span class="edit-link">@L["Edit"]</span>
                         </div>
                     </div>
                 }
@@ -70,36 +71,36 @@
 
 @if (ShowModal)
 {
-    <TerminalModal Visible="ShowModal" Title="@(IsCreating ? "New Room" : "Edit Room")" OnClose="CloseModal">
+    <TerminalModal Visible="ShowModal" Title="@(IsCreating ? L["NewRoom"] : L["EditRoom"])" OnClose="CloseModal">
         <ChildContent>
             <div class="room-form">
                 <div class="form-row">
-                    <TerminalInput Label="Room Number" Type="number" @bind-Value="RoomNumberString" CssClass="flex-1" />
-                    <TerminalInput Label="Name" @bind-Value="EditRoom.Name" Placeholder="e.g. Premiere Hall" CssClass="flex-2" />
+                    <TerminalInput Label="@L["RoomNumberLabel"]" Type="number" @bind-Value="RoomNumberString" CssClass="flex-1" />
+                    <TerminalInput Label="@L["NameLabel"]" @bind-Value="EditRoom.Name" Placeholder="@L["RoomNamePlaceholder"]" CssClass="flex-2" />
                 </div>
                 
                 <div class="checkbox-row">
                     <label class="checkbox-container">
                         <input type="checkbox" @bind="EditRoom.Has3D" />
                         <span class="checkmark"></span>
-                        Supports 3D
+                        @L["Supports3D"]
                     </label>
                     <label class="checkbox-container">
                         <input type="checkbox" @bind="EditRoom.IsWheelchairAccessible" />
                         <span class="checkmark"></span>
-                        Wheelchair Accessible
+                        @L["WheelchairAccessible"]
                     </label>
                 </div>
 
                 <div class="rows-editor">
                     <div class="editor-header">
-                        <h3>Rows & Seats</h3>
+                        <h3>@L["RowsAndSeatsTitle"]</h3>
                         <FormButton IsPrimary="false" OnClick="AddRow" CssClass="small-btn">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
-                            Add Row
+                            @L["AddRow"]
                         </FormButton>
                     </div>
                     
@@ -109,10 +110,10 @@
                             var index = i;
                             var row = EditRows[i];
                             <div class="row-entry">
-                                <span class="row-num">Row @(index + 1)</span>
+                                <span class="row-num">@L["RowLabel", index + 1]</span>
                                 <div class="seat-input">
                                     <input type="number" class="terminal-input" @oninput="(e) => row.SeatCount = int.TryParse(e.Value?.ToString(), out var v) ? v : 0" value="@row.SeatCount" />
-                                    <span class="label">Seats</span>
+                                    <span class="label">@L["SeatsLabel"]</span>
                                 </div>
                                 <button class="remove-row-btn" @onclick="() => RemoveRow(index)">
                                     <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
@@ -129,22 +130,22 @@
         <Footer>
             @if (!IsCreating)
             {
-                <FormButton IsPrimary="false" Text="Delete" OnClick="() => ShowConfirmation = true" CssClass="delete-btn" />
+                <FormButton IsPrimary="false" Text="@L["Delete"]" OnClick="() => ShowConfirmation = true" CssClass="delete-btn" />
             }
             <div style="flex-grow: 1"></div>
-            <FormButton IsPrimary="false" Text="Cancel" OnClick="CloseModal" />
-            <FormButton IsPrimary="true" Text="@(IsCreating ? "Add" : "Save")" OnClick="HandleSave" />
+            <FormButton IsPrimary="false" Text="@L["Cancel"]" OnClick="CloseModal" />
+            <FormButton IsPrimary="true" Text="@(IsCreating ? L["Add"] : L["Save"])" OnClick="HandleSave" />
         </Footer>
     </TerminalModal>
 }
 
 <ConfirmationModal Visible="ShowConfirmation" 
-                   Title="Delete Room" 
-                   ConfirmText="Delete"
+                   Title="@L["DeleteRoomTitle"]" 
+                   ConfirmText="@L["Delete"]"
                    OnConfirm="HandleDelete" 
                    OnCancel="() => ShowConfirmation = false">
     <ChildContent>
-        <p>Are you sure you want to delete <strong>@(EditRoom.Name ?? $"Room {EditRoom.Number}")</strong>?</p>
+        <p>@L["DeleteRoomConfirm", EditRoom.Name ?? $"{L["RoomLabel"]} {EditRoom.Number}"]</p>
     </ChildContent>
 </ConfirmationModal>
 

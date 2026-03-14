@@ -2,29 +2,30 @@
 @using BioscoopCasus.Web.Components
 @inject MoviesOverviewService MoviesOverviewService
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Home</PageTitle>
+<PageTitle>@L["HomeTitle"]</PageTitle>
 
 <TerminalShell>
     <div class="terminal-header">
-        <h1>Polo's Cinema Paradise Breda</h1>
+        <h1>@L["AppTitle"]</h1>
     </div>
 
     <div class="column">
-        <h3>Upcoming Showings</h3>
-        <p class="placeholder-text">No shows found...</p>
-        <TerminalButton Href="/films" Text="All Showings" IsPrimary="true" />
+        <h3>@L["UpcomingShowings"]</h3>
+        <p class="placeholder-text">@L["NoShowsFound"]</p>
+        <TerminalButton Href="/films" Text="@L["AllShowings"]" IsPrimary="true" />
     </div>
 
     <div class="column">
-        <h3>Latest Movies</h3>
+        <h3>@L["LatestMovies"]</h3>
         @if (_movies == null)
         {
-            <p class="empty-message">Loading...</p>
+            <p class="empty-message">@L["Loading"]</p>
         }
         else if (!_movies.Any())
         {
-            <p class="placeholder-text">No movies found...</p>
+            <p class="placeholder-text">@L["NoMoviesFound"]</p>
         }
         else
         {
@@ -36,19 +37,19 @@
                         <div class="movie-card-info">
                             <h3>@movie.Title</h3>
                             <p class="movie-genres">@movie.Genres</p>
-                            <p class="movie-duration">@movie.DurationMinutes minuten</p>
+                            <p class="movie-duration">@movie.DurationMinutes @L["MinutesSuffix"]</p>
                         </div>
                     </div>
                 }
 
             </div>
         }
-        <TerminalButton Href="/movies" Text="All Movies" IsPrimary="true" />
+        <TerminalButton Href="/movies" Text="@L["AllMovies"]" IsPrimary="true" />
     </div>
 
     <div class="column">
-        <h3>Print Ticket</h3>
-        <TerminalButton Href="/ticketprint" Text="Print your ticket" IsPrimary="true" />
+        <h3>@L["PrintTicket"]</h3>
+        <TerminalButton Href="/ticketprint" Text="@L["PrintYourTicket"]" IsPrimary="true" />
     </div>
 
     <div class="admin-login-wrapper">

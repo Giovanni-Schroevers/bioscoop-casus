@@ -2,14 +2,15 @@
 @inject MoviesOverviewService MoviesOverviewService
 @inject NavigationManager NavigationManager
 @using BioscoopCasus.Web.Layout
+@inject IStringLocalizer<SharedResource> L
 
 <TerminalShell>
 <div class="movies-page">
     <button class="return-button" @onclick="@(() => NavigationManager.NavigateTo("/"))">
-        <span class="return-button-icon">←</span>
-        <span>Terug naar home</span>
+        <span class="return-button-icon">&larr;</span>
+        <span>@L["BackToHome"]</span>
     </button>
-    <h1>Films</h1>
+    <h1>@L["MoviesTitle"]</h1>
 
     <select class="day-select" @onchange="OnDayChanged">
         @foreach (var day in _availableDays)
@@ -20,11 +21,11 @@
 
     @if (_movies == null)
     {
-        <p class="empty-message">Loading...</p>
+        <p class="empty-message">@L["Loading"]</p>
     }
     else if (!_movies.Any())
     {
-        <p class="empty-message">Geen films beschikbaar voor deze dag.</p>
+        <p class="empty-message">@L["NoMoviesForDay"]</p>
     }
     else
     {
@@ -36,8 +37,8 @@
                     <div class="movie-card-info">
                         <h3>@movie.Title</h3>
                         <p class="movie-genres">@movie.Genres</p>
-                        <p class="movie-duration">@movie.DurationMinutes minuten</p>
-                        <p class="showtime-label">Tijden</p>
+                        <p class="movie-duration">@movie.DurationMinutes @L["MinutesSuffix"]</p>
+                        <p class="showtime-label">@L["ShowtimesLabel"]</p>
                         <div class="showtimes">
                             @foreach (var showtime in movie.Showtimes)
                             {
@@ -95,4 +96,3 @@
         NavigationManager.NavigateTo($"/movies/{movieId.ToString()}/ticketsale/{showtimeId.ToString()}");
     }
 }
-

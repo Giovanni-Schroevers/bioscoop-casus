@@ -1,7 +1,8 @@
-﻿@page "/movies/{movieId}"
+@page "/movies/{movieId}"
 @using BioscoopCasus.Web.Components
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>@(_movieInfo?.Title ?? "Film")</PageTitle>
+<PageTitle>@(_movieInfo?.Title ?? L["MovieFallbackTitle"])</PageTitle>
 
 @inject MovieInformationService MovieInformationService
 @inject NavigationManager NavigationManager
@@ -9,17 +10,17 @@
 <div class="movies-page">
 <div class="movie-details-wrapper">
     <button class="return-button" @onclick="GoBackToOverview">
-        <span class="return-button-icon">←</span>
-        <span>Terug naar films</span>
+        <span class="return-button-icon">&larr;</span>
+        <span>@L["BackToMovies"]</span>
     </button>
     @if (_isLoading)
     {
-        <p class="empty-message">Loading...</p>
+        <p class="empty-message">@L["Loading"]</p>
     }
     else if (_movieInfo == null)
     {
         <p class="empty-message">
-            Movie information could not be found. Please try again later.
+            @L["MovieInfoNotFound"]
         </p>
     }
     else
@@ -34,31 +35,31 @@
 
                 <div class="movie-meta">
                     <span class="meta-badge">@_movieInfo.Genres</span>
-                    <span class="meta-badge">@_movieInfo.DurationMinutes minuten</span>
-                    <span class="meta-badge">Leeftijd: @_movieInfo.AgeRating+</span>
+                    <span class="meta-badge">@_movieInfo.DurationMinutes @L["MinutesSuffix"]</span>
+                    <span class="meta-badge">@L["AgeLabel"]: @_movieInfo.AgeRating+</span>
                 </div>
 
                 <div class="movie-section">
-                    <h3>Beschrijving</h3>
+                    <h3>@L["Description"]</h3>
                     <p>@_movieInfo.Description</p>
                 </div>
 
                 <div class="movie-section">
-                    <h3>Acteurs</h3>
+                    <h3>@L["Actors"]</h3>
                     <p>@_movieInfo.Actors</p>
                 </div>
 
                 @if (!string.IsNullOrWhiteSpace(_movieInfo.TrailerUrl))
                 {
                     <div class="movie-section">
-                        <h3>Trailer</h3>
+                        <h3>@L["Trailer"]</h3>
 
                         @if (TrailerEmbedUrl != null)
                         {
                             <div class="trailer-container">
                                 <iframe
                                     src="@TrailerEmbedUrl"
-                                    title="Movie Trailer"
+                                    title="@L["MovieTrailerTitle"]"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowfullscreen>
                                 </iframe>
@@ -70,7 +71,7 @@
                                href="@_movieInfo.TrailerUrl"
                                target="_blank"
                                rel="noopener noreferrer">
-                                Bekijk de trailer
+                                @L["WatchTrailer"]
                             </a>
                         }
                     </div>

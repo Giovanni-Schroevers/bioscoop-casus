@@ -1,6 +1,8 @@
+@inject IStringLocalizer<SharedResource> L
+
 @if (Visible)
 {
-    <TerminalModal Visible="Visible" Title="@Title" OnClose="OnCancel">
+    <TerminalModal Visible="Visible" Title="@EffectiveTitle" OnClose="OnCancel">
         <ChildContent>
             <div class="confirmation-view">
                 <div class="warning-box">
@@ -10,14 +12,14 @@
                     }
                     else
                     {
-                        <p>@Message</p>
+                        <p>@EffectiveMessage</p>
                     }
                 </div>
             </div>
         </ChildContent>
         <Footer>
-            <FormButton IsPrimary="false" Text="Cancel" OnClick="OnCancel" />
-            <FormButton IsPrimary="true" Text="@ConfirmText" OnClick="OnConfirm" />
+            <FormButton IsPrimary="false" Text="@L["Cancel"]" OnClick="OnCancel" />
+            <FormButton IsPrimary="true" Text="@EffectiveConfirmText" OnClick="OnConfirm" />
         </Footer>
     </TerminalModal>
 }
@@ -38,10 +40,19 @@
 
 @code {
     [Parameter] public bool Visible { get; set; }
-    [Parameter] public string Title { get; set; } = "Confirm";
-    [Parameter] public string Message { get; set; } = "Are you sure?";
-    [Parameter] public string ConfirmText { get; set; } = "Confirm";
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public string? ConfirmText { get; set; }
     [Parameter] public EventCallback OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string EffectiveTitle =>
+        string.IsNullOrWhiteSpace(Title) ? L["Confirm"] : Title;
+
+    private string EffectiveMessage =>
+        string.IsNullOrWhiteSpace(Message) ? L["AreYouSure"] : Message;
+
+    private string EffectiveConfirmText =>
+        string.IsNullOrWhiteSpace(ConfirmText) ? L["Confirm"] : ConfirmText;
 }

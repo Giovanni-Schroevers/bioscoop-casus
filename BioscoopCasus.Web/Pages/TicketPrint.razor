@@ -1,8 +1,9 @@
 @page "/TicketPrint/{ReservationId:int}"
 @inject ReservationService ReservationService
 @inject QrCodeHelper QrCodeHelper
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Ticket</PageTitle>
+<PageTitle>@L["TicketTitle"]</PageTitle>
 
 @if (_isLoading)
 {
@@ -11,7 +12,7 @@
 else if (_reservation is null)
 {
     <div class="alert alert-danger mt-5" role="alert">
-        Reservation not found.
+        @L["ReservationNotFound"]
     </div>
 }
 else if (_isExpired)
@@ -20,12 +21,12 @@ else if (_isExpired)
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
                 <div class="alert alert-warning" role="alert">
-                    <h4 class="alert-heading">Ticket no longer available</h4>
-                    <p>This ticket can no longer be viewed because the movie has already started.</p>
+                    <h4 class="alert-heading">@L["TicketExpiredTitle"]</h4>
+                    <p>@L["TicketExpiredMessage"]</p>
                     <hr>
                     <p class="mb-0">
-                        <strong>Movie:</strong> @_reservation.MovieTitle<br>
-                        <strong>Start time:</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'at' HH:mm")
+                        <strong>@L["MovieLabel"]</strong> @_reservation.MovieTitle<br>
+                        <strong>@L["StartTimeLabel"]</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy HH:mm")
                     </p>
                 </div>
             </div>
@@ -39,38 +40,38 @@ else
             <div class="col-md-8 col-lg-6">
                 <div class="card shadow">
                     <div class="card-body p-4">
-                        <h2 class="card-title mb-4 text-center">Cinema Ticket</h2>
+                        <h2 class="card-title mb-4 text-center">@L["CinemaTicketTitle"]</h2>
 
                         <div class="mb-3">
-                            <strong>Movie:</strong> @_reservation.MovieTitle
+                            <strong>@L["MovieLabel"]</strong> @_reservation.MovieTitle
                         </div>
 
                         <div class="mb-3">
-                            <strong>Room:</strong> @_reservation.RoomName
+                            <strong>@L["RoomLabel"]</strong> @_reservation.RoomName
                         </div>
 
                         <div class="mb-3">
-                            <strong>Time:</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy 'at' HH:mm")
+                            <strong>@L["TimeLabel"]</strong> @_reservation.Showtime.StartTime.ToString("dddd, dd MMMM, yyyy HH:mm")
                         </div>
 
                         <div class="mb-3">
-                            <strong>Seats:</strong>
+                            <strong>@L["SeatsLabel"]</strong>
                             <ul class="mb-0">
                                 @foreach (var rowGroup in _reservation.Seats.GroupBy(s => s.Row).OrderBy(g => g.Key))
                                 {
                                     <li>
-                                        Row @rowGroup.Key: @string.Join(", ", rowGroup.OrderBy(s => s.SeatNumber).Select(s => $"Seat {s.SeatNumber}"))
+                                        @L["RowSeatList", rowGroup.Key, string.Join(", ", rowGroup.OrderBy(s => s.SeatNumber).Select(s => string.Format(L["SeatNumber"], s.SeatNumber)))]
                                     </li>
                                 }
                             </ul>
                         </div>
 
                         <div class="text-center my-4">
-                            <img src="data:image/png;base64,@_qrCodeImage" alt="QR Code" class="img-fluid" style="max-width: 300px;" />
+                            <img src="data:image/png;base64,@_qrCodeImage" alt="@L["QrCodeAlt"]" class="img-fluid" style="max-width: 300px;" />
                         </div>
 
                         <div class="text-center">
-                            <p class="mb-0"><strong>Ticket Code:</strong></p>
+                            <p class="mb-0"><strong>@L["TicketCodeLabel"]</strong></p>
                             <p class="font-monospace">@_qrCodeText</p>
                         </div>
                     </div>

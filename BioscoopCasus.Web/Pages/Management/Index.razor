@@ -6,46 +6,47 @@
 @inject ShowtimeService ShowtimeService
 @inject NavigationManager NavigationManager
 @using BioscoopCasus.Web.Components
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Management Dashboard</PageTitle>
+<PageTitle>@L["ManagementDashboardTitle"]</PageTitle>
 
 <div class="management-container">
     <div class="utility-bar">
-        <FormButton IsPrimary="false" Text="Log Out" OnClick="HandleLogout" CssClass="logout-btn" />
+        <FormButton IsPrimary="false" Text="@L["LogOut"]" OnClick="HandleLogout" CssClass="logout-btn" />
     </div>
 
     <header class="management-header">
-        <h1>Management Dashboard</h1>
-        <p class="subtitle">Manage your cinema, movies and showtimes.</p>
+        <h1>@L["ManagementDashboardTitle"]</h1>
+        <p class="subtitle">@L["ManagementDashboardSubtitle"]</p>
     </header>
 
     <div class="nav-grid">
         <a href="/management/movies" class="nav-card">
-            <div class="card-icon">🎬</div>
+            <div class="card-icon">&#127916;</div>
             <div class="card-info">
-                <h3>Movies</h3>
-                <p>Manage the movie collection</p>
+                <h3>@L["MoviesNavTitle"]</h3>
+                <p>@L["MoviesNavDesc"]</p>
             </div>
         </a>
         <a href="/management/rooms" class="nav-card">
-            <div class="card-icon">🛋️</div>
+            <div class="card-icon">&#128715;</div>
             <div class="card-info">
-                <h3>Rooms</h3>
-                <p>Configure the cinema rooms</p>
+                <h3>@L["RoomsNavTitle"]</h3>
+                <p>@L["RoomsNavDesc"]</p>
             </div>
         </a>
     </div>
 
     <div class="timeline-section">
         <div class="section-header">
-            <h2>Dagschema</h2>
+            <h2>@L["DaySchedule"]</h2>
             <div class="header-actions">
                 <div class="date-picker-wrapper">
                     <select class="date-select" @onchange="OnDateChanged">
                         @foreach (var date in AvailableDates)
                         {
                             <option value="@date.ToString("yyyy-MM-dd")" selected="@(date.Date == SelectedDate.Date)">
-                                @(date.Date == DateTime.Today ? "Vandaag" : date.ToString("dddd d MMMM"))
+                                @(date.Date == DateTime.Today ? L["Today"] : date.ToString("dddd d MMMM"))
                             </option>
                         }
                     </select>
@@ -55,7 +56,7 @@
                         </svg>
                     </div>
                 </div>
-                <FormButton IsPrimary="true" Text="Nieuwe Voorstelling" OnClick="OnAddShowClick" CssClass="add-show-btn" />
+                <FormButton IsPrimary="true" Text="@L["NewShow"]" OnClick="OnAddShowClick" CssClass="add-show-btn" />
             </div>
         </div>
 
@@ -63,7 +64,7 @@
         {
             <div class="loading-state">
                 <span class="loading-spinner"></span>
-                <p>Schema laden...</p>
+                <p>@L["ScheduleLoading"]</p>
             </div>
         }
         else
@@ -79,7 +80,7 @@
                 <div class="timeline-grid">
                     @if (!Rooms.Any())
                     {
-                        <div class="empty-state">Geen zalen gevonden.</div>
+                        <div class="empty-state">@L["NoRoomsFound"]</div>
                     }
                     else
                     {
@@ -88,7 +89,7 @@
                             var roomShowtimes = Showtimes.Where(s => s.RoomId == room.Id).ToList();
                             <div class="timeline-row">
                                 <div class="room-label">
-                                    <span class="room-num">Zaal @room.Number</span>
+                                    <span class="room-num">@L["RoomNumber", room.Number]</span>
                                     <span class="room-name">@room.Name</span>
                                 </div>
                                 <div class="slots-container" @onclick="(e) => OnTimelineClick(e, room)">
@@ -121,7 +122,7 @@
     @if (_showModal)
     {
         var movie = Movies.FirstOrDefault(m => m.Id == (_isCreating ? _selectedMovieId : (_selectedShowtime?.MovieId ?? 0)));
-        <TerminalModal Visible="_showModal" Title="@(_isCreating ? "Nieuwe Voorstelling" : (movie?.Title ?? "Voorstelling"))" OnClose="CloseModal">
+        <TerminalModal Visible="_showModal" Title="@(_isCreating ? L["NewShowTitle"] : (movie?.Title ?? L["ShowTitleFallback"]))" OnClose="CloseModal">
             <ChildContent>
                 @if (_showConfirmation)
                 {
@@ -136,40 +137,38 @@
                                     <line x1="12" y1="9" x2="12" y2="13"></line>
                                     <line x1="12" y1="17" x2="12.01" y2="17"></line>
                                 </svg>
-                                <h3>Belangrijke waarschuwing!</h3>
+                                <h3>@L["ImportantWarningTitle"]</h3>
                             </div>
-                            <p>Het wijzigen of verwijderen van een geplande voorstelling kan conflicteren met reeds verkochte
-                                tickets. Gebruikers die al een ticket hebben gekocht, kunnen hierdoor gedupeerd worden.</p>
+                            <p>@L["ShowtimeWarning"]</p>
                         </div>
-                        <p class="confirm-text">Weet u zeker dat u deze voorstelling wilt @(_isDeleting ? "verwijderen" :
-                                                "wijzigen")?</p>
+                        <p class="confirm-text">@(_isDeleting ? L["ConfirmDeleteShowtime"] : L["ConfirmEditShowtime"])</p>
                     </div>
                 }
                 else
                 {
                     <div class="edit-view">
                         <div class="form-group">
-                            <label>Starttijd</label>
+                            <label>@L["StartTimeLabel"]</label>
                             <input type="datetime-local" class="terminal-input" @bind="_editStartTime" />
                         </div>
                         <div class="form-group">
-                            <label>Zaal</label>
+                            <label>@L["RoomLabel"]</label>
                             <select class="terminal-input" @bind="_selectedRoomId">
                                 @foreach (var room in Rooms)
                                 {
-                                    <option value="@room.Id">Zaal @room.Number (@room.Name)</option>
+                                    <option value="@room.Id">@L["RoomNumber", room.Number] (@room.Name)</option>
                                 }
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Film</label>
+                            <label>@L["MovieLabel"]</label>
                             @if (_isCreating)
                             {
                                 <select class="terminal-input" @bind="_selectedMovieId">
-                                    <option value="0">Selecteer een film...</option>
+                                    <option value="0">@L["SelectMoviePlaceholder"]</option>
                                     @foreach (var terminalMovie in Movies)
                                     {
-                                        <option value="@terminalMovie.Id">@terminalMovie.Title (@terminalMovie.DurationMinutes min)</option>
+                                        <option value="@terminalMovie.Id">@terminalMovie.Title (@terminalMovie.DurationMinutes @L["MinutesSuffixShort"])</option>
                                     }
                                 </select>
                             }
@@ -184,18 +183,18 @@
             <Footer>
                 @if (_showConfirmation)
                 {
-                    <FormButton IsPrimary="false" Text="Terug" OnClick="() => _showConfirmation = false" />
-                    <FormButton IsPrimary="true" Text="Ik begrijp het, bevestig" OnClick="ExecuteConfirmedAction" />
+                    <FormButton IsPrimary="false" Text="@L["Back"]" OnClick="() => _showConfirmation = false" />
+                    <FormButton IsPrimary="true" Text="@L["IUnderstandConfirm"]" OnClick="ExecuteConfirmedAction" />
                 }
                 else
                 {
                     @if (!_isCreating)
                     {
-                        <FormButton IsPrimary="false" Text="Verwijderen" OnClick="() => PromptConfirmation(true)"
+                        <FormButton IsPrimary="false" Text="@L["Delete"]" OnClick="() => PromptConfirmation(true)"
                             CssClass="delete-btn" />
                     }
                     <div style="flex-grow: 1"></div>
-                    <FormButton IsPrimary="true" Text="@(_isCreating ? "Toevoegen" : "Opslaan")" OnClick="() => HandleSaveClick()" />
+                    <FormButton IsPrimary="true" Text="@(_isCreating ? L["Add"] : L["Save"])" OnClick="() => HandleSaveClick()" />
                 }
             </Footer>
         </TerminalModal>

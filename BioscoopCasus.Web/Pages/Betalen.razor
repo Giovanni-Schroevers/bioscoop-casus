@@ -1,16 +1,17 @@
 @page "/betalen"
+@inject IStringLocalizer<SharedResource> L
 
 <div class="betalen-page">
     @if (!IsPaid)
     {
-        <h1>Betaling</h1>
-        <p class="betalen-info">iDEAL/Wero betaling simulatie</p>
-        <button class="betalen-button" @onclick="Pay">Betaal nu</button>
+        <h1>@L["PaymentTitle"]</h1>
+        <p class="betalen-info">@L["PaymentSimulation"]</p>
+        <button class="betalen-button" @onclick="Pay">@L["PayNow"]</button>
     }
     else
     {
-        <h1>Betaling Geslaagd</h1>
-        <p class="betalen-info">Venster mag gesloten worden</p>
+        <h1>@L["PaymentSuccessTitle"]</h1>
+        <p class="betalen-info">@L["PaymentWindowClose"]</p>
     }
 </div>
 @code {

@@ -1,0 +1,67 @@
+@using System.Globalization
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<div class="language-switcher">
+    <button class="language-button" type="button" @onclick="Toggle">
+        <span class="language-label">@CurrentLanguageLabel</span>
+    </button>
+
+    @if (_isOpen)
+    {
+        <div class="language-overlay" @onclick="Close">
+            <div class="language-panel" @onclick:stopPropagation="true">
+                <div class="language-header">
+                    <span>Language</span>
+                    <button class="language-close" type="button" @onclick="Close" aria-label="Close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="language-options">
+                    <button class="language-option @(IsCurrent("en-US") ? "active" : string.Empty)"
+                            type="button"
+                            @onclick="@(() => SetCulture("en-US"))">
+                        <span class="language-code">EN</span>
+                        <span class="language-name">English</span>
+                    </button>
+                    <button class="language-option @(IsCurrent("nl-NL") ? "active" : string.Empty)"
+                            type="button"
+                            @onclick="@(() => SetCulture("nl-NL"))">
+                        <span class="language-code">NL</span>
+                        <span class="language-name">Nederlands</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isOpen;
+
+    private string CurrentLanguageLabel =>
+        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant();
+
+    private void Toggle()
+    {
+        _isOpen = !_isOpen;
+    }
+
+    private void Close()
+    {
+        _isOpen = false;
+    }
+
+    private bool IsCurrent(string culture) =>
+        string.Equals(CultureInfo.CurrentUICulture.Name, culture, StringComparison.OrdinalIgnoreCase);
+
+    private async Task SetCulture(string culture)
+    {
+        await JS.InvokeVoidAsync("blazorCulture.set", culture);
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+}

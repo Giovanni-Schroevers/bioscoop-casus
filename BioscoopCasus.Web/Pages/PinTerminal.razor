@@ -4,14 +4,15 @@
 @using System.Globalization
 @inject PaymentService PaymentService
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 
 <div class="pin-page">
-    <h1>Betaling</h1>
+    <h1>@L["PaymentTitle"]</h1>
 
     @if (TotalPriceCents > 0)
     {
         <div class="amount-display">
-            <span class="amount-label">Te betalen</span>
+            <span class="amount-label">@L["AmountDue"]</span>
             <span class="amount-value">@TotalPriceFormatted</span>
         </div>
     }
@@ -20,7 +21,7 @@
     {
         <div class="payment-options">
             <div class="pin-section">
-                <h2>PIN</h2>
+                <h2>@L["PinTitle"]</h2>
 
                 <div class="pin-display">
                     @for (int i = 0; i < 4; i++)
@@ -43,24 +44,24 @@
             </div>
 
             <div class="qr-section">
-                <h2>QR Betaling</h2>
-                <p class="qr-info">Scan de QR-code om te betalen via iDEAL/Wero</p>
+                <h2>@L["QrPaymentTitle"]</h2>
+                <p class="qr-info">@L["QrPaymentInfo"]</p>
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://localhost:5158/betalen" 
-                     alt="QR Code" />
+                     alt="@L["QrCodeAlt"]" />
             </div>
         </div>
     }
     else
     {
         <div class="payment-success">
-            <div class="success-icon">✓</div>
-            <h2>Betaling geslaagd!</h2>
+            <div class="success-icon">&#10003;</div>
+            <h2>@L["PaymentSuccessTitle"]</h2>
             @if (TotalPriceCents > 0)
             {
-                <p>@TotalPriceFormatted betaald.</p>
+                <p>@L["AmountPaid", TotalPriceFormatted]</p>
             }
-            <p class="success-sub">Bedankt voor uw aankoop. Geniet van de film!</p>
-            <button class="home-button" @onclick="GoHome">Terug naar films</button>
+            <p class="success-sub">@L["PaymentThanks"]</p>
+            <button class="home-button" @onclick="GoHome">@L["BackToMovies"]</button>
         </div>
     }
 
@@ -137,7 +138,7 @@
     private bool _paymentDone;
 
     private string TotalPriceFormatted =>
-        (TotalPriceCents / 100m).ToString("C", new CultureInfo("nl-NL"));
+        (TotalPriceCents / 100m).ToString("C", CultureInfo.CurrentCulture);
 
     private void AddDigit(string digit)
     {
@@ -158,7 +159,7 @@
     {
         if (EnteredPin.Length != 4)
         {
-            Message = "Voer 4 cijfers in";
+            Message = L["EnterFourDigits"];
             IsSuccess = false;
             return;
         }
@@ -173,7 +174,7 @@
         }
         else
         {
-            Message = "Ongeldige pincode, probeer opnieuw";
+            Message = L["InvalidPinTryAgain"];
         }
     }
 

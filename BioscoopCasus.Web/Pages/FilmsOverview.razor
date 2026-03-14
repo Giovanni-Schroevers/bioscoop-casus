@@ -2,25 +2,26 @@
 @inject FilmsOverviewService FilmsOverviewService
 @inject NavigationManager NavigationManager
 @using BioscoopCasus.Web.Layout
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Films</PageTitle>
+<PageTitle>@L["FilmsTitle"]</PageTitle>
 
 <TerminalShell>
 <div class="films-page">
     <button class="return-button" @onclick="@(() => NavigationManager.NavigateTo("/"))">
-        <span class="return-button-icon">←</span>
-        <span>Terug naar home</span>
+        <span class="return-button-icon">&larr;</span>
+        <span>@L["BackToHome"]</span>
     </button>
 
-    <h1>Aankomende voorstellingen</h1>
+    <h1>@L["UpcomingShowingsTitle"]</h1>
 
     @if (_films == null)
     {
-        <p class="empty-message">Loading...</p>
+        <p class="empty-message">@L["Loading"]</p>
     }
     else if (!_films.Any())
     {
-        <p class="empty-message">Geen aankomende voorstellingen gevonden.</p>
+        <p class="empty-message">@L["NoUpcomingShowings"]</p>
     }
     else
     {
@@ -32,7 +33,7 @@
                     <div class="film-card-info">
                         <h3>@film.Title</h3>
                         <p class="film-genres">@film.Genres</p>
-                        <p class="film-duration">@film.DurationMinutes minuten</p>
+                        <p class="film-duration">@film.DurationMinutes @L["MinutesSuffix"]</p>
                         <span class="film-showtime">@film.StartTime.ToString("dddd dd MMM, HH:mm")</span>
                     </div>
                 </div>

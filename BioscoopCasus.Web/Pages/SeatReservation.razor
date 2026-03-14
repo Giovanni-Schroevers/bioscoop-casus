@@ -2,15 +2,16 @@
 @page "/seat-reservation/{MovieId}/{ShowtimeId}/{TotalTickets:int}/{TotalPriceCents:int}"
 @inject SeatSelectionService SeatSelectionService
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 
-<h1>Stoelkeuze</h1>
+<h1>@L["SeatSelectionTitle"]</h1>
 
 @* Only show movie grid when navigated to standalone (no params passed) *@
 @if (!_cameFromTicketSale)
 {
 @if (Movies == null)
 {
-<p>Loading movies...</p>
+<p>@L["LoadingMovies"]</p>
 }
 else
 {
@@ -29,7 +30,7 @@ else
 @if (ConfirmationResult != null)
 {
 <div class="success">
-    Reservering gelukt! ID: @ConfirmationResult.ReservationId
+    @L["ReservationSuccess", ConfirmationResult.ReservationId]
 </div>
 }
 
@@ -40,11 +41,11 @@ else
 <div class="modal-overlay">
     <div class="modal">
 
-        <h2>Kies een tijd</h2>
+        <h2>@L["ChooseTime"]</h2>
 
         @if (Showtimes == null)
         {
-        <p>Loading...</p>
+        <p>@L["Loading"]</p>
         }
         else
         {
@@ -52,12 +53,12 @@ else
         {
         <div class="showtime"
              @onclick="() => SelectShowtime(showtime)">
-            @showtime.StartTime.ToString("dd/MM HH:mm") - Zaal @showtime.RoomId
+            @showtime.StartTime.ToString("dd/MM HH:mm") - @L["RoomNumber", showtime.RoomId]
         </div>
         }
         }
 
-        <button @onclick="CloseShowtimeModal">Sluiten</button>
+        <button @onclick="CloseShowtimeModal">@L["Close"]</button>
 
     </div>
 </div>
@@ -70,20 +71,19 @@ else
 <div class="modal-overlay">
     <div class="modal">
 
-        <h2>Aantal personen</h2>
+        <h2>@L["GroupSizeTitle"]</h2>
 
         @if (_cameFromTicketSale)
         {
         <p class="group-size-info">
-            Je hebt <strong>@GroupSize ticket(s)</strong> geselecteerd.
-            Kies <strong>@GroupSize stoel(en)</strong>.
+            @L["GroupSizeInfo", GroupSize]
         </p>
         }
 
         <input type="number" min="1" max="20" @bind="GroupSize"
                disabled="@_cameFromTicketSale" />
 
-        <button @onclick="ConfirmGroupSize">Verder</button>
+        <button @onclick="ConfirmGroupSize">@L["Continue"]</button>
 
     </div>
 </div>
@@ -96,35 +96,35 @@ else
 <div class="modal-overlay">
     <div class="modal large">
 
-        <h2>Kies je stoelen</h2>
+        <h2>@L["ChooseSeatsTitle"]</h2>
         <p class="seats-subtitle">
-            Selecteer <strong>@GroupSize stoel(en)</strong>
+            @L["SelectSeatsCount", GroupSize]
             @if (_selectedMovieTitle != null)
             {
-            <span> voor <em>@_selectedMovieTitle</em></span>
+            <span> @L["ForMovie", _selectedMovieTitle]</span>
             }
             @if (_selectedShowtimeDisplay != null)
             {
-            <span> — @_selectedShowtimeDisplay</span>
+            <span> - @_selectedShowtimeDisplay</span>
             }
         </p>
 
         @if (IsLoadingSeats)
         {
-        <p>Stoelen laden...</p>
+        <p>@L["SeatsLoading"]</p>
         }
         else if (AllSeats == null || !AllSeats.Any())
         {
-        <p>Geen stoelen beschikbaar voor dit tijdstip.</p>
+        <p>@L["NoSeatsAvailableForShowtime"]</p>
         }
         else
         {
-        <div class="screen">SCHERM</div>
+        <div class="screen">@L["ScreenLabel"]</div>
 
         <div class="seats-legend">
-            <span class="legend-item"><span class="dot available"></span> Beschikbaar</span>
-            <span class="legend-item"><span class="dot occupied"></span> Bezet</span>
-            <span class="legend-item"><span class="dot selected"></span> Geselecteerd</span>
+            <span class="legend-item"><span class="dot available"></span> @L["LegendAvailable"]</span>
+            <span class="legend-item"><span class="dot occupied"></span> @L["LegendOccupied"]</span>
+            <span class="legend-item"><span class="dot selected"></span> @L["LegendSelected"]</span>
         </div>
 
         <div class="seats-grid">
@@ -133,7 +133,7 @@ else
             {
             <div class="row">
 
-                <div class="row-label">Rij @row</div>
+                <div class="row-label">@L["RowLabel", row]</div>
 
                 @for (int seat = 1; seat <= MaxSeat; seat++)
                 {
@@ -146,7 +146,7 @@ else
                 var seatClass = GetSeatClass(seatInfo, isSelected);
 
                 <div class="seat @seatClass"
-                     title="Rij @row, Stoel @seat"
+                     title="@L["SeatTitle", row, seat]"
                      @onclick="() => ToggleSeatSelection(seatInfo)">
                     @seat
                 </div>
@@ -165,12 +165,12 @@ else
 
         <div class="modal-actions">
             <button class="cancel-button" @onclick="() => ShowSeatsModal = false">
-                Annuleren
+                @L["Cancel"]
             </button>
             <button class="confirm-button"
                     disabled="@(SelectedSeatIds.Count != GroupSize)"
                     @onclick="ConfirmReservation">
-                Bevestigen (@SelectedSeatIds.Count / @GroupSize)
+                @L["ConfirmSeatCount", SelectedSeatIds.Count, GroupSize]
             </button>
         </div>
 
@@ -462,7 +462,7 @@ ShowGroupSizeModal = true;
 }
 
 
-// ── Standalone flow ────────────────────────────────────────────────────────
+// Standalone flow
 
 async Task SelectMovie(MovieResponseDto movie)
 {
@@ -486,7 +486,7 @@ ShowGroupSizeModal = true;
 }
 
 
-// ── Shared flow ────────────────────────────────────────────────────────────
+// Shared flow
 
 async Task ConfirmGroupSize()
 {
@@ -550,7 +550,7 @@ else
 {
 if (SelectedSeatIds.Count >= GroupSize)
 {
-_seatSelectionError = $"Je kunt maximaal {GroupSize} stoel(en) kiezen.";
+_seatSelectionError = L["MaxSeatsError", GroupSize];
 return;
 }
 SelectedSeatIds.Add(seat.Id);

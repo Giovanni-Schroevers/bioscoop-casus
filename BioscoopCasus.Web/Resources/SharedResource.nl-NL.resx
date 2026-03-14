@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTitle" xml:space="preserve">
+    <value>Polo's Cinema Paradise Breda</value>
+  </data>
+  <data name="UpcomingShowings" xml:space="preserve">
+    <value>Aankomende voorstellingen</value>
+  </data>
+  <data name="NoShowsFound" xml:space="preserve">
+    <value>Geen voorstellingen gevonden...</value>
+  </data>
+  <data name="AllShowings" xml:space="preserve">
+    <value>Alle voorstellingen</value>
+  </data>
+  <data name="LatestMovies" xml:space="preserve">
+    <value>Nieuwste films</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Laden...</value>
+  </data>
+  <data name="NoMoviesFound" xml:space="preserve">
+    <value>Geen films gevonden...</value>
+  </data>
+  <data name="MinutesSuffix" xml:space="preserve">
+    <value>minuten</value>
+  </data>
+  <data name="AllMovies" xml:space="preserve">
+    <value>Alle films</value>
+  </data>
+  <data name="PrintTicket" xml:space="preserve">
+    <value>Ticket afdrukken</value>
+  </data>
+  <data name="PrintYourTicket" xml:space="preserve">
+    <value>Druk je ticket af</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Taal</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Engels</value>
+  </data>
+  <data name="Dutch" xml:space="preserve">
+    <value>Nederlands</value>
+  </data>
+  <data name="NotAuthorizedTitle" xml:space="preserve">
+    <value>Je bent niet gemachtigd om deze sectie te bekijken.</value>
+  </data>
+  <data name="NotAuthorizedMessage" xml:space="preserve">
+    <value>Log eerst in als beheerder.</value>
+  </data>
+  <data name="PaymentTitle" xml:space="preserve">
+    <value>Betaling</value>
+  </data>
+  <data name="PaymentSimulation" xml:space="preserve">
+    <value>iDEAL/Wero betaling simulatie</value>
+  </data>
+  <data name="PayNow" xml:space="preserve">
+    <value>Betaal nu</value>
+  </data>
+  <data name="PaymentSuccessTitle" xml:space="preserve">
+    <value>Betaling geslaagd</value>
+  </data>
+  <data name="PaymentWindowClose" xml:space="preserve">
+    <value>Venster mag gesloten worden</value>
+  </data>
+  <data name="FilmsTitle" xml:space="preserve">
+    <value>Voorstellingen</value>
+  </data>
+  <data name="BackToHome" xml:space="preserve">
+    <value>Terug naar home</value>
+  </data>
+  <data name="UpcomingShowingsTitle" xml:space="preserve">
+    <value>Aankomende voorstellingen</value>
+  </data>
+  <data name="NoUpcomingShowings" xml:space="preserve">
+    <value>Geen aankomende voorstellingen gevonden.</value>
+  </data>
+  <data name="AdminAccessTitle" xml:space="preserve">
+    <value>Beheerders toegang</value>
+  </data>
+  <data name="AdminAccessSubtitle" xml:space="preserve">
+    <value>Voer je wachtwoord in om de bioscoop te beheren.</value>
+  </data>
+  <data name="PasswordLabel" xml:space="preserve">
+    <value>Wachtwoord</value>
+  </data>
+  <data name="Verifying" xml:space="preserve">
+    <value>Controleren...</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Inloggen</value>
+  </data>
+  <data name="MovieFallbackTitle" xml:space="preserve">
+    <value>Film</value>
+  </data>
+  <data name="BackToMovies" xml:space="preserve">
+    <value>Terug naar films</value>
+  </data>
+  <data name="MovieInfoNotFound" xml:space="preserve">
+    <value>Film informatie kon niet worden gevonden. Probeer het later opnieuw.</value>
+  </data>
+  <data name="AgeLabel" xml:space="preserve">
+    <value>Leeftijd</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Beschrijving</value>
+  </data>
+  <data name="Actors" xml:space="preserve">
+    <value>Acteurs</value>
+  </data>
+  <data name="Trailer" xml:space="preserve">
+    <value>Trailer</value>
+  </data>
+  <data name="MovieTrailerTitle" xml:space="preserve">
+    <value>Film trailer</value>
+  </data>
+  <data name="WatchTrailer" xml:space="preserve">
+    <value>Bekijk de trailer</value>
+  </data>
+  <data name="MoviesTitle" xml:space="preserve">
+    <value>Films</value>
+  </data>
+  <data name="NoMoviesForDay" xml:space="preserve">
+    <value>Geen films beschikbaar voor deze dag.</value>
+  </data>
+  <data name="ShowtimesLabel" xml:space="preserve">
+    <value>Tijden</value>
+  </data>
+  <data name="BuyTicketsTitle" xml:space="preserve">
+    <value>Tickets kopen</value>
+  </data>
+  <data name="MovieInfoLoadFailed" xml:space="preserve">
+    <value>Film informatie kon niet worden geladen.</value>
+  </data>
+  <data name="TicketTypeNormal" xml:space="preserve">
+    <value>Normaal</value>
+  </data>
+  <data name="TicketTypeChild" xml:space="preserve">
+    <value>Kind</value>
+  </data>
+  <data name="TicketTypeStudent" xml:space="preserve">
+    <value>Student</value>
+  </data>
+  <data name="TicketTypeSenior" xml:space="preserve">
+    <value>65+</value>
+  </data>
+  <data name="UseVoucher" xml:space="preserve">
+    <value>Nationale Bioscoopbon gebruiken</value>
+  </data>
+  <data name="VoucherCodePlaceholder" xml:space="preserve">
+    <value>Voucher code</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Totaal</value>
+  </data>
+  <data name="ContinueToSeatSelection" xml:space="preserve">
+    <value>Doorgaan naar stoelkeuze</value>
+  </data>
+  <data name="ValidationSelectAtLeastOneTicket" xml:space="preserve">
+    <value>Kies minimaal 1 ticket.</value>
+  </data>
+  <data name="ValidationVoucherInvalidTime" xml:space="preserve">
+    <value>Bioscoopbon is niet geldig voor dit tijdstip.</value>
+  </data>
+  <data name="AmountDue" xml:space="preserve">
+    <value>Te betalen</value>
+  </data>
+  <data name="PinTitle" xml:space="preserve">
+    <value>PIN</value>
+  </data>
+  <data name="QrPaymentTitle" xml:space="preserve">
+    <value>QR betaling</value>
+  </data>
+  <data name="QrPaymentInfo" xml:space="preserve">
+    <value>Scan de QR-code om te betalen via iDEAL/Wero</value>
+  </data>
+  <data name="QrCodeAlt" xml:space="preserve">
+    <value>QR-code</value>
+  </data>
+  <data name="AmountPaid" xml:space="preserve">
+    <value>{0} betaald.</value>
+  </data>
+  <data name="PaymentThanks" xml:space="preserve">
+    <value>Bedankt voor uw aankoop. Geniet van de film!</value>
+  </data>
+  <data name="EnterFourDigits" xml:space="preserve">
+    <value>Voer 4 cijfers in</value>
+  </data>
+  <data name="InvalidPinTryAgain" xml:space="preserve">
+    <value>Ongeldige pincode, probeer opnieuw</value>
+  </data>
+  <data name="SeatSelectionTitle" xml:space="preserve">
+    <value>Stoelkeuze</value>
+  </data>
+  <data name="LoadingMovies" xml:space="preserve">
+    <value>Films laden...</value>
+  </data>
+  <data name="ReservationSuccess" xml:space="preserve">
+    <value>Reservering gelukt! ID: {0}</value>
+  </data>
+  <data name="ChooseTime" xml:space="preserve">
+    <value>Kies een tijd</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Sluiten</value>
+  </data>
+  <data name="GroupSizeTitle" xml:space="preserve">
+    <value>Aantal personen</value>
+  </data>
+  <data name="GroupSizeInfo" xml:space="preserve">
+    <value>Je hebt {0} ticket(s) geselecteerd. Kies {0} stoel(en).</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Verder</value>
+  </data>
+  <data name="ChooseSeatsTitle" xml:space="preserve">
+    <value>Kies je stoelen</value>
+  </data>
+  <data name="SelectSeatsCount" xml:space="preserve">
+    <value>Selecteer {0} stoel(en)</value>
+  </data>
+  <data name="ForMovie" xml:space="preserve">
+    <value>voor {0}</value>
+  </data>
+  <data name="SeatsLoading" xml:space="preserve">
+    <value>Stoelen laden...</value>
+  </data>
+  <data name="NoSeatsAvailableForShowtime" xml:space="preserve">
+    <value>Geen stoelen beschikbaar voor dit tijdstip.</value>
+  </data>
+  <data name="ScreenLabel" xml:space="preserve">
+    <value>SCHERM</value>
+  </data>
+  <data name="LegendAvailable" xml:space="preserve">
+    <value>Beschikbaar</value>
+  </data>
+  <data name="LegendOccupied" xml:space="preserve">
+    <value>Bezet</value>
+  </data>
+  <data name="LegendSelected" xml:space="preserve">
+    <value>Geselecteerd</value>
+  </data>
+  <data name="RowLabel" xml:space="preserve">
+    <value>Rij {0}</value>
+  </data>
+  <data name="SeatTitle" xml:space="preserve">
+    <value>Rij {0}, Stoel {1}</value>
+  </data>
+  <data name="ConfirmSeatCount" xml:space="preserve">
+    <value>Bevestigen ({0} / {1})</value>
+  </data>
+  <data name="MaxSeatsError" xml:space="preserve">
+    <value>Je kunt maximaal {0} stoel(en) kiezen.</value>
+  </data>
+  <data name="TicketTitle" xml:space="preserve">
+    <value>Ticket</value>
+  </data>
+  <data name="ReservationNotFound" xml:space="preserve">
+    <value>Reservering niet gevonden.</value>
+  </data>
+  <data name="TicketExpiredTitle" xml:space="preserve">
+    <value>Ticket niet meer beschikbaar</value>
+  </data>
+  <data name="TicketExpiredMessage" xml:space="preserve">
+    <value>Dit ticket kan niet meer worden bekeken omdat de film al is begonnen.</value>
+  </data>
+  <data name="MovieLabel" xml:space="preserve">
+    <value>Film:</value>
+  </data>
+  <data name="StartTimeLabel" xml:space="preserve">
+    <value>Starttijd:</value>
+  </data>
+  <data name="CinemaTicketTitle" xml:space="preserve">
+    <value>Bioscoop ticket</value>
+  </data>
+  <data name="RoomLabel" xml:space="preserve">
+    <value>Zaal:</value>
+  </data>
+  <data name="TimeLabel" xml:space="preserve">
+    <value>Tijd:</value>
+  </data>
+  <data name="SeatsLabel" xml:space="preserve">
+    <value>Stoelen:</value>
+  </data>
+  <data name="RowSeatList" xml:space="preserve">
+    <value>Rij {0}: {1}</value>
+  </data>
+  <data name="SeatNumber" xml:space="preserve">
+    <value>Stoel {0}</value>
+  </data>
+  <data name="TicketCodeLabel" xml:space="preserve">
+    <value>Ticketcode:</value>
+  </data>
+  <data name="EnterTicketTitle" xml:space="preserve">
+    <value>Ticket invoeren</value>
+  </data>
+  <data name="EnterQrSubtitle" xml:space="preserve">
+    <value>Voer je QR-code in om je ticket te bekijken</value>
+  </data>
+  <data name="QrCodeLabel" xml:space="preserve">
+    <value>QR-code</value>
+  </data>
+  <data name="QrCodePlaceholder" xml:space="preserve">
+    <value>Plak hier je QR-code...</value>
+  </data>
+  <data name="QrCodeHint" xml:space="preserve">
+    <value>Scan je QR-code of plak de code uit je email</value>
+  </data>
+  <data name="Validating" xml:space="preserve">
+    <value>Valideren...</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Bevestigen</value>
+  </data>
+  <data name="ErrorValidatingQrCode" xml:space="preserve">
+    <value>Er is een fout opgetreden bij het valideren van de QR-code.</value>
+  </data>
+  <data name="InvalidQrCode" xml:space="preserve">
+    <value>Ongeldige QR-code.</value>
+  </data>
+  <data name="NoReservationFound" xml:space="preserve">
+    <value>Geen reservering gevonden.</value>
+  </data>
+  <data name="NotFoundTitle" xml:space="preserve">
+    <value>Niet gevonden</value>
+  </data>
+  <data name="NotFoundMessage" xml:space="preserve">
+    <value>Sorry, de pagina die je zoekt bestaat niet.</value>
+  </data>
+  <data name="ManagementDashboardTitle" xml:space="preserve">
+    <value>Beheer dashboard</value>
+  </data>
+  <data name="LogOut" xml:space="preserve">
+    <value>Uitloggen</value>
+  </data>
+  <data name="ManagementDashboardSubtitle" xml:space="preserve">
+    <value>Beheer de bioscoop, films en voorstellingen.</value>
+  </data>
+  <data name="MoviesNavTitle" xml:space="preserve">
+    <value>Films</value>
+  </data>
+  <data name="MoviesNavDesc" xml:space="preserve">
+    <value>Beheer de film collectie</value>
+  </data>
+  <data name="RoomsNavTitle" xml:space="preserve">
+    <value>Zalen</value>
+  </data>
+  <data name="RoomsNavDesc" xml:space="preserve">
+    <value>Beheer de bioscoopzalen</value>
+  </data>
+  <data name="DaySchedule" xml:space="preserve">
+    <value>Dagschema</value>
+  </data>
+  <data name="Today" xml:space="preserve">
+    <value>Vandaag</value>
+  </data>
+  <data name="NewShow" xml:space="preserve">
+    <value>Nieuwe voorstelling</value>
+  </data>
+  <data name="ScheduleLoading" xml:space="preserve">
+    <value>Schema laden...</value>
+  </data>
+  <data name="NoRoomsFound" xml:space="preserve">
+    <value>Geen zalen gevonden.</value>
+  </data>
+  <data name="NewShowTitle" xml:space="preserve">
+    <value>Nieuwe voorstelling</value>
+  </data>
+  <data name="ShowTitleFallback" xml:space="preserve">
+    <value>Voorstelling</value>
+  </data>
+  <data name="ImportantWarningTitle" xml:space="preserve">
+    <value>Belangrijke waarschuwing!</value>
+  </data>
+  <data name="ShowtimeWarning" xml:space="preserve">
+    <value>Het wijzigen of verwijderen van een geplande voorstelling kan conflicteren met reeds verkochte tickets. Gebruikers die al een ticket hebben gekocht, kunnen hierdoor gedupeerd worden.</value>
+  </data>
+  <data name="ConfirmDeleteShowtime" xml:space="preserve">
+    <value>Weet u zeker dat u deze voorstelling wilt verwijderen?</value>
+  </data>
+  <data name="ConfirmEditShowtime" xml:space="preserve">
+    <value>Weet u zeker dat u deze voorstelling wilt wijzigen?</value>
+  </data>
+  <data name="SelectMoviePlaceholder" xml:space="preserve">
+    <value>Selecteer een film...</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Terug</value>
+  </data>
+  <data name="IUnderstandConfirm" xml:space="preserve">
+    <value>Ik begrijp het, bevestig</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Verwijderen</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Toevoegen</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Opslaan</value>
+  </data>
+  <data name="MinutesSuffixShort" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="MovieManagementTitle" xml:space="preserve">
+    <value>Filmbeheer</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="NewMovie" xml:space="preserve">
+    <value>Nieuwe film</value>
+  </data>
+  <data name="SearchMoviesPlaceholder" xml:space="preserve">
+    <value>Zoek op titel of beschrijving...</value>
+  </data>
+  <data name="NoMoviesFoundSearch" xml:space="preserve">
+    <value>Geen films gevonden voor deze zoekopdracht.</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Bewerken</value>
+  </data>
+  <data name="EditMovie" xml:space="preserve">
+    <value>Film bewerken</value>
+  </data>
+  <data name="ReleaseLabel" xml:space="preserve">
+    <value>Release:</value>
+  </data>
+  <data name="TitleLabel" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="TitlePlaceholder" xml:space="preserve">
+    <value>bijv. Inception</value>
+  </data>
+  <data name="GenresLabel" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="GenresPlaceholder" xml:space="preserve">
+    <value>bijv. Sci-Fi, Actie</value>
+  </data>
+  <data name="DurationMinutesLabel" xml:space="preserve">
+    <value>Duur (min)</value>
+  </data>
+  <data name="ReleaseDateLabel" xml:space="preserve">
+    <value>Releasedatum</value>
+  </data>
+  <data name="DescriptionLabel" xml:space="preserve">
+    <value>Beschrijving</value>
+  </data>
+  <data name="PosterUrlLabel" xml:space="preserve">
+    <value>Poster URL</value>
+  </data>
+  <data name="ActorsLabel" xml:space="preserve">
+    <value>Acteurs</value>
+  </data>
+  <data name="TrailerUrlLabel" xml:space="preserve">
+    <value>Trailer URL</value>
+  </data>
+  <data name="DeleteMovieTitle" xml:space="preserve">
+    <value>Film verwijderen</value>
+  </data>
+  <data name="DeleteMovieConfirm" xml:space="preserve">
+    <value>Weet je zeker dat je {0} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</value>
+  </data>
+  <data name="NoPoster" xml:space="preserve">
+    <value>Geen poster</value>
+  </data>
+  <data name="UnknownMovie" xml:space="preserve">
+    <value>deze film</value>
+  </data>
+  <data name="RoomManagementTitle" xml:space="preserve">
+    <value>Zalenbeheer</value>
+  </data>
+  <data name="NewRoom" xml:space="preserve">
+    <value>Nieuwe zaal</value>
+  </data>
+  <data name="RoomsSubtitle" xml:space="preserve">
+    <value>Beheer de configuratie van de bioscoopzalen.</value>
+  </data>
+  <data name="LoadingRooms" xml:space="preserve">
+    <value>Zalen laden...</value>
+  </data>
+  <data name="NoRoomsConfigured" xml:space="preserve">
+    <value>Geen zalen geconfigureerd.</value>
+  </data>
+  <data name="RowsLabel" xml:space="preserve">
+    <value>Rijen</value>
+  </data>
+  <data name="EditRoom" xml:space="preserve">
+    <value>Zaal bewerken</value>
+  </data>
+  <data name="RoomNumberLabel" xml:space="preserve">
+    <value>Zaalnummer</value>
+  </data>
+  <data name="NameLabel" xml:space="preserve">
+    <value>Naam</value>
+  </data>
+  <data name="RoomNamePlaceholder" xml:space="preserve">
+    <value>bijv. Premiere zaal</value>
+  </data>
+  <data name="Supports3D" xml:space="preserve">
+    <value>Ondersteunt 3D</value>
+  </data>
+  <data name="WheelchairAccessible" xml:space="preserve">
+    <value>Rolstoel toegankelijk</value>
+  </data>
+  <data name="RowsAndSeatsTitle" xml:space="preserve">
+    <value>Rijen en stoelen</value>
+  </data>
+  <data name="AddRow" xml:space="preserve">
+    <value>Rij toevoegen</value>
+  </data>
+  <data name="DeleteRoomTitle" xml:space="preserve">
+    <value>Zaal verwijderen</value>
+  </data>
+  <data name="DeleteRoomConfirm" xml:space="preserve">
+    <value>Weet je zeker dat je {0} wilt verwijderen?</value>
+  </data>
+  <data name="RoomNumber" xml:space="preserve">
+    <value>Zaal {0}</value>
+  </data>
+  <data name="ScheduleHeading" xml:space="preserve">
+    <value>Speelt in de komende dagen</value>
+  </data>
+  <data name="NoShowtimesNextDays" xml:space="preserve">
+    <value>Geen voorstellingen gepland in de komende {0} dagen.</value>
+  </data>
+  <data name="AreYouSure" xml:space="preserve">
+    <value>Weet u het zeker?</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuleren</value>
+  </data>
+  <data name="HomeTitle" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Required" xml:space="preserve">
+    <value>Het veld {0} is verplicht.</value>
+  </data>
+  <data name="MinLength" xml:space="preserve">
+    <value>Het veld {0} moet minimaal {1} tekens bevatten.</value>
+  </data>
+</root>

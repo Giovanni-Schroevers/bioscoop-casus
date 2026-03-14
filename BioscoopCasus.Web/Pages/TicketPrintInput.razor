@@ -1,16 +1,18 @@
 @page "/TicketPrint"
 @using System.ComponentModel.DataAnnotations
 @using BioscoopCasus.Web.Components
+@using BioscoopCasus.Web.Resources
 @inject ReservationService ReservationService
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Enter Ticket</PageTitle>
+<PageTitle>@L["EnterTicketTitle"]</PageTitle>
 
 <div class="ticket-input-container">
     <div class="ticket-card">
         <div class="ticket-header">
-            <h2>Cinema Ticket</h2>
-            <p class="subtitle">Enter your QR code to view your ticket</p>
+            <h2>@L["CinemaTicketTitle"]</h2>
+            <p class="subtitle">@L["EnterQrSubtitle"]</p>
         </div>
 
         @if (!string.IsNullOrEmpty(_errorMessage))
@@ -30,15 +32,15 @@
             <DataAnnotationsValidator />
 
             <div class="form-group-fancy">
-                <label for="qrCode" class="form-label-fancy">QR Code</label>
-                <InputText id="qrCode" class="terminal-input" @bind-Value="_qrCodeModel.QrCode" placeholder="Paste your QR code here..." />
+                <label for="qrCode" class="form-label-fancy">@L["QrCodeLabel"]</label>
+                <InputText id="qrCode" class="terminal-input" @bind-Value="_qrCodeModel.QrCode" placeholder="@L["QrCodePlaceholder"]" />
                 <div class="validation-wrapper">
                     <ValidationMessage For="@(() => _qrCodeModel.QrCode)" />
                 </div>
-                <small class="form-hint">Scan your QR code or paste the code from your email</small>
+                <small class="form-hint">@L["QrCodeHint"]</small>
             </div>
 
-            <FormButton Type="submit" IsPrimary="true" IsLoading="@_isLoading" LoadingText="Validating..." Text="Confirm" />
+            <FormButton Type="submit" IsPrimary="true" IsLoading="@_isLoading" LoadingText="@L["Validating"]" Text="@L["Confirm"]" />
         </EditForm>
     </div>
 </div>
@@ -121,8 +123,8 @@
 @code {
     public class QrCodeInputModel
     {
-        [Required(ErrorMessage = "QR code is required")]
-        [MinLength(10, ErrorMessage = "QR code is too short")]
+        [Required(ErrorMessageResourceType = typeof(SharedResourceDataAnnotations), ErrorMessageResourceName = nameof(SharedResourceDataAnnotations.Required))]
+        [MinLength(10, ErrorMessageResourceType = typeof(SharedResourceDataAnnotations), ErrorMessageResourceName = nameof(SharedResourceDataAnnotations.MinLength))]
         public string QrCode { get; set; } = string.Empty;
     }
 
@@ -139,14 +141,14 @@
 
         if (result is null)
         {
-            _errorMessage = "Er is een fout opgetreden bij het valideren van de QR code.";
+            _errorMessage = L["ErrorValidatingQrCode"];
             _isLoading = false;
             return;
         }
 
         if (!result.IsValid)
         {
-            _errorMessage = result.ErrorMessage ?? "Invalid QR code.";
+            _errorMessage = result.ErrorMessage ?? L["InvalidQrCode"];
             _isLoading = false;
             return;
         }
@@ -155,7 +157,7 @@
             NavigationManager.NavigateTo($"/TicketPrint/{result.ReservationId.Value}");
         else
         {
-            _errorMessage = "No reservation found.";
+            _errorMessage = L["NoReservationFound"];
             _isLoading = false;
         }
     }

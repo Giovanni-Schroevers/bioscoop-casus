@@ -1,11 +1,12 @@
 @using System.Globalization
+@inject IStringLocalizer<SharedResource> L
 
 <section class="schedule">
-    <h2>Playing in the coming days</h2>
+    <h2>@L["ScheduleHeading"]</h2>
 
     @if (!GroupedShowtimes.Any())
     {
-        <p class="empty-message">No showtimes scheduled in the next @DaysAhead days.</p>
+        <p class="empty-message">@L["NoShowtimesNextDays", DaysAhead]</p>
     }
     else
     {
@@ -17,7 +18,7 @@
                     @foreach (var showtime in day.Showtimes)
                     {
                         <a class="time-pill" href="/movies/@MovieId/ticketsale/@showtime.Id">
-                            @showtime.StartTime.ToString("HH:mm") - Room @showtime.RoomId
+                            @showtime.StartTime.ToString("HH:mm") - @L["RoomNumber", showtime.RoomId]
                         </a>
                     }
                 </div>

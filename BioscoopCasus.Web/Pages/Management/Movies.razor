@@ -3,8 +3,9 @@
 @inject MovieService MovieService
 @inject NavigationManager NavigationManager
 @using BioscoopCasus.Web.Components
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Movie Management</PageTitle>
+<PageTitle>@L["MovieManagementTitle"]</PageTitle>
 
 <div class="management-container">
     <div class="header-section">
@@ -13,16 +14,16 @@
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Dashboard
+            @L["Dashboard"]
         </a>
         <div class="title-row">
-            <h1>Movie Management</h1>
-            <FormButton IsPrimary="true" Text="New Movie" OnClick="OnAddMovieClick" CssClass="add-movie-btn" />
+            <h1>@L["MovieManagementTitle"]</h1>
+            <FormButton IsPrimary="true" Text="@L["NewMovie"]" OnClick="OnAddMovieClick" CssClass="add-movie-btn" />
         </div>
         
         <div class="search-bar">
             <div class="search-input-wrapper">
-                <input type="text" placeholder="Search by title or description..." @bind="SearchTerm" @bind:event="oninput" class="terminal-input" />
+                <input type="text" placeholder="@L["SearchMoviesPlaceholder"]" @bind="SearchTerm" @bind:event="oninput" class="terminal-input" />
             </div>
         </div>
     </div>
@@ -31,7 +32,7 @@
     {
         <div class="loading-state">
             <span class="loading-spinner"></span>
-            <p>Loading movies...</p>
+            <p>@L["LoadingMovies"]</p>
         </div>
     }
     else
@@ -39,7 +40,7 @@
         <div class="movie-grid">
             @if (!FilteredMovies.Any())
             {
-                <div class="empty-state">No movies found matching your search.</div>
+                <div class="empty-state">@L["NoMoviesFoundSearch"]</div>
             }
             else
             {
@@ -47,18 +48,18 @@
                 {
                     <div class="movie-card" @onclick="() => OnMovieClick(movie)">
                         <div class="card-poster">
-                            <img src="@movie.PosterUrl" alt="@movie.Title" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22450%22><rect fill=%22%2312151e%22 width=%22300%22 height=%22450%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22 font-size=%2216%22>No poster</text></svg>'" />
+                            <img src="@movie.PosterUrl" alt="@movie.Title" onerror="@GetPosterFallbackOnError()" />
                             <div class="card-overlay">
-                                <span class="edit-badge">Edit</span>
+                                <span class="edit-badge">@L["Edit"]</span>
                             </div>
                         </div>
                         <div class="card-content">
                             <h3>@movie.Title</h3>
                             <div class="movie-meta">
                                 <span class="genre">@movie.Genres</span>
-                                <span class="duration">@movie.DurationMinutes min</span>
+                                <span class="duration">@movie.DurationMinutes @L["MinutesSuffixShort"]</span>
                             </div>
-                            <p class="release-date">Release: @movie.ReleaseDate.ToString("d MMM yyyy")</p>
+                            <p class="release-date">@L["ReleaseLabel"] @movie.ReleaseDate.ToString("d MMM yyyy")</p>
                         </div>
                     </div>
                 }
@@ -69,14 +70,14 @@
 
 @if (ShowModal)
 {
-    <TerminalModal Visible="ShowModal" Title="@(IsCreating ? "New Movie" : "Edit Movie")" OnClose="CloseModal">
+    <TerminalModal Visible="ShowModal" Title="@(IsCreating ? L["NewMovie"] : L["EditMovie"])" OnClose="CloseModal">
         <ChildContent>
             <div class="movie-form">
-                <TerminalInput Label="Title" @bind-Value="EditMovie.Title" Placeholder="e.g. Inception" />
+                <TerminalInput Label="@L["TitleLabel"]" @bind-Value="EditMovie.Title" Placeholder="@L["TitlePlaceholder"]" />
                 
                 <div class="form-row">
-                    <TerminalInput Label="Genres" @bind-Value="EditMovie.Genres" Placeholder="e.g. Sci-Fi, Action" CssClass="flex-1" />
-                    <TerminalInput Label="Age Rating" Type="select" @bind-Value="AgeRatingString" CssClass="flex-1">
+                    <TerminalInput Label="@L["GenresLabel"]" @bind-Value="EditMovie.Genres" Placeholder="@L["GenresPlaceholder"]" CssClass="flex-1" />
+                    <TerminalInput Label="@L["AgeRatingLabel"]" Type="select" @bind-Value="AgeRatingString" CssClass="flex-1">
                         <option value="0">AL</option>
                         <option value="6">6+</option>
                         <option value="9">9+</option>
@@ -87,38 +88,38 @@
                 </div>
 
                 <div class="form-row">
-                    <TerminalInput Label="Duration (min)" Type="number" @bind-Value="DurationMinutesString" CssClass="flex-1" />
-                    <TerminalInput Label="Release Date" Type="date" @bind-Value="ReleaseDateString" CssClass="flex-1" />
+                    <TerminalInput Label="@L["DurationMinutesLabel"]" Type="number" @bind-Value="DurationMinutesString" CssClass="flex-1" />
+                    <TerminalInput Label="@L["ReleaseDateLabel"]" Type="date" @bind-Value="ReleaseDateString" CssClass="flex-1" />
                 </div>
 
-                <TerminalInput Label="Description" Type="textarea" @bind-Value="EditMovie.Description" Rows="3" />
+                <TerminalInput Label="@L["DescriptionLabel"]" Type="textarea" @bind-Value="EditMovie.Description" Rows="3" />
                 
-                <TerminalInput Label="Poster URL" @bind-Value="EditMovie.PosterUrl" />
+                <TerminalInput Label="@L["PosterUrlLabel"]" @bind-Value="EditMovie.PosterUrl" />
                 
-                <TerminalInput Label="Actors" @bind-Value="EditMovie.Actors" />
+                <TerminalInput Label="@L["ActorsLabel"]" @bind-Value="EditMovie.Actors" />
                 
-                <TerminalInput Label="Trailer URL" @bind-Value="EditMovie.TrailerUrl" CssClass="flex-1" />
+                <TerminalInput Label="@L["TrailerUrlLabel"]" @bind-Value="EditMovie.TrailerUrl" CssClass="flex-1" />
             </div>
         </ChildContent>
         <Footer>
             @if (!IsCreating)
             {
-                <FormButton IsPrimary="false" Text="Delete" OnClick="() => ShowConfirmation = true" CssClass="delete-btn" />
+                <FormButton IsPrimary="false" Text="@L["Delete"]" OnClick="() => ShowConfirmation = true" CssClass="delete-btn" />
             }
             <div style="flex-grow: 1"></div>
-            <FormButton IsPrimary="false" Text="Cancel" OnClick="CloseModal" />
-            <FormButton IsPrimary="true" Text="@(IsCreating ? "Add" : "Save")" OnClick="HandleSave" />
+            <FormButton IsPrimary="false" Text="@L["Cancel"]" OnClick="CloseModal" />
+            <FormButton IsPrimary="true" Text="@(IsCreating ? L["Add"] : L["Save"])" OnClick="HandleSave" />
         </Footer>
     </TerminalModal>
 }
 
 <ConfirmationModal Visible="ShowConfirmation" 
-                   Title="Delete Movie" 
-                   ConfirmText="Delete"
+                   Title="@L["DeleteMovieTitle"]" 
+                   ConfirmText="@L["Delete"]"
                    OnConfirm="HandleDelete" 
                    OnCancel="() => ShowConfirmation = false">
     <ChildContent>
-        <p>Are you sure you want to delete <strong>@SelectedMovie?.Title</strong>? This action cannot be undone.</p>
+        <p>@L["DeleteMovieConfirm", SelectedMovie?.Title ?? L["UnknownMovie"]]</p>
     </ChildContent>
 </ConfirmationModal>
 
@@ -484,6 +485,14 @@
             ShowConfirmation = false;
             CloseModal();
         }
+    }
+
+    private string GetPosterFallbackOnError()
+    {
+        var text = L["NoPoster"];
+        var svg = $"<svg xmlns='http://www.w3.org/2000/svg' width='300' height='450'><rect fill='#12151e' width='300' height='450'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#666' font-size='16'>{text}</text></svg>";
+        var encoded = Uri.EscapeDataString(svg);
+        return $"this.onerror=null;this.src='data:image/svg+xml;utf8,{encoded}'";
     }
 
     private static Models.DTOs.MovieCreateDto CreateDefaultMovie() => new(

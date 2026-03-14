@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Net.Http;
 using BioscoopCasus.Models.Helpers;
 using Microsoft.AspNetCore.Components.Web;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using BioscoopCasus.Web;
 using BioscoopCasus.Web.Services;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -62,7 +64,16 @@ builder.Services.AddHttpClient<PaymentService>(client =>
     client.BaseAddress = new Uri("http://localhost:5064/");
 });
 
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
 var host = builder.Build();
+
+var js = host.Services.GetRequiredService<IJSRuntime>();
+var storedCulture = await js.InvokeAsync<string>("blazorCulture.get");
+var culture = string.IsNullOrWhiteSpace(storedCulture) ? "en-US" : storedCulture;
+var cultureInfo = new CultureInfo(culture);
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 // Initialize pricing configuration BEFORE the app runs
 var pricingService = host.Services.GetRequiredService<TicketPricingService>();

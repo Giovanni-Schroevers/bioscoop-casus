@@ -2,12 +2,13 @@
 @inject AuthService AuthService
 @inject NavigationManager NavigationManager
 @using BioscoopCasus.Web.Components
+@inject IStringLocalizer<SharedResource> L
 
 <TerminalShell>
     <div class="login-container">
         <div class="terminal-header">
-            <h1>Admin Access</h1>
-            <p class="subtitle">Enter your password to manage the cinema.</p>
+            <h1>@L["AdminAccessTitle"]</h1>
+            <p class="subtitle">@L["AdminAccessSubtitle"]</p>
         </div>
 
         @if (!string.IsNullOrEmpty(ErrorMessage))
@@ -27,9 +28,9 @@
             <DataAnnotationsValidator />
 
             <div class="form-group-fancy">
-                <label for="password" class="form-label-fancy">Password</label>
+                <label for="password" class="form-label-fancy">@L["PasswordLabel"]</label>
                 <div class="input-wrapper">
-                    <InputText id="password" type="password" class="terminal-input" placeholder="••••••••"
+                    <InputText id="password" type="password" class="terminal-input" placeholder="********"
                         @bind-Value="LoginModel.Password" />
                 </div>
                 <div class="validation-wrapper">
@@ -37,8 +38,8 @@
                 </div>
             </div>
 
-            <FormButton Type="submit" IsPrimary="true" IsLoading="@IsLoading" LoadingText="Verifying..."
-                Text="Sign In" />
+            <FormButton Type="submit" IsPrimary="true" IsLoading="@IsLoading" LoadingText="@L["Verifying"]"
+                Text="@L["SignIn"]" />
         </EditForm>
 
         <div class="back-wrapper">
@@ -48,7 +49,7 @@
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                Back to home
+                @L["BackToHome"]
             </a>
         </div>
     </div>
