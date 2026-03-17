@@ -1,10 +1,10 @@
 @page "/pin"
-@page "/pin/{TotalPriceCents:int}"
 @using BioscoopCasus.Web.Services
 @using System.Globalization
 @inject PaymentService PaymentService
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> L
+@inject PaymentStateService PaymentStateService
 
 <div class="pin-page">
     <h1>@L["PaymentTitle"]</h1>
@@ -130,12 +130,18 @@
 </style>
 
 @code {
-    [Parameter] public int TotalPriceCents { get; set; }
+    [Parameter] public int TotalPriceCents { get; set; }  // kept for interface compat — value comes from PaymentStateService
 
     private string EnteredPin = "";
     private string? Message;
     private bool IsSuccess;
     private bool _paymentDone;
+
+    protected override void OnInitialized()
+    {
+        // Price is read from the state service — it was never in the URL
+        TotalPriceCents = PaymentStateService.TotalPriceCents;
+    }
 
     private string TotalPriceFormatted =>
         (TotalPriceCents / 100m).ToString("C", CultureInfo.CurrentCulture);

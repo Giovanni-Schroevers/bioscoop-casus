@@ -6,6 +6,7 @@
 @inject NavigationManager NavigationManager
 @inject MovieInformationService MovieInformationService
 @inject TicketPricingService TicketPricingConfigService
+@inject PaymentStateService PaymentStateService
 
 <div class="movies-page">
 <div class="movie-details-wrapper">
@@ -259,11 +260,11 @@ private void BuyTickets()
         return;
     }
 
-    // Encode total price as cents (integer) to safely pass through the URL
-    var totalPriceCents = (int)(TotalPrice * 100);
+    // Store price in memory — never in the URL
+    PaymentStateService.SetPrice((int)(TotalPrice * 100));
 
     NavigationManager.NavigateTo(
-        $"/seat-reservation/{MovieId}/{ShowtimeId}/{TotalTickets}/{totalPriceCents}");
+        $"/seat-reservation/{MovieId}/{ShowtimeId}/{TotalTickets}");
 }
 
 private int TotalTickets =>

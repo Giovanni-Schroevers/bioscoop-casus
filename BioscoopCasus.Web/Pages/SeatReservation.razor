@@ -1,12 +1,12 @@
 @page "/seat-reservation"
-@page "/seat-reservation/{MovieId}/{ShowtimeId}/{TotalTickets:int}/{TotalPriceCents:int}"
+@page "/seat-reservation/{MovieId}/{ShowtimeId}/{TotalTickets:int}"
 @inject SeatSelectionService SeatSelectionService
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> L
+@inject PaymentStateService PaymentStateService
 
 <h1>@L["SeatSelectionTitle"]</h1>
 
-@* Only show movie grid when navigated to standalone (no params passed) *@
 @if (!_cameFromTicketSale)
 {
 @if (Movies == null)
@@ -378,11 +378,11 @@ else
 
 @code {
 
-// Optional route parameters (set when navigating from MovieTicketSale)
 [Parameter] public string? MovieId { get; set; }
 [Parameter] public string? ShowtimeId { get; set; }
 [Parameter] public int TotalTickets { get; set; }
-[Parameter] public int TotalPriceCents { get; set; }
+
+private int TotalPriceCents => PaymentStateService.TotalPriceCents;
 
 List<MovieResponseDto>? Movies;
 
@@ -568,9 +568,8 @@ SelectedSeatIds.ToList());
 
 ShowSeatsModal = false;
 
-// Navigate to payment page, carrying the total price (in cents)
-var priceCents = _cameFromTicketSale ? TotalPriceCents : 0;
-NavigationManager.NavigateTo($"/pin/{priceCents}");
+PaymentStateService.SetPrice(TotalPriceCents);
+NavigationManager.NavigateTo("/pin");
 }
 
 string GetSeatClass(SeatInfoDto? seat, bool selected)

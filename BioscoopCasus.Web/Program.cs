@@ -33,6 +33,7 @@ builder.Services.AddScoped<FilmsOverviewService>();
 builder.Services.AddScoped<MovieInformationService>();
 builder.Services.AddScoped<TicketPricingService>();
 builder.Services.AddSingleton<QrCodeHelper>();
+builder.Services.AddScoped<PaymentStateService>();
 
 // JWT handler
 builder.Services.AddTransient<JwtAuthorizationMessageHandler>();
