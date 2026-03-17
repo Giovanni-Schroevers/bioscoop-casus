@@ -569,7 +569,8 @@ SelectedSeatIds.ToList());
 ShowSeatsModal = false;
 
 PaymentStateService.SetPrice(TotalPriceCents);
-NavigationManager.NavigateTo("/pin");
+var movieTitleParam = !string.IsNullOrEmpty(_selectedMovieTitle) ? $"/{Uri.EscapeDataString(_selectedMovieTitle)}" : "";
+NavigationManager.NavigateTo($"/pin/{movieTitleParam}");
 }
 
 string GetSeatClass(SeatInfoDto? seat, bool selected)
