@@ -15,5 +15,7 @@
     [Parameter] public bool IsPrimary { get; set; } = true;
     [Parameter] public string? CssClass { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Target { get; set; } = "_self";
+    [Parameter] public string Rel { get; set; } = string.Empty;
     [Parameter] public EventCallback OnClick { get; set; }
 }

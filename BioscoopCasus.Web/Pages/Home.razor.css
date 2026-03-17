@@ -1,4 +1,4 @@
-﻿.terminal-header {
+.terminal-header {
     margin-bottom: 3rem;
     text-align: center;
 }
@@ -82,4 +82,22 @@
     background: rgba(255,255,255,0.07);
     border-color: rgba(255,255,255,0.2);
     cursor: pointer;
+}
+
+.address-text {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.directions-btn-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
 }
