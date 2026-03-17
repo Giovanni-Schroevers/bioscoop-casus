@@ -1,4 +1,4 @@
-<a href="@Href" class="terminal-button @(IsPrimary ? "primary" : "secondary") @CssClass" @onclick="OnClick">
+<a href="@Href" class="terminal-button @(IsPrimary ? "primary" : "secondary") @CssClass" @onclick="OnClick" target="@Target" rel="@Rel">
     @if (ChildContent != null)
     {
         @ChildContent
