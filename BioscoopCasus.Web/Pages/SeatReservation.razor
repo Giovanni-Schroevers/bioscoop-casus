@@ -7,6 +7,7 @@
 
 <h1>@L["SeatSelectionTitle"]</h1>
 
+@* Only show movie grid when navigated to standalone (no params passed) *@
 @if (!_cameFromTicketSale)
 {
 @if (Movies == null)
@@ -169,11 +170,34 @@ else
             </button>
             <button class="confirm-button"
                     disabled="@(SelectedSeatIds.Count != GroupSize)"
-                    @onclick="ConfirmReservation">
+                    @onclick="TryConfirmReservation">
                 @L["ConfirmSeatCount", SelectedSeatIds.Count, GroupSize]
             </button>
         </div>
 
+    </div>
+</div>
+}
+
+<!-- LONELY SEAT WARNING POPUP -->
+@if (_showLonelyWarning)
+{
+<div class="modal-overlay" style="z-index:1100">
+    <div class="modal" style="max-width:420px;text-align:center;">
+        <div style="font-size:2.4rem;margin-bottom:8px;">🪑</div>
+        <h2 style="margin-bottom:12px;">Alleen zitten?</h2>
+        <p style="color:#ccc;margin-bottom:8px;">
+            Je hebt <strong>1 losse stoel</strong> geselecteerd.<br/>
+            Weet je zeker dat je alleen wil zitten?
+        </p>
+        <div class="modal-actions" style="justify-content:center;margin-top:24px;">
+            <button class="cancel-button" @onclick="CancelLonelyWarning">
+                Annuleer
+            </button>
+            <button class="confirm-button" @onclick="ProceedAfterWarning">
+                Ja, bevestig
+            </button>
+        </div>
     </div>
 </div>
 }
@@ -378,10 +402,12 @@ else
 
 @code {
 
+// Optional route parameters (set when navigating from MovieTicketSale)
 [Parameter] public string? MovieId { get; set; }
 [Parameter] public string? ShowtimeId { get; set; }
 [Parameter] public int TotalTickets { get; set; }
 
+// Price comes from PaymentStateService — not from the URL
 private int TotalPriceCents => PaymentStateService.TotalPriceCents;
 
 List<MovieResponseDto>? Movies;
@@ -390,6 +416,7 @@ bool ShowShowtimeModal;
 bool ShowGroupSizeModal;
 bool ShowSeatsModal;
 bool IsLoadingSeats;
+bool _showLonelyWarning;
 
 MovieResponseDto? SelectedMovie;
 ShowtimeResponseDto? SelectedShowtime;
@@ -555,6 +582,81 @@ return;
 }
 SelectedSeatIds.Add(seat.Id);
 }
+}
+
+// Check if selection is a lone isolated seat
+bool IsLonelySeat()
+{
+    if (AllSeats == null || SelectedSeatIds.Count != 1) return false;
+
+    var selectedId = SelectedSeatIds.First();
+    var seat = AllSeats.FirstOrDefault(s => s.Id == selectedId);
+    if (seat == null) return false;
+
+    // A seat is "lonely" when it has no available unselected neighbour in the same row
+    var leftNeighbour  = AllSeats.FirstOrDefault(s => s.Row == seat.Row && s.SeatNumber == seat.SeatNumber - 1);
+    var rightNeighbour = AllSeats.FirstOrDefault(s => s.Row == seat.Row && s.SeatNumber == seat.SeatNumber + 1);
+
+    bool leftFree  = leftNeighbour  != null && leftNeighbour.IsAvailable  && !SelectedSeatIds.Contains(leftNeighbour.Id);
+    bool rightFree = rightNeighbour != null && rightNeighbour.IsAvailable && !SelectedSeatIds.Contains(rightNeighbour.Id);
+
+    // Lonely = no free neighbour on either side
+    return !leftFree && !rightFree;
+}
+
+// Also warn when the selection would leave a single gap in the row
+bool CreatesIsolatedGap()
+{
+    if (AllSeats == null) return false;
+
+    // Group all seats by row
+    var rows = AllSeats.GroupBy(s => s.Row);
+    foreach (var row in rows)
+    {
+        var sorted = row.OrderBy(s => s.SeatNumber).ToList();
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var s = sorted[i];
+            // Skip selected, occupied, or already-unavailable seats
+            if (SelectedSeatIds.Contains(s.Id) || !s.IsAvailable) continue;
+
+            // Check neighbours
+            bool leftBlocked  = i == 0
+                || !sorted[i - 1].IsAvailable
+                || SelectedSeatIds.Contains(sorted[i - 1].Id);
+            bool rightBlocked = i == sorted.Count - 1
+                || !sorted[i + 1].IsAvailable
+                || SelectedSeatIds.Contains(sorted[i + 1].Id);
+
+            if (leftBlocked && rightBlocked)
+                return true; // this unselected seat would be isolated
+        }
+    }
+    return false;
+}
+
+void TryConfirmReservation()
+{
+    if (IsLonelySeat() || CreatesIsolatedGap())
+    {
+        _showLonelyWarning = true;
+    }
+    else
+    {
+        _ = ConfirmReservation();
+    }
+}
+
+void CancelLonelyWarning()
+{
+    _showLonelyWarning = false;
+    // Seat modal stays open so user can adjust their choice
+}
+
+async Task ProceedAfterWarning()
+{
+    _showLonelyWarning = false;
+    await ConfirmReservation();
 }
 
 async Task ConfirmReservation()
