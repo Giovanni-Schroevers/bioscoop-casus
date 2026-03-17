@@ -1,5 +1,5 @@
 @page "/pin"
-@using BioscoopCasus.Web.Services
+@page "/pin/{MovieTitle}"
 @using System.Globalization
 @inject PaymentService PaymentService
 @inject NavigationManager NavigationManager
@@ -61,6 +61,26 @@
                 <p>@L["AmountPaid", TotalPriceFormatted]</p>
             }
             <p class="success-sub">@L["PaymentThanks"]</p>
+            
+            @if (!string.IsNullOrEmpty(MovieTitle))
+            {
+                <div class="social-share">
+                    <p>@L["ShareExcitement"]</p>
+                    <div class="share-buttons">
+                        <a href="https://x.com/intent/post?text=@(Uri.EscapeDataString(L["ShareMessage", MovieTitle]))"
+                           target="_blank" rel="noopener noreferrer" class="share-button x-share">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" class="share-icon"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+                            <span>@L["ShareOnX"]</span>
+                        </a>
+                        <a href="https://wa.me/?text=@(Uri.EscapeDataString(L["ShareMessage", MovieTitle]))"
+                           target="_blank" rel="noopener noreferrer" class="share-button wa-share">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" class="share-icon"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12.001 20c-1.465 0-2.846-.394-4.04-1.082l-4.226 1.107 1.127-4.12A7.962 7.962 0 0 1 4.001 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8zm0-18C6.477 2 2 6.477 2 12c0 1.891.524 3.662 1.435 5.176L2 22l4.957-1.298C8.351 21.54 10.111 22 12.001 22c5.523 0 10-4.477 10-10S17.524 2 12.001 2z"></path></svg>
+                            <span>@L["ShareOnWhatsApp"]</span>
+                        </a>
+                    </div>
+                </div>
+            }
+
             <button class="home-button" @onclick="GoHome">@L["BackToMovies"]</button>
         </div>
     }
@@ -127,10 +147,71 @@
     cursor: pointer;
     font-size: 1rem;
 }
+
+.social-share {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.social-share p {
+    color: #ccc;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.share-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.share-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.share-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    color: white;
+}
+
+.share-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.x-share {
+    background-color: #000;
+    color: white;
+}
+
+.x-share:hover {
+    background-color: #333;
+}
+
+.wa-share {
+    background-color: #25D366;
+    color: white;
+}
+
+.wa-share:hover {
+    background-color: #128C7E;
+}
 </style>
 
 @code {
     [Parameter] public int TotalPriceCents { get; set; }  // kept for interface compat — value comes from PaymentStateService
+    [Parameter] public string? MovieTitle { get; set; }
 
     private string EnteredPin = "";
     private string? Message;

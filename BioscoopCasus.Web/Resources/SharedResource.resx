@@ -560,5 +560,16 @@
   </data>
   <data name="CinemaAddress" xml:space="preserve">
     <value>Hogeschoollaan 1 Breda</value>
+  <data name="ShareExcitement" xml:space="preserve">
+    <value>Share your excitement!</value>
+  </data>
+  <data name="ShareOnX" xml:space="preserve">
+    <value>Share on X</value>
+  </data>
+  <data name="ShareOnWhatsApp" xml:space="preserve">
+    <value>Share on WhatsApp</value>
+  </data>
+  <data name="ShareMessage" xml:space="preserve">
+    <value>I am going to {0} at Polo's Cinema Paradise Breda!</value>
   </data>
 </root>
