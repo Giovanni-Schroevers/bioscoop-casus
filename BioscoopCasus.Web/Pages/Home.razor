@@ -52,6 +52,24 @@
         <TerminalButton Href="/ticketprint" Text="@L["PrintYourTicket"]" IsPrimary="true" />
     </div>
 
+    <div class="column">
+        <h3>@L["Location"]</h3>
+        <p class="address-text">@L["CinemaAddress"]</p>
+        <TerminalButton Href="https://www.google.com/maps/dir/?api=1&destination=Hogeschoollaan+1+Breda"
+                        Target="_blank"
+                        Rel="noopener noreferrer"
+                        IsPrimary="true">
+            <ChildContent>
+                <div class="directions-btn-content">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                        <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                    </svg>
+                    <span>@L["Directions"]</span>
+                </div>
+            </ChildContent>
+        </TerminalButton>
+    </div>
+
     <div class="admin-login-wrapper">
         <TerminalButton Href="/login" IsPrimary="false" CssClass="admin-btn">
             <ChildContent>

@@ -552,6 +552,14 @@
   <data name="MinLength" xml:space="preserve">
     <value>Het veld {0} moet minimaal {1} tekens bevatten.</value>
   </data>
+  <data name="Location" xml:space="preserve">
+    <value>Locatie</value>
+  </data>
+  <data name="Directions" xml:space="preserve">
+    <value>Routebeschrijving</value>
+  </data>
+  <data name="CinemaAddress" xml:space="preserve">
+    <value>Hogeschoollaan 1 Breda</value>
   <data name="ShareExcitement" xml:space="preserve">
     <value>Deel je enthousiasme!</value>
   </data>
