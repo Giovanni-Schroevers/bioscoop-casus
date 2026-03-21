@@ -7,7 +7,9 @@
 @inject MovieInformationService MovieInformationService
 @inject TicketPricingService TicketPricingConfigService
 @inject PaymentStateService PaymentStateService
+@using BioscoopCasus.Web.Layout
 
+<TerminalShell>
 <div class="movies-page">
 <div class="movie-details-wrapper">
     <button class="return-button" @onclick="GoBackToOverview">
@@ -143,6 +145,7 @@ else
 
 </div>
 </div>
+</TerminalShell>
 
 @code {
 
