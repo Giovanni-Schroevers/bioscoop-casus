@@ -20,23 +20,30 @@ public class FilmsOverviewController : ControllerBase
     public async Task<ActionResult<List<FilmsOverviewDto>>> GetFilmsOverview()
     {
         var now = DateTime.Now;
+        var culture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
 
         var showtimes = await _context.Showtimes
             .Include(s => s.Movie)
+                .ThenInclude(m => m.Translations)
             .Where(s => s.StartTime >= now)
             .OrderBy(s => s.StartTime)
-            .ThenBy(s => s.Movie.Title)
             .ToListAsync();
 
-        var result = showtimes.Select(s => new FilmsOverviewDto(
-            s.Id,
-            s.MovieId,
-            s.Movie.Title,
-            s.Movie.Genres,
-            s.Movie.DurationMinutes,
-            s.StartTime,
-            s.Movie.PosterUrl
-        )).ToList();
+        var result = showtimes.Select(s => {
+            var t = s.Movie.Translations.FirstOrDefault(tr => tr.LanguageCode == culture) 
+                 ?? s.Movie.Translations.FirstOrDefault(tr => tr.LanguageCode == "en") 
+                 ?? new BioscoopCasus.API.Entities.MovieTranslation { Genres = "" };
+
+            return new FilmsOverviewDto(
+                s.Id,
+                s.MovieId,
+                s.Movie.Title,
+                t.Genres,
+                s.Movie.DurationMinutes,
+                s.StartTime,
+                s.Movie.PosterUrl
+            );
+        }).ToList();
 
         return Ok(result);
     }

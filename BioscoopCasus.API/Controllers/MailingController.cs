@@ -34,7 +34,7 @@ public class MailingController(BioscoopDbContext context, MailingService mailing
         if (reservationId is null)
             return BadRequest("Invalid ticket code format");
 
-        var reservation = await context.Reservations
+            var reservation = await context.Reservations
             .Include(r => r.Showtime)
                 .ThenInclude(s => s.Movie)
             .Include(r => r.Showtime)

@@ -11,6 +11,7 @@ public class BioscoopDbContext : DbContext
     }
 
     public DbSet<Movie> Movies { get; set; }
+    public DbSet<MovieTranslation> MovieTranslations { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Row> Rows { get; set; }
     public DbSet<Seat> Seats { get; set; }
@@ -22,6 +23,17 @@ public class BioscoopDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // MovieTranslation configurations
+        modelBuilder.Entity<MovieTranslation>()
+            .HasIndex(mt => new { mt.MovieId, mt.LanguageCode })
+            .IsUnique();
+        
+        modelBuilder.Entity<MovieTranslation>()
+            .HasOne(mt => mt.Movie)
+            .WithMany(m => m.Translations)
+            .HasForeignKey(mt => mt.MovieId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Room.Number must be unique
         modelBuilder.Entity<Room>()

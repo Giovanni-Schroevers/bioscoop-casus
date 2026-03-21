@@ -87,74 +87,92 @@ public static class BioscoopDbSeeder
             new Movie
             {
                 Title = "The Matrix Resurrections",
-                Description = "Return to the world of two realities: one, everyday life; the other, what lies behind it.",
                 PosterUrl = "https://example.com/matrix.jpg",
                 Actors = "Keanu Reeves, Carrie-Anne Moss, Yahya Abdul-Mateen II",
                 TrailerUrl = "https://youtube.com/watch?v=9ix7TUGVYIo",
-                Genres = "Sci-Fi, Action",
                 AgeRating = 16,
                 DurationMinutes = 148,
-                ReleaseDate = new DateTime(2025, 12, 22)
+                ReleaseDate = new DateTime(2025, 12, 22),
+                Translations = new List<MovieTranslation>
+                {
+                    new MovieTranslation { LanguageCode = "en", Description = "Return to the world of two realities: one, everyday life; the other, what lies behind it.", Genres = "Sci-Fi, Action" },
+                    new MovieTranslation { LanguageCode = "nl", Description = "Keer terug naar de wereld van twee realiteiten: de ene, het dagelijkse leven; de andere, wat daarachter ligt.", Genres = "Sci-Fi, Actie" }
+                }
             },
             new Movie
             {
                 Title = "Dune: Part Three",
-                Description = "The epic conclusion of the Dune saga as Paul Atreides faces his ultimate destiny.",
                 PosterUrl = "https://example.com/dune3.jpg",
                 Actors = "Timothée Chalamet, Zendaya, Florence Pugh",
                 TrailerUrl = "https://youtube.com/watch?v=WayToDune3",
-                Genres = "Sci-Fi, Adventure",
                 AgeRating = 12,
                 DurationMinutes = 155,
-                ReleaseDate = new DateTime(2026, 1, 15)
+                ReleaseDate = new DateTime(2026, 1, 15),
+                Translations = new List<MovieTranslation>
+                {
+                    new MovieTranslation { LanguageCode = "en", Description = "The epic conclusion of the Dune saga as Paul Atreides faces his ultimate destiny.", Genres = "Sci-Fi, Adventure" },
+                    new MovieTranslation { LanguageCode = "nl", Description = "De epische ontknoping van de Dune saga.", Genres = "Sci-Fi, Avontuur" }
+                }
             },
             new Movie
             {
                 Title = "Spider-Man: Beyond",
-                Description = "Spider-Man faces threats from across the multiverse in this action-packed adventure.",
                 PosterUrl = "https://example.com/spiderman.jpg",
                 Actors = "Tom Holland, Zendaya, Jacob Batalon",
                 TrailerUrl = "https://youtube.com/watch?v=SpiderManBeyond",
-                Genres = "Action, Superhero",
                 AgeRating = 12,
                 DurationMinutes = 130,
-                ReleaseDate = new DateTime(2026, 2, 1)
+                ReleaseDate = new DateTime(2026, 2, 1),
+                Translations = new List<MovieTranslation>
+                {
+                    new MovieTranslation { LanguageCode = "en", Description = "Spider-Man faces threats from across the multiverse in this action-packed adventure.", Genres = "Action, Superhero" },
+                    new MovieTranslation { LanguageCode = "nl", Description = "Spider-Man neemt het op tegen gevaren uit het multiversum.", Genres = "Actie, Superheld" }
+                }
             },
             new Movie
             {
                 Title = "Inside Out 3",
-                Description = "Riley's emotions embark on yet another adventure as she navigates adulthood.",
                 PosterUrl = "https://example.com/insideout3.jpg",
                 Actors = "Amy Poehler, Phyllis Smith, Bill Hader",
                 TrailerUrl = "https://youtube.com/watch?v=InsideOut3",
-                Genres = "Animation, Family",
                 AgeRating = 6,
                 DurationMinutes = 105,
-                ReleaseDate = new DateTime(2026, 2, 14)
+                ReleaseDate = new DateTime(2026, 2, 14),
+                Translations = new List<MovieTranslation>
+                {
+                    new MovieTranslation { LanguageCode = "en", Description = "Riley's emotions embark on yet another adventure as she navigates adulthood.", Genres = "Animation, Family" },
+                    new MovieTranslation { LanguageCode = "nl", Description = "Riley's emoties beleven opnieuw een groot avontuur.", Genres = "Animatie, Familie" }
+                }
             },
             new Movie
             {
                 Title = "The Batman: Gotham Nights",
-                Description = "The Dark Knight returns to protect Gotham from a new wave of crime.",
                 PosterUrl = "https://example.com/batman.jpg",
                 Actors = "Robert Pattinson, Zoë Kravitz, Jeffrey Wright",
                 TrailerUrl = "https://youtube.com/watch?v=BatmanGothamNights",
-                Genres = "Action, Crime",
                 AgeRating = 16,
                 DurationMinutes = 152,
-                ReleaseDate = new DateTime(2025, 11, 20)
+                ReleaseDate = new DateTime(2025, 11, 20),
+                Translations = new List<MovieTranslation>
+                {
+                    new MovieTranslation { LanguageCode = "en", Description = "The Dark Knight returns to protect Gotham from a new wave of crime.", Genres = "Action, Crime" },
+                    new MovieTranslation { LanguageCode = "nl", Description = "De Dark Knight keert terug om Gotham te beschermen.", Genres = "Actie, Misdaad" }
+                }
             },
             new Movie
             {
                 Title = "Frozen III",
-                Description = "Elsa and Anna discover new magical realms beyond Arendelle.",
                 PosterUrl = "https://example.com/frozen3.jpg",
                 Actors = "Idina Menzel, Kristen Bell, Josh Gad",
                 TrailerUrl = "https://youtube.com/watch?v=Frozen3",
-                Genres = "Animation, Musical",
                 AgeRating = 6,
                 DurationMinutes = 110,
-                ReleaseDate = new DateTime(2025, 12, 6)
+                ReleaseDate = new DateTime(2025, 12, 6),
+                Translations = new List<MovieTranslation>
+                {
+                    new MovieTranslation { LanguageCode = "en", Description = "Elsa and Anna discover new magical realms beyond Arendelle.", Genres = "Animation, Musical" },
+                    new MovieTranslation { LanguageCode = "nl", Description = "Elsa en Anna ontdekken nieuwe magische werelden.", Genres = "Animatie, Musical" }
+                }
             },
         ];
     }

@@ -23,6 +23,8 @@ public class ReservationsController(BioscoopDbContext context, QrCodeHelper qrCo
                 .ThenInclude(ss => ss.Seat)
             .ToListAsync();
 
+        var culture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
         var response = reservations.Select(r =>
         {
             var seats = r.ShowtimeSeats
