@@ -46,9 +46,18 @@
             <div class="qr-section">
                 <h2>@L["QrPaymentTitle"]</h2>
                 <p class="qr-info">@L["QrPaymentInfo"]</p>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://localhost:5158/betalen" 
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://localhost:5158/betalen"
                      alt="@L["QrCodeAlt"]" />
             </div>
+        </div>
+
+        <div class="email-section">
+            <label for="email">@L["EmailLabel"]</label>
+            <input id="email" type="email" placeholder="@L["EmailPlaceholder"]" @bind="_email" @bind:event="oninput" />
+            @if (_emailError != null)
+            {
+                <p class="email-error">@_emailError</p>
+            }
         </div>
     }
     else
@@ -207,6 +216,39 @@
 .wa-share:hover {
     background-color: #128C7E;
 }
+
+.email-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
+    margin-bottom: 24px;
+}
+
+.email-section label {
+    font-size: .9rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.email-section input {
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #1a1f2b;
+    color: white;
+    font-size: 1rem;
+    width: 300px;
+    text-align: center;
+}
+
+.email-error {
+    color: #ff6b6b;
+    font-size: .85rem;
+    margin: 0;
+}
 </style>
 
 @code {
@@ -217,6 +259,8 @@
     private string? Message;
     private bool IsSuccess;
     private bool _paymentDone;
+    private string _email = "";
+    private string? _emailError;
 
     protected override void OnInitialized()
     {
@@ -244,6 +288,14 @@
 
     private async Task Submit()
     {
+        _emailError = null;
+
+        if (string.IsNullOrWhiteSpace(_email) || !_email.Contains('@') || !_email.Contains('.'))
+        {
+            _emailError = L["EmailRequired"];
+            return;
+        }
+
         if (EnteredPin.Length != 4)
         {
             Message = L["EnterFourDigits"];

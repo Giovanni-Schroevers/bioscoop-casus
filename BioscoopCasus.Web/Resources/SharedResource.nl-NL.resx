@@ -615,4 +615,13 @@
   <data name="PopcornAddRefill" xml:space="preserve">
     <value>Popcorn refill (pauze)</value>
   </data>
+  <data name="EmailLabel" xml:space="preserve">
+    <value>E-mailadres</value>
+  </data>
+  <data name="EmailPlaceholder" xml:space="preserve">
+    <value>jouw@email.nl</value>
+  </data>
+  <data name="EmailRequired" xml:space="preserve">
+    <value>Vul een geldig e-mailadres in.</value>
+  </data>
 </root>
