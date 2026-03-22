@@ -573,4 +573,46 @@
   <data name="CinemaAddress" xml:space="preserve">
     <value>Hogeschoollaan 1 Breda</value>
   </data>
+  <data name="PopcornTitle" xml:space="preserve">
+    <value>Popcorn Arrangement</value>
+  </data>
+  <data name="PopcornItem" xml:space="preserve">
+    <value>Popcorn</value>
+  </data>
+  <data name="PopcornSizeLabel" xml:space="preserve">
+    <value>Formaat</value>
+  </data>
+  <data name="PopcornAdd" xml:space="preserve">
+    <value>Popcorn toevoegen</value>
+  </data>
+  <data name="PopcornSmall" xml:space="preserve">
+    <value>Klein</value>
+  </data>
+  <data name="PopcornMedium" xml:space="preserve">
+    <value>Middel</value>
+  </data>
+  <data name="PopcornLarge" xml:space="preserve">
+    <value>Groot</value>
+  </data>
+  <data name="PopcornFlavor" xml:space="preserve">
+    <value>Smaak</value>
+  </data>
+  <data name="FlavorSweet" xml:space="preserve">
+    <value>Zoet</value>
+  </data>
+  <data name="FlavorSalty" xml:space="preserve">
+    <value>Zout</value>
+  </data>
+  <data name="FlavorMix" xml:space="preserve">
+    <value>Zoet &amp; Zout Mix</value>
+  </data>
+  <data name="FlavorCaramel" xml:space="preserve">
+    <value>Caramel</value>
+  </data>
+  <data name="PopcornAddDrink" xml:space="preserve">
+    <value>Frisdrank toevoegen</value>
+  </data>
+  <data name="PopcornAddRefill" xml:space="preserve">
+    <value>Popcorn refill (pauze)</value>
+  </data>
 </root>

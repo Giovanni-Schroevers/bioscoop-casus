@@ -1,6 +1,4 @@
 ﻿.movies-page {
-    background-color: #0b0e14;
-    min-height: 100vh;
     padding: 3rem;
 }
 
@@ -98,6 +96,116 @@
     border: 1px solid rgba(255,255,255,0.1);
     background: rgba(255,255,255,0.05);
     color: white;
+}
+
+/* POPCORN */
+
+.popcorn-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    color: #f8fafc;
+}
+
+.popcorn-section h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.popcorn-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.popcorn-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.popcorn-item-number {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.popcorn-remove {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.popcorn-remove:hover {
+    color: #e11d48;
+    background: rgba(225,29,72,0.1);
+}
+
+.popcorn-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.75rem;
+}
+
+.popcorn-row label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.popcorn-row select {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: white;
+    padding: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.popcorn-row select:focus {
+    outline: none;
+    border-color: #e11d48;
+}
+
+.popcorn-extras {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.popcorn-extras label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.popcorn-add-button {
+    margin-top: 0.5rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: #94a3b8;
+    padding: 0.6rem;
+    width: 100%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.popcorn-add-button:hover {
+    background: rgba(225,29,72,0.08);
+    color: #f8fafc;
+    border-color: rgba(225,29,72,0.3);
 }
 
 /* TOTAL */

@@ -663,16 +663,18 @@ async Task ConfirmReservation()
 {
 if (SelectedShowtime == null) return;
 
+var popcornOrders = PaymentStateService.PopcornOrders.Any() ? PaymentStateService.PopcornOrders : null;
 ConfirmationResult =
 await SeatSelectionService.ConfirmReservationAsync(
 SelectedShowtime.Id,
-SelectedSeatIds.ToList());
+SelectedSeatIds.ToList(),
+popcornOrders);
 
 ShowSeatsModal = false;
 
 PaymentStateService.SetPrice(TotalPriceCents);
 var movieTitleParam = !string.IsNullOrEmpty(_selectedMovieTitle) ? $"/{Uri.EscapeDataString(_selectedMovieTitle)}" : "";
-NavigationManager.NavigateTo($"/pin/{movieTitleParam}");
+NavigationManager.NavigateTo($"/pin{movieTitleParam}");
 }
 
 string GetSeatClass(SeatInfoDto? seat, bool selected)

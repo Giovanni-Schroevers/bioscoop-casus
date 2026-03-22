@@ -1,13 +1,16 @@
 @page "/movies/{MovieId}/ticketsale/{ShowtimeId}"
 @page "/movies/{MovieId}/ticketsale/{ShowtimeId}/{ReturnUrl}"
 @using System.Globalization
+@using BioscoopCasus.Models.DTOs
 @inject IStringLocalizer<SharedResource> L
 
 @inject NavigationManager NavigationManager
 @inject MovieInformationService MovieInformationService
 @inject TicketPricingService TicketPricingConfigService
 @inject PaymentStateService PaymentStateService
+@using BioscoopCasus.Web.Layout
 
+<TerminalShell>
 <div class="movies-page">
 <div class="movie-details-wrapper">
     <button class="return-button" @onclick="GoBackToOverview">
@@ -71,6 +74,59 @@ else
             }
         </div>
 
+        <div class="popcorn-section">
+            <h3>@L["PopcornTitle"]</h3>
+
+            @foreach (var item in _popcornItems)
+            {
+                var index = _popcornItems.IndexOf(item);
+                <div class="popcorn-item">
+                    <div class="popcorn-item-header">
+                        <span class="popcorn-item-number">@L["PopcornItem"] @(index + 1)</span>
+                        <button class="popcorn-remove" @onclick="@(() => _popcornItems.Remove(item))">✕</button>
+                    </div>
+
+                    <div class="popcorn-row">
+                        <label>@L["PopcornSizeLabel"]</label>
+                        <select @bind="item.Size">
+                            <option value="small">@L["PopcornSmall"] — @TicketPricingConfigService.GetPopcornPrice("small").ToString("C", CultureInfo.CurrentCulture)</option>
+                            <option value="medium">@L["PopcornMedium"] — @TicketPricingConfigService.GetPopcornPrice("medium").ToString("C", CultureInfo.CurrentCulture)</option>
+                            <option value="large">@L["PopcornLarge"] — @TicketPricingConfigService.GetPopcornPrice("large").ToString("C", CultureInfo.CurrentCulture)</option>
+                        </select>
+                    </div>
+
+                    <div class="popcorn-row">
+                        <label>@L["PopcornFlavor"]</label>
+                        <select @bind="item.Flavor">
+                            <option value="sweet">@L["FlavorSweet"]</option>
+                            <option value="salty">@L["FlavorSalty"]</option>
+                            <option value="mix">@L["FlavorMix"]</option>
+                            <option value="caramel">@L["FlavorCaramel"]</option>
+                        </select>
+                    </div>
+
+                    <div class="popcorn-extras">
+                        <label>
+                            <input type="checkbox" @bind="item.AddDrink" />
+                            @L["PopcornAddDrink"] (+@TicketPricingConfigService.GetDrinkPrice().ToString("C", CultureInfo.CurrentCulture))
+                        </label>
+
+                        @if (HasIntermission)
+                        {
+                            <label>
+                                <input type="checkbox" @bind="item.AddRefill" />
+                                @L["PopcornAddRefill"] (+@TicketPricingConfigService.GetRefillPrice().ToString("C", CultureInfo.CurrentCulture))
+                            </label>
+                        }
+                    </div>
+                </div>
+            }
+
+            <button class="popcorn-add-button" @onclick="@(() => _popcornItems.Add(new PopcornItem()))">
+                + @L["PopcornAdd"]
+            </button>
+        </div>
+
         <div class="total-section">
             <span>@L["Total"]</span>
             <strong>@TotalPrice.ToString("C", CultureInfo.CurrentCulture)</strong>
@@ -90,6 +146,7 @@ else
 
 </div>
 </div>
+</TerminalShell>
 
 @code {
 
@@ -112,6 +169,16 @@ private int _studentTickets;
 private int _seniorTickets;
 
 private bool _useVoucher;
+
+private List<PopcornItem> _popcornItems = new();
+
+private class PopcornItem
+{
+    public string Size { get; set; } = "small";
+    public string Flavor { get; set; } = "sweet";
+    public bool AddDrink { get; set; }
+    public bool AddRefill { get; set; }
+}
 
 private int _movieDurationMinutes;
 // TODO: Pass parameter for a movie being 3D
@@ -197,6 +264,9 @@ private bool IsSeniorDiscountValid =>
 private bool IsVoucherValid =>
     TicketPricingConfigService.IsVoucherValid(_showtime);
 
+private bool HasIntermission =>
+    TicketPricingConfigService.HasIntermission(_movieDurationMinutes);
+
 
 /*
  FINAL PRICES
@@ -220,6 +290,14 @@ private decimal SeniorPrice =>
         : BaseTicketPrice;
 
 
+private decimal PopcornTotal => _popcornItems.Sum(item =>
+{
+    var total = TicketPricingConfigService.GetPopcornPrice(item.Size);
+    if (item.AddDrink) total += TicketPricingConfigService.GetDrinkPrice();
+    if (item.AddRefill && HasIntermission) total += TicketPricingConfigService.GetRefillPrice();
+    return total;
+});
+
 private decimal TotalPrice
 {
     get
@@ -228,7 +306,8 @@ private decimal TotalPrice
             _normalTickets * NormalPrice +
             _childTickets * ChildPrice +
             _studentTickets * StudentPrice +
-            _seniorTickets * SeniorPrice;
+            _seniorTickets * SeniorPrice +
+            PopcornTotal;
 
         if (_useVoucher && IsVoucherValid)
         {
@@ -260,8 +339,11 @@ private void BuyTickets()
         return;
     }
 
-    // Store price in memory — never in the URL
+    // Store price and popcorn in memory — never in the URL
     PaymentStateService.SetPrice((int)(TotalPrice * 100));
+    PaymentStateService.SetPopcornOrders(_popcornItems.Select(p => new PopcornOrderDto(
+        p.Size, p.Flavor, p.AddDrink, p.AddRefill
+    )).ToList());
 
     NavigationManager.NavigateTo(
         $"/seat-reservation/{MovieId}/{ShowtimeId}/{TotalTickets}");

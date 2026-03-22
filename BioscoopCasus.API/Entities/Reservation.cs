@@ -8,4 +8,5 @@ public class Reservation
     // Navigation properties
     public Showtime Showtime { get; set; }
     public ICollection<ShowtimeSeat> ShowtimeSeats { get; set; } = new List<ShowtimeSeat>();
+    public ICollection<PopcornOrder> PopcornOrders { get; set; } = new List<PopcornOrder>();
 }

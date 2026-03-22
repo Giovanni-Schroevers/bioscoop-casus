@@ -573,4 +573,46 @@
   <data name="ShareMessage" xml:space="preserve">
     <value>I am going to {0} at Polo's Cinema Paradise Breda!</value>
   </data>
+  <data name="PopcornTitle" xml:space="preserve">
+    <value>Popcorn Arrangement</value>
+  </data>
+  <data name="PopcornItem" xml:space="preserve">
+    <value>Popcorn</value>
+  </data>
+  <data name="PopcornSizeLabel" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="PopcornAdd" xml:space="preserve">
+    <value>Add popcorn</value>
+  </data>
+  <data name="PopcornSmall" xml:space="preserve">
+    <value>Small</value>
+  </data>
+  <data name="PopcornMedium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="PopcornLarge" xml:space="preserve">
+    <value>Large</value>
+  </data>
+  <data name="PopcornFlavor" xml:space="preserve">
+    <value>Flavor</value>
+  </data>
+  <data name="FlavorSweet" xml:space="preserve">
+    <value>Sweet</value>
+  </data>
+  <data name="FlavorSalty" xml:space="preserve">
+    <value>Salty</value>
+  </data>
+  <data name="FlavorMix" xml:space="preserve">
+    <value>Sweet &amp; Salty Mix</value>
+  </data>
+  <data name="FlavorCaramel" xml:space="preserve">
+    <value>Caramel</value>
+  </data>
+  <data name="PopcornAddDrink" xml:space="preserve">
+    <value>Add a soft drink</value>
+  </data>
+  <data name="PopcornAddRefill" xml:space="preserve">
+    <value>Popcorn refill (intermission)</value>
+  </data>
 </root>

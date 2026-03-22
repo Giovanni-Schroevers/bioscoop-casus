@@ -155,6 +155,20 @@ public class SeatSelectionController : ControllerBase
             ShowtimeId = showtimeId
         };
 
+        if (request.PopcornOrders is { Count: > 0 })
+        {
+            foreach (var popcorn in request.PopcornOrders)
+            {
+                reservation.PopcornOrders.Add(new PopcornOrder
+                {
+                    Size = popcorn.Size,
+                    Flavor = popcorn.Flavor,
+                    AddDrink = popcorn.AddDrink,
+                    AddRefill = popcorn.AddRefill
+                });
+            }
+        }
+
         _context.Reservations.Add(reservation);
         await _context.SaveChangesAsync();
         

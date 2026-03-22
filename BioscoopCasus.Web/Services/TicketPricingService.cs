@@ -57,4 +57,18 @@ public class TicketPricingService
 
         return validWeekday;
     }
+
+    public decimal GetPopcornPrice(string size) => size switch
+    {
+        "small" => _pricingConfig.Popcorn.Small,
+        "medium" => _pricingConfig.Popcorn.Medium,
+        "large" => _pricingConfig.Popcorn.Large,
+        _ => 0m
+    };
+
+    public decimal GetDrinkPrice() => _pricingConfig.Popcorn.Drink;
+    public decimal GetRefillPrice() => _pricingConfig.Popcorn.Refill;
+
+    public bool HasIntermission(int durationMinutes) =>
+        durationMinutes > _pricingConfig.Rules.IntermissionThresholdMinutes;
 }

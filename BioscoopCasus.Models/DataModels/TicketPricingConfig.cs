@@ -6,6 +6,7 @@ public class TicketPricingConfig
     public DiscountConfig Discounts { get; set; } = new();
     public SurchargeConfig Surcharges { get; set; } = new();
     public RuleConfig Rules { get; set; } = new();
+    public PopcornConfig Popcorn { get; set; } = new();
 }
 
 public class BasePriceConfig
@@ -35,4 +36,14 @@ public class RuleConfig
     public List<int> StudentValidDays { get; set; } = new() { 1, 2, 3, 4 };
     public List<int> SeniorValidDays { get; set; } = new() { 1, 2, 3, 4 };
     public List<int> VoucherValidDays { get; set; } = new() { 1, 2, 3, 4 };
+    public int IntermissionThresholdMinutes { get; set; } = 120;
+}
+
+public class PopcornConfig
+{
+    public decimal Small { get; set; } = 5.00m;
+    public decimal Medium { get; set; } = 8.00m;
+    public decimal Large { get; set; } = 12.00m;
+    public decimal Drink { get; set; } = 2.00m;
+    public decimal Refill { get; set; } = 2.00m;
 }
