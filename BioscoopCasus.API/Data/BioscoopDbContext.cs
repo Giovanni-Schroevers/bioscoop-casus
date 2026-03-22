@@ -18,6 +18,7 @@ public class BioscoopDbContext : DbContext
     public DbSet<PinCard> PinCards { get; set; }
     public DbSet<ShowtimeSeat> ShowtimeSeats { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<PopcornOrder> PopcornOrders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -97,5 +98,12 @@ public class BioscoopDbContext : DbContext
             .WithMany()
             .HasForeignKey(r => r.ShowtimeId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // PopcornOrder belongs to Reservation
+        modelBuilder.Entity<PopcornOrder>()
+            .HasOne(p => p.Reservation)
+            .WithMany(r => r.PopcornOrders)
+            .HasForeignKey(p => p.ReservationId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

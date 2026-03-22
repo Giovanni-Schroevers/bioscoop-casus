@@ -4,6 +4,7 @@ using BioscoopCasus.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BioscoopCasus.API.Migrations
 {
     [DbContext(typeof(BioscoopDbContext))]
-    partial class BioscoopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260321024503_AddPopcornOrders")]
+    partial class AddPopcornOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,7 +68,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Movies", (string)null);
+                    b.ToTable("Movies");
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.PinCard", b =>
@@ -82,7 +85,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PinCards", (string)null);
+                    b.ToTable("PinCards");
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.PopcornOrder", b =>
@@ -114,7 +117,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("ReservationId");
 
-                    b.ToTable("PopcornOrders", (string)null);
+                    b.ToTable("PopcornOrders");
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Reservation", b =>
@@ -132,7 +135,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("ShowtimeId");
 
-                    b.ToTable("Reservations", (string)null);
+                    b.ToTable("Reservations");
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Room", b =>
@@ -161,7 +164,7 @@ namespace BioscoopCasus.API.Migrations
                     b.HasIndex("Number")
                         .IsUnique();
 
-                    b.ToTable("Rooms", (string)null);
+                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Row", b =>
@@ -185,7 +188,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Rows", (string)null);
+                    b.ToTable("Rows");
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Seat", b =>
@@ -211,7 +214,7 @@ namespace BioscoopCasus.API.Migrations
                     b.HasIndex("RoomId", "Row", "SeatNumber")
                         .IsUnique();
 
-                    b.ToTable("Seats", (string)null);
+                    b.ToTable("Seats");
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Showtime", b =>
@@ -237,7 +240,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Showtimes", (string)null);
+                    b.ToTable("Showtimes");
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.ShowtimeSeat", b =>
@@ -257,7 +260,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("SeatId");
 
-                    b.ToTable("ShowtimeSeats", (string)null);
+                    b.ToTable("ShowtimeSeats");
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.PopcornOrder", b =>

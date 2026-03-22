@@ -21,7 +21,8 @@ public record SeatSelectionResponseDto(
 );
 
 public record ReservationConfirmRequestDto(
-    List<int> SeatIds
+    List<int> SeatIds,
+    List<PopcornOrderDto>? PopcornOrders = null
 );
 
 public record ReservationConfirmResponseDto(

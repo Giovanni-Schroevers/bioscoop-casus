@@ -1,6 +1,7 @@
 @page "/movies/{MovieId}/ticketsale/{ShowtimeId}"
 @page "/movies/{MovieId}/ticketsale/{ShowtimeId}/{ReturnUrl}"
 @using System.Globalization
+@using BioscoopCasus.Models.DTOs
 @inject IStringLocalizer<SharedResource> L
 
 @inject NavigationManager NavigationManager
@@ -338,8 +339,11 @@ private void BuyTickets()
         return;
     }
 
-    // Store price in memory — never in the URL
+    // Store price and popcorn in memory — never in the URL
     PaymentStateService.SetPrice((int)(TotalPrice * 100));
+    PaymentStateService.SetPopcornOrders(_popcornItems.Select(p => new PopcornOrderDto(
+        p.Size, p.Flavor, p.AddDrink, p.AddRefill
+    )).ToList());
 
     NavigationManager.NavigateTo(
         $"/seat-reservation/{MovieId}/{ShowtimeId}/{TotalTickets}");
