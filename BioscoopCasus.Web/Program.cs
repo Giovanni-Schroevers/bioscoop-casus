@@ -8,6 +8,7 @@ using BioscoopCasus.Web;
 using BioscoopCasus.Web.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
+using BioscoopCasus.Web.Handlers;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -15,11 +16,17 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 var apiBase = new Uri("http://localhost:5064/");
 
+// Register the custom Accept-Language header handler
+builder.Services.AddTransient<AcceptLanguageHeaderHandler>();
+
 // Default HttpClient used by most services
-builder.Services.AddScoped(sp => new HttpClient
+builder.Services.AddHttpClient("DefaultClient", client =>
 {
-    BaseAddress = apiBase
-});
+    client.BaseAddress = apiBase;
+}).AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
+
+builder.Services.AddScoped(sp => 
+    sp.GetRequiredService<IHttpClientFactory>().CreateClient("DefaultClient"));
 
 // Auth
 builder.Services.AddAuthorizationCore();
@@ -42,28 +49,31 @@ builder.Services.AddTransient<JwtAuthorizationMessageHandler>();
 builder.Services.AddHttpClient<MovieService>(client =>
 {
     client.BaseAddress = apiBase;
-}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>()
+  .AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
 
 builder.Services.AddHttpClient<RoomService>(client =>
 {
     client.BaseAddress = apiBase;
-}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>()
+  .AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
 
 builder.Services.AddHttpClient<ShowtimeService>(client =>
 {
     client.BaseAddress = apiBase;
-}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>()
+  .AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
 
 // Seat selection uses another backend
 builder.Services.AddHttpClient<SeatSelectionService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:5064/");
-});
+}).AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
 
 builder.Services.AddHttpClient<PaymentService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:5064/");
-});
+}).AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
