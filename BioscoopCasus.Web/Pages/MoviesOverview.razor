@@ -3,6 +3,7 @@
 @inject NavigationManager NavigationManager
 @using BioscoopCasus.Web.Layout
 @inject IStringLocalizer<SharedResource> L
+@inject MysteryShowtimeService MysteryShowtimeService
 
 <TerminalShell>
 <div class="movies-page">
@@ -11,6 +12,13 @@
         <span>@L["BackToHome"]</span>
     </button>
     <h1>@L["MoviesTitle"]</h1>
+
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button class="manager-toggle @(_managerMode ? "active" : "")"
+                @onclick="() => _managerMode = !_managerMode">
+            🔧 @(_managerMode ? "Manager-modus aan" : "Manager-modus")
+        </button>
+    </div>
 
     <select class="day-select" @onchange="OnDayChanged">
         @foreach (var day in _availableDays)
@@ -30,6 +38,17 @@
     else
     {
         <div class="movie-grid">
+            <div class="movie-card clickable-card mystery-entry-card"
+                 @onclick="@(() => NavigationManager.NavigateTo("/mystery"))">
+                <div class="mystery-poster">🎭</div>
+                <div class="movie-card-info">
+                    <h3>Mystery Movie</h3>
+                    <p class="movie-genres">Verrassing</p>
+                    <p class="movie-duration" style="color:#e50914;font-weight:600;">EUR 2,50 mystery korting + kind/student/65+ korting</p>
+                    <p class="showtime-label">Laat je verrassen →</p>
+                </div>
+            </div>
+
             @foreach (var movie in _movies)
             {
                 <div class="movie-card clickable-card" @onclick="@(() => OpenMovie(movie.Id))">
@@ -42,11 +61,22 @@
                         <div class="showtimes">
                             @foreach (var showtime in movie.Showtimes)
                             {
-                                <span class="showtime"
+                                var isMystery = MysteryShowtimeService.IsMystery(showtime.Id);
+                                <span class="showtime @(isMystery ? "mystery-showtime" : "")"
                                       @onclick="() => OpenTicketSale(movie.Id, showtime.Id)"
                                       @onclick:stopPropagation>
                                     @showtime.StartTime.ToString("HH:mm")
+                                    @if (isMystery) { <span> 🎭</span> }
                                 </span>
+                                @if (_managerMode)
+                                {
+                                    <button class="mystery-toggle-btn @(isMystery ? "on" : "")"
+                                            title="@(isMystery ? "Mystery uitzetten" : "Als mystery markeren")"
+                                            @onclick="() => MysteryShowtimeService.Toggle(showtime.Id)"
+                                            @onclick:stopPropagation>
+                                        @(isMystery ? "🔓" : "🔒")
+                                    </button>
+                                }
                             }
                         </div>
                     </div>
@@ -57,11 +87,61 @@
 
 </div>
 </TerminalShell>
+
+<style>
+.mystery-entry-card {
+    border: 2px dashed #e50914 !important;
+    background: #1a0a0b !important;
+}
+.mystery-poster {
+    font-size: 4rem;
+    height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0e0505;
+    border-radius: 6px 6px 0 0;
+}
+.mystery-showtime {
+    background: #4a0a10 !important;
+    border-color: #e50914 !important;
+}
+.mystery-toggle-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: .85rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    vertical-align: middle;
+    opacity: .6;
+    transition: opacity .15s;
+}
+.mystery-toggle-btn:hover { opacity: 1; }
+.mystery-toggle-btn.on { opacity: 1; }
+.manager-toggle {
+    background: #1e2533;
+    color: #aaa;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: .8rem;
+    cursor: pointer;
+    transition: all .15s;
+}
+.manager-toggle.active {
+    background: #2b3a1a;
+    border-color: #5a9e2a;
+    color: #8fce4a;
+}
+</style>
+
 @code
 {
     private List<MoviesOverviewDto>? _movies;
     private List<DateTime> _availableDays = [];
     private DateTime _selectedDay;
+    private bool _managerMode;
 
     protected override async Task OnInitializedAsync()
     {

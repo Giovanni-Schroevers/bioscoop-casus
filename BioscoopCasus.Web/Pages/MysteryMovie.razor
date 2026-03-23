@@ -1,0 +1,301 @@
+@page "/mystery"
+@page "/MysteryMovie"
+@using BioscoopCasus.Web.Layout
+@using System.Globalization
+@inject MoviesOverviewService MoviesOverviewService
+@inject MysteryMovieStateService MysteryMovieStateService
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>🎭 Mystery Movie</PageTitle>
+
+<TerminalShell>
+<div class="movies-page mystery-page">
+
+    <button class="return-button" @onclick="@(() => NavigationManager.NavigateTo("/movies"))">
+        <span class="return-button-icon">&larr;</span>
+        <span>@L["BackToMovies"]</span>
+    </button>
+
+    <div class="mystery-header">
+        <div class="mystery-icon">🎭</div>
+        <h1>Mystery Movie</h1>
+        <p class="mystery-subtitle">
+            Laat je verrassen - kies een tijd en ontdek pas in de zaal welke film je ziet.<br/>
+            <strong style="color:#e50914">EUR 2,50 mystery korting</strong> + extra korting voor kind, student en 65+.
+        </p>
+    </div>
+
+    <select class="day-select" @onchange="OnDayChanged">
+        @foreach (var day in _availableDays)
+        {
+            <option value="@day.ToString("yyyy-MM-dd")">
+                @day.ToString("dddd dd MMMM", CultureInfo.CurrentCulture)
+            </option>
+        }
+    </select>
+
+    @if (_isLoading)
+    {
+        <p class="empty-message">@L["Loading"]</p>
+    }
+    else
+    {
+        <!-- GENRE FILTER -->
+        @if (_allGenres.Any())
+        {
+            <div class="genre-filter">
+                <span class="genre-filter-label">Genres:</span>
+                @foreach (var genre in _allGenres)
+                {
+                    var active = _selectedGenres.Contains(genre);
+                    <button class="genre-chip @(active ? "active" : "")"
+                            @onclick="() => ToggleGenre(genre)">
+                        @genre
+                    </button>
+                }
+                @if (_selectedGenres.Any())
+                {
+                    <button class="genre-chip clear-chip" @onclick="ClearGenres">✕ Alles</button>
+                }
+            </div>
+        }
+
+        @if (!_filteredSlots.Any())
+        {
+            <p class="empty-message">
+                Geen mystery voorstellingen beschikbaar op deze dag
+                @if (_selectedGenres.Any()) { <span> met de gekozen genres</span>  }
+                .
+            </p>
+        }
+        else
+        {
+            <div class="mystery-grid">
+                @foreach (var slot in _filteredSlots)
+                {
+                    <div class="mystery-card" @onclick="() => SelectSlot(slot)">
+                        <div class="mystery-time">@slot.Time.ToString("HH:mm")</div>
+                        <div class="mystery-duration">± @RoundToFive(slot.AverageDuration) min</div>
+                        <div class="mystery-genres">@string.Join(" · ", slot.Genres)</div>
+                        <div class="mystery-cta">Kies deze tijd →</div>
+                    </div>
+                }
+            </div>
+        }
+    }
+
+</div>
+</TerminalShell>
+
+<style>
+.mystery-page { max-width: 900px; }
+
+.mystery-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+.mystery-icon { font-size: 3rem; line-height: 1; margin-bottom: 8px; }
+.mystery-subtitle { color: #ccc; font-size: .95rem; margin-top: 6px; line-height: 1.6; }
+
+.genre-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.genre-filter-label { color: #aaa; font-size: .85rem; margin-right: 4px; }
+.genre-chip {
+    background: #1e2533;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all .15s;
+}
+.genre-chip.active {
+    background: #e50914;
+    border-color: #e50914;
+    color: #fff;
+}
+.genre-chip.clear-chip { border-color: #666; }
+.genre-chip:hover { opacity: .85; }
+
+.mystery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px;
+    margin-top: 8px;
+}
+.mystery-card {
+    background: #1a1f2b;
+    border: 1px solid #2b3242;
+    border-radius: 12px;
+    padding: 24px 20px;
+    cursor: pointer;
+    transition: all .2s;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.mystery-card:hover {
+    background: #22293a;
+    border-color: #e50914;
+    transform: translateY(-2px);
+}
+.mystery-time {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+}
+.mystery-duration { color: #aaa; font-size: .85rem; }
+.mystery-genres { color: #ccc; font-size: .82rem; }
+.mystery-cta {
+    margin-top: 8px;
+    color: #e50914;
+    font-size: .85rem;
+    font-weight: 600;
+}
+</style>
+
+@code {
+
+    private record MysterySlot(
+        DateTime Time,
+        int AverageDuration,
+        List<string> Genres,
+        List<(int MovieId, int ShowtimeId)> Candidates
+    );
+
+    private List<DateTime> _availableDays = [];
+    private DateTime _selectedDay;
+    private bool _isLoading = true;
+
+    private List<string> _allGenres = [];
+    private HashSet<string> _selectedGenres = [];
+
+    private List<MysterySlot> _allSlots = [];
+    private List<MysterySlot> _filteredSlots = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var today = DateTime.Today;
+        for (var d = today; d <= today.AddDays(7); d = d.AddDays(1))
+            _availableDays.Add(d);
+        _selectedDay = today;
+        await LoadSlots();
+    }
+
+    private async Task OnDayChanged(ChangeEventArgs e)
+    {
+        _selectedDay = DateTime.Parse(e.Value!.ToString()!);
+        _selectedGenres.Clear();
+        await LoadSlots();
+    }
+
+    private async Task LoadSlots()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var movies = await MoviesOverviewService.GetMoviesAsync(_selectedDay);
+
+            var byTime = new Dictionary<DateTime, List<(int MovieId, int ShowtimeId, int Duration, List<string> Genres)>>();
+
+            foreach (var movie in movies ?? [])
+            {
+                var genres = (movie.Genres ?? "")
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .ToList();
+
+                foreach (var showtime in movie.Showtimes ?? [])
+                {
+                    if (!byTime.TryGetValue(showtime.StartTime, out var list))
+                    {
+                        list = [];
+                        byTime[showtime.StartTime] = list;
+                    }
+                    list.Add((movie.Id, showtime.Id, movie.DurationMinutes, genres));
+                }
+            }
+
+            _allSlots = byTime
+                .OrderBy(kv => kv.Key)
+                .Select(kv =>
+                {
+                    var avgDuration = (int)kv.Value.Average(x => x.Duration);
+                    var genres = kv.Value
+                        .SelectMany(x => x.Genres)
+                        .Distinct()
+                        .OrderBy(g => g)
+                        .ToList();
+                    var candidates = kv.Value
+                        .Select(x => (x.MovieId, x.ShowtimeId))
+                        .ToList();
+                    return new MysterySlot(kv.Key, avgDuration, genres, candidates);
+                })
+                .ToList();
+
+            _allGenres = _allSlots
+                .SelectMany(s => s.Genres)
+                .Distinct()
+                .OrderBy(g => g)
+                .ToList();
+
+            ApplyFilter();
+        }
+        catch
+        {
+            _allSlots = [];
+        }
+
+        _isLoading = false;
+    }
+
+    private void ToggleGenre(string genre)
+    {
+        if (!_selectedGenres.Remove(genre))
+            _selectedGenres.Add(genre);
+        ApplyFilter();
+    }
+
+    private void ClearGenres()
+    {
+        _selectedGenres.Clear();
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        if (!_selectedGenres.Any())
+        {
+            _filteredSlots = [.._allSlots];
+            return;
+        }
+
+        _filteredSlots = _allSlots
+            .Where(s => _selectedGenres.All(g => s.Genres.Contains(g)))
+            .ToList();
+    }
+
+    private void SelectSlot(MysterySlot slot)
+    {
+        var pool = slot.Candidates;
+
+        if (pool.Count == 0) return;
+
+        var pick = pool[Random.Shared.Next(pool.Count)];
+
+        MysteryMovieStateService.SetMystery();
+        NavigationManager.NavigateTo($"/movies/{pick.MovieId}/ticketsale/{pick.ShowtimeId}");
+    }
+
+    private static int RoundToFive(int minutes)
+        => (int)(Math.Round(minutes / 5.0) * 5);
+}
