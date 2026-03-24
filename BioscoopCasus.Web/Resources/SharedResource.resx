@@ -624,4 +624,184 @@
   <data name="EmailRequired" xml:space="preserve">
     <value>Please enter a valid email address.</value>
   </data>
+  <data name="ReservationId" xml:space="preserve">
+    <value>Reservation Id</value>
+  </data>
+  <data name="MovieTitle" xml:space="preserve">
+    <value>Movie title</value>
+  </data>
+  <data name="RoomName" xml:space="preserve">
+    <value>Room name</value>
+  </data>
+  <data name="Seats" xml:space="preserve">
+    <value>Seats</value>
+  </data>
+  <data name="QrCodeContentId" xml:space="preserve">
+    <value>QR Code ID</value>
+  </data>
+  <data name="TicketPrintUrl" xml:space="preserve">
+    <value>Ticket print URL</value>
+  </data>
+  <data name="UndoTooltip" xml:space="preserve">
+  <value>Undo (Ctrl+Z)</value>
+</data>
+  <data name="RedoTooltip" xml:space="preserve">
+  <value>Redo (Ctrl+Y / Ctrl+Shift+Z)</value>
+</data>
+  <data name="BoldTooltip" xml:space="preserve">
+  <value>Bold (Ctrl+B)</value>
+</data>
+  <data name="ItalicTooltip" xml:space="preserve">
+  <value>Italic (Ctrl+I)</value>
+</data>
+  <data name="UnderlineTooltip" xml:space="preserve">
+  <value>Underline (Ctrl+U)</value>
+</data>
+  <data name="ClearFormattingTooltip" xml:space="preserve">
+  <value>Clear formatting</value>
+</data>
+  <data name="Paragraph" xml:space="preserve">
+  <value>Paragraph</value>
+</data>
+  <data name="Heading1" xml:space="preserve">
+  <value>Heading 1</value>
+</data>
+  <data name="Heading2" xml:space="preserve">
+  <value>Heading 2</value>
+</data>
+  <data name="Heading3" xml:space="preserve">
+  <value>Heading 3</value>
+</data>
+  <data name="Quote" xml:space="preserve">
+  <value>Quote</value>
+</data>
+  <data name="BulletedListTooltip" xml:space="preserve">
+  <value>Bulleted list (Ctrl+Shift+8)</value>
+</data>
+  <data name="NumberedListTooltip" xml:space="preserve">
+  <value>Numbered list (Ctrl+Shift+7)</value>
+</data>
+  <data name="InsertOrEditLinkTooltip" xml:space="preserve">
+  <value>Insert or edit link</value>
+</data>
+  <data name="EditLink" xml:space="preserve">
+  <value>Edit link</value>
+</data>
+  <data name="InsertLink" xml:space="preserve">
+  <value>Insert link</value>
+</data>
+  <data name="LinkUrlPlaceholder" xml:space="preserve">
+  <value>https://example.com</value>
+</data>
+  <data name="OptionalLinkText" xml:space="preserve">
+  <value>Optional link text</value>
+</data>
+  <data name="Update" xml:space="preserve">
+  <value>Update</value>
+</data>
+  <data name="Remove" xml:space="preserve">
+  <value>Remove</value>
+</data>
+  <data name="InsertImageTooltip" xml:space="preserve">
+  <value>Insert image</value>
+</data>
+  <data name="InsertImage" xml:space="preserve">
+  <value>Insert image</value>
+</data>
+  <data name="ImageUrlPlaceholder" xml:space="preserve">
+  <value>Image URL</value>
+</data>
+  <data name="AltTextPlaceholder" xml:space="preserve">
+  <value>Alt text</value>
+</data>
+  <data name="Insert" xml:space="preserve">
+  <value>Insert</value>
+</data>
+  <data name="TextColorTooltip" xml:space="preserve">
+  <value>Text color</value>
+</data>
+  <data name="TextColor" xml:space="preserve">
+  <value>Text color</value>
+</data>
+  <data name="Apply" xml:space="preserve">
+  <value>Apply</value>
+</data>
+  <data name="InsertVariable" xml:space="preserve">
+  <value>Insert variable</value>
+</data>
+  <data name="Visual" xml:space="preserve">
+  <value>Visual</value>
+</data>
+  <data name="Html" xml:space="preserve">
+  <value>HTML</value>
+</data>
+  <data name="Desktop" xml:space="preserve">
+  <value>Desktop</value>
+</data>
+  <data name="Mobile" xml:space="preserve">
+  <value>Mobile</value>
+</data>
+  <data name="SaveTemplate" xml:space="preserve">
+  <value>Save template</value>
+</data>
+  <data name="Editor" xml:space="preserve">
+  <value>Editor</value>
+</data>
+  <data name="HtmlMode" xml:space="preserve">
+  <value>HTML mode</value>
+</data>
+  <data name="LivePreview" xml:space="preserve">
+  <value>Live preview</value>
+</data>
+  <data name="ChooseVariableAtCursor" xml:space="preserve">
+  <value>Choose a variable to insert at the cursor position.</value>
+</data>
+  <data name="SearchVariablesPlaceholder" xml:space="preserve">
+  <value>Search variables...</value>
+</data>
+  <data name="NoVariablesFound" xml:space="preserve">
+  <value>No variables found</value>
+</data>
+  <data name="EnterNameForTemplate" xml:space="preserve">
+  <value>Enter a name for this email template.</value>
+</data>
+  <data name="TemplateNamePlaceholder" xml:space="preserve">
+  <value>Template name</value>
+</data>
+  <data name="Saving" xml:space="preserve">
+    <value>Saving</value>
+  </data>
+  <data name="TemplateSaved" xml:space="preserve">
+    <value>Template saved</value>
+  </data>
+  <data name="Saved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="TemplateNameRequired" xml:space="preserve">
+    <value>Template name is required</value>
+  </data>
+  <data name="TemplateBodyEmpty" xml:space="preserve">
+    <value>Template body is empty</value>
+  </data>
+  <data name="NoTemplateSelected" xml:space="preserve">
+    <value>No template selected</value>
+  </data>
+  <data name="TemplateCreated" xml:space="preserve">
+    <value>Template created</value>
+  </data>
+  <data name="NoDataWasReturned" xml:space="preserve">
+    <value>No data was returned</value>
+  </data>
+  <data name="CouldNotLoadTemplates" xml:space="preserve">
+    <value>Could not load the templates</value>
+  </data>
+  <data name="EnterTemplateName" xml:space="preserve">
+    <value>Enter a name for the new email template:</value>
+  </data>
+  <data name="NewTemplate" xml:space="preserve">
+    <value>New template</value>
+  </data>
+  <data name="SelectTemplate" xml:space="preserve">
+    <value>Select a template</value>
+  </data>
 </root>
