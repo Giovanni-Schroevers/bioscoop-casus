@@ -2,7 +2,7 @@
 
 public record TicketMailSendDto(
     string Email,
-    string TicketCode);
+    int ReservationId = 0);
 
 public record TicketMailResponseDto(
     bool Success);

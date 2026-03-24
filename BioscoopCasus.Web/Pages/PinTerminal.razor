@@ -1,10 +1,12 @@
-@page "/pin"
-@page "/pin/{MovieTitle}"
+@page "/payment"
+@page "/payment/{MovieTitle}"
 @using System.Globalization
 @inject PaymentService PaymentService
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> L
 @inject PaymentStateService PaymentStateService
+@inject CheckoutStateService CheckoutStateService
+@inject ReservationService ReservationService
 
 <div class="pin-page">
     <h1>@L["PaymentTitle"]</h1>
@@ -254,7 +256,7 @@
 @code {
     [Parameter] public int TotalPriceCents { get; set; }  // kept for interface compat — value comes from PaymentStateService
     [Parameter] public string? MovieTitle { get; set; }
-
+    
     private string EnteredPin = "";
     private string? Message;
     private bool IsSuccess;
@@ -262,6 +264,23 @@
     private string _email = "";
     private string? _emailError;
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (!CheckoutStateService.HasActiveCheckout)
+        {
+            NavigationManager.NavigateTo("/films");
+            return;
+        }
+
+        // Example values
+        var showtimeId = CheckoutStateService.ShowtimeId!.Value;
+        var selectedSeatIds = CheckoutStateService.SelectedSeatIds;
+        var movieTitle = CheckoutStateService.MovieTitle;
+        var showtimeDisplay = CheckoutStateService.ShowtimeDisplay;
+        var popcornOrders = CheckoutStateService.PopcornOrders;
+        var totalPriceCents = CheckoutStateService.TotalPriceCents;
+    }
+    
     protected override void OnInitialized()
     {
         // Price is read from the state service — it was never in the URL
@@ -309,12 +328,41 @@
         if (IsSuccess)
         {
             Message = null;
-            _paymentDone = true;
+            _paymentDone = await CompletePaymentAsync();
+            if (!_paymentDone)
+                Message = "Error";
         }
         else
         {
             Message = L["InvalidPinTryAgain"];
         }
+    }
+    
+    private async Task<bool> CompletePaymentAsync()
+    {
+        if (!CheckoutStateService.HasActiveCheckout || !CheckoutStateService.ShowtimeId.HasValue)
+        {
+            NavigationManager.NavigateTo("/films");
+            return false;
+        }
+
+        var confirmationResult =
+            await ReservationService.ConfirmReservationAsync(
+                CheckoutStateService.ShowtimeId.Value,
+                CheckoutStateService.SelectedSeatIds,
+                CheckoutStateService.PopcornOrders);
+
+        if (confirmationResult != null)
+        {
+            var success = await PaymentService.SendReservationEmail(_email, confirmationResult.ReservationId);
+            if(success)
+                CheckoutStateService.Clear();
+
+            return success;
+        }
+
+        NavigationManager.NavigateTo("/films");
+        return false;
     }
 
     private void GoHome()

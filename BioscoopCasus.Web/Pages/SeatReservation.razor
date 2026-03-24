@@ -4,6 +4,7 @@
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> L
 @inject PaymentStateService PaymentStateService
+@inject CheckoutStateService CheckoutStateService
 
 <h1>@L["SeatSelectionTitle"]</h1>
 
@@ -185,17 +186,18 @@ else
 <div class="modal-overlay" style="z-index:1100">
     <div class="modal" style="max-width:420px;text-align:center;">
         <div style="font-size:2.4rem;margin-bottom:8px;">🪑</div>
-        <h2 style="margin-bottom:12px;">Iemand zit alleen</h2>
+        <h2 style="margin-bottom:12px;">@L["SitAlone"]</h2>
         <p style="color:#ccc;margin-bottom:8px;">
-            In je stoelkeuze zit <strong>1 persoon los van de rest</strong>.<br/>
-            Wil je hiermee doorgaan?
+            @L["EmptySeatPart1"] <strong>@L["EmptySeatPart2"]</strong> @L["EmptySeatPart3"] 
+            <br/>
+            @L["EmptySeatPart4"]
         </p>
         <div class="modal-actions" style="justify-content:center;margin-top:24px;">
             <button class="cancel-button" @onclick="CancelLonelyWarning">
-                Annuleer
+                @L["Cancel"]
             </button>
             <button class="confirm-button" @onclick="ProceedAfterWarning">
-                Ja, bevestig
+                @L["YesConfirm"]
             </button>
         </div>
     </div>
@@ -403,186 +405,187 @@ else
 @code {
 
 // Optional route parameters (set when navigating from MovieTicketSale)
-[Parameter] public string? MovieId { get; set; }
-[Parameter] public string? ShowtimeId { get; set; }
-[Parameter] public int TotalTickets { get; set; }
+    [Parameter] public string? MovieId { get; set; }
+    [Parameter] public string? ShowtimeId { get; set; }
+    [Parameter] public int TotalTickets { get; set; }
 
 // Price comes from PaymentStateService — not from the URL
-private int TotalPriceCents => PaymentStateService.TotalPriceCents;
+    private int TotalPriceCents => PaymentStateService.TotalPriceCents;
 
-List<MovieResponseDto>? Movies;
+    List<MovieResponseDto>? Movies;
 
-bool ShowShowtimeModal;
-bool ShowGroupSizeModal;
-bool ShowSeatsModal;
-bool IsLoadingSeats;
-bool _showLonelyWarning;
+    bool ShowShowtimeModal;
+    bool ShowGroupSizeModal;
+    bool ShowSeatsModal;
+    bool IsLoadingSeats;
+    bool _showLonelyWarning;
 
-MovieResponseDto? SelectedMovie;
-ShowtimeResponseDto? SelectedShowtime;
+    MovieResponseDto? SelectedMovie;
+    ShowtimeResponseDto? SelectedShowtime;
 
-List<ShowtimeResponseDto>? Showtimes;
-List<SeatInfoDto>? AllSeats;
+    List<ShowtimeResponseDto>? Showtimes;
+    List<SeatInfoDto>? AllSeats;
 
-SeatSelectionResponseDto? SeatSelectionResult;
+    SeatSelectionResponseDto? SeatSelectionResult;
 
-HashSet<int> SelectedSeatIds = new();
+    HashSet<int> SelectedSeatIds = new();
 
-ReservationConfirmResponseDto? ConfirmationResult;
+    ReservationConfirmResponseDto? ConfirmationResult;
 
-int GroupSize = 1;
+    int GroupSize = 1;
 
-int MaxRow;
-int MaxSeat;
+    int MaxRow;
+    int MaxSeat;
 
-string? _selectedMovieTitle;
-string? _selectedShowtimeDisplay;
-string? _seatSelectionError;
+    string? _selectedMovieTitle;
+    string? _selectedShowtimeDisplay;
+    string? _seatSelectionError;
 
 // True when navigated here from the ticket sale flow
-bool _cameFromTicketSale => !string.IsNullOrEmpty(MovieId) && !string.IsNullOrEmpty(ShowtimeId);
+    bool _cameFromTicketSale => !string.IsNullOrEmpty(MovieId) && !string.IsNullOrEmpty(ShowtimeId);
 
 
-protected override async Task OnInitializedAsync()
-{
-if (_cameFromTicketSale)
-{
+    protected override async Task OnInitializedAsync()
+    {
+        if (_cameFromTicketSale)
+        {
 // Came from ticket sale: load showtimes for the given movie+showtime
 // so we can resolve the showtime object, then open group size modal.
-await LoadShowtimeFromParams();
-}
-else
-{
+            await LoadShowtimeFromParams();
+        }
+        else
+        {
 // Standalone mode: show movie grid
-Movies = await SeatSelectionService.GetMoviesAsync();
-}
-}
+            Movies = await SeatSelectionService.GetMoviesAsync();
+        }
+    }
 
 // Resolve the ShowtimeResponseDto from the URL params
-async Task LoadShowtimeFromParams()
-{
-try
-{ if (!int.TryParse(MovieId, out var movieIdInt)) return; 
-    var showtimes = await SeatSelectionService.GetShowtimesForMovieAsync(movieIdInt);
-if (showtimes != null)
-{
-SelectedShowtime = showtimes.FirstOrDefault(
-s => s.Id.ToString() == ShowtimeId);
+    async Task LoadShowtimeFromParams()
+    {
+        try
+        {
+            if (!int.TryParse(MovieId, out var movieIdInt)) return;
+            var showtimes = await SeatSelectionService.GetShowtimesForMovieAsync(movieIdInt);
+            if (showtimes != null)
+            {
+                SelectedShowtime = showtimes.FirstOrDefault(s => s.Id.ToString() == ShowtimeId);
 
-if (SelectedShowtime != null)
-_selectedShowtimeDisplay = SelectedShowtime.StartTime.ToString("dddd dd MMMM HH:mm");
-}
+                if (SelectedShowtime != null)
+                    _selectedShowtimeDisplay = SelectedShowtime.StartTime.ToString("dddd dd MMMM HH:mm");
+            }
 
 // Try to get movie title for display
-var movies = await SeatSelectionService.GetMoviesAsync();
-SelectedMovie = movies?.FirstOrDefault(m => m.Id.ToString() == MovieId);
-_selectedMovieTitle = SelectedMovie?.Title;
-}
-catch (Exception ex)
-{
-Console.WriteLine($"Error loading showtime from params: {ex.Message}");
-}
+            var movies = await SeatSelectionService.GetMoviesAsync();
+            SelectedMovie = movies?.FirstOrDefault(m => m.Id.ToString() == MovieId);
+            _selectedMovieTitle = SelectedMovie?.Title;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading showtime from params: {ex.Message}");
+        }
 
 // Pre-fill group size from ticket count and open modal
-GroupSize = TotalTickets > 0 ? TotalTickets : 1;
-ShowGroupSizeModal = true;
-}
+        GroupSize = TotalTickets > 0 ? TotalTickets : 1;
+        ShowGroupSizeModal = true;
+    }
 
 
 // Standalone flow
 
-async Task SelectMovie(MovieResponseDto movie)
-{
-SelectedMovie = movie;
-_selectedMovieTitle = movie.Title;
-ShowShowtimeModal = true;
-Showtimes = await SeatSelectionService.GetShowtimesForMovieAsync(movie.Id);
-}
+    async Task SelectMovie(MovieResponseDto movie)
+    {
+        SelectedMovie = movie;
+        _selectedMovieTitle = movie.Title;
+        ShowShowtimeModal = true;
+        Showtimes = await SeatSelectionService.GetShowtimesForMovieAsync(movie.Id);
+    }
 
-void CloseShowtimeModal()
-{
-ShowShowtimeModal = false;
-}
+    void CloseShowtimeModal()
+    {
+        ShowShowtimeModal = false;
+    }
 
-void SelectShowtime(ShowtimeResponseDto showtime)
-{
-SelectedShowtime = showtime;
-_selectedShowtimeDisplay = showtime.StartTime.ToString("dddd dd MMMM HH:mm");
-ShowShowtimeModal = false;
-ShowGroupSizeModal = true;
-}
+    void SelectShowtime(ShowtimeResponseDto showtime)
+    {
+        SelectedShowtime = showtime;
+        _selectedShowtimeDisplay = showtime.StartTime.ToString("dddd dd MMMM HH:mm");
+        ShowShowtimeModal = false;
+        ShowGroupSizeModal = true;
+    }
 
 
 // Shared flow
 
-async Task ConfirmGroupSize()
-{
-ShowGroupSizeModal = false;
-ShowSeatsModal = true;
-SelectedSeatIds.Clear();
-_seatSelectionError = null;
-await LoadSeats();
-}
+    async Task ConfirmGroupSize()
+    {
+        ShowGroupSizeModal = false;
+        ShowSeatsModal = true;
+        SelectedSeatIds.Clear();
+        _seatSelectionError = null;
+        await LoadSeats();
+    }
 
-async Task LoadSeats()
-{
-if (SelectedShowtime == null) return;
+    async Task LoadSeats()
+    {
+        if (SelectedShowtime == null) return;
 
-IsLoadingSeats = true;
-StateHasChanged();
+        IsLoadingSeats = true;
+        StateHasChanged();
 
-try
-{
-AllSeats =
-await SeatSelectionService.GetAvailableSeatsAsync(SelectedShowtime.Id);
+        try
+        {
+            AllSeats =
+                await SeatSelectionService.GetAvailableSeatsAsync(SelectedShowtime.Id);
 
-if (AllSeats != null && AllSeats.Any())
-{
-SeatSelectionResult =
-await SeatSelectionService.SuggestSeatsAsync(SelectedShowtime.Id, GroupSize);
+            if (AllSeats != null && AllSeats.Any())
+            {
+                SeatSelectionResult =
+                    await SeatSelectionService.SuggestSeatsAsync(SelectedShowtime.Id, GroupSize);
 
-if (SeatSelectionResult != null)
-{
-SelectedSeatIds =
-new HashSet<int>(SeatSelectionResult.SuggestedSeats.Select(x => x.Id));
-}
+                if (SeatSelectionResult != null)
+                {
+                    SelectedSeatIds =
+                        new HashSet<int>(SeatSelectionResult.SuggestedSeats.Select(x => x.Id));
+                }
 
-MaxRow = AllSeats.Max(x => x.Row);
-MaxSeat = AllSeats.Max(x => x.SeatNumber);
-}
-}
-catch (Exception ex)
-{
-Console.WriteLine($"Error loading seats: {ex.Message}");
-AllSeats = null;
-}
-finally
-{
-IsLoadingSeats = false;
-StateHasChanged();
-}
-}
+                MaxRow = AllSeats.Max(x => x.Row);
+                MaxSeat = AllSeats.Max(x => x.SeatNumber);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading seats: {ex.Message}");
+            AllSeats = null;
+        }
+        finally
+        {
+            IsLoadingSeats = false;
+            StateHasChanged();
+        }
+    }
 
-void ToggleSeatSelection(SeatInfoDto? seat)
-{
-if (seat == null || !seat.IsAvailable) return;
+    void ToggleSeatSelection(SeatInfoDto? seat)
+    {
+        if (seat == null || !seat.IsAvailable) return;
 
-_seatSelectionError = null;
+        _seatSelectionError = null;
 
-if (SelectedSeatIds.Contains(seat.Id))
-{
-SelectedSeatIds.Remove(seat.Id);
-}
-else
-{
-if (SelectedSeatIds.Count >= GroupSize)
-{
-_seatSelectionError = L["MaxSeatsError", GroupSize];
-return;
-}
-SelectedSeatIds.Add(seat.Id);
-}
-}
+        if (SelectedSeatIds.Contains(seat.Id))
+        {
+            SelectedSeatIds.Remove(seat.Id);
+        }
+        else
+        {
+            if (SelectedSeatIds.Count >= GroupSize)
+            {
+                _seatSelectionError = L["MaxSeatsError", GroupSize];
+                return;
+            }
+
+            SelectedSeatIds.Add(seat.Id);
+        }
+    }
 
 // Warn when a multi-ticket selection contains a selected seat with no selected neighbour
 bool HasLonelyPersonInSelection()
@@ -627,41 +630,51 @@ void TryConfirmReservation()
     }
 }
 
-void CancelLonelyWarning()
-{
-    _showLonelyWarning = false;
-    // Seat modal stays open so user can adjust their choice
-}
 
-async Task ProceedAfterWarning()
-{
-    _showLonelyWarning = false;
-    await ConfirmReservation();
-}
+    void CancelLonelyWarning()
+    {
+        _showLonelyWarning = false;
+        // Seat modal stays open so user can adjust their choice
+    }
 
-async Task ConfirmReservation()
-{
-if (SelectedShowtime == null) return;
+    async Task ProceedAfterWarning()
+    {
+        _showLonelyWarning = false;
+        await ConfirmReservation();
+    }
 
-var popcornOrders = PaymentStateService.PopcornOrders.Any() ? PaymentStateService.PopcornOrders : null;
-ConfirmationResult =
-await SeatSelectionService.ConfirmReservationAsync(
-SelectedShowtime.Id,
-SelectedSeatIds.ToList(),
-popcornOrders);
+    Task ConfirmReservation()
+    {
+        if (SelectedShowtime == null) return Task.CompletedTask;
 
-ShowSeatsModal = false;
+        var popcornOrders = PaymentStateService.PopcornOrders.Any()
+            ? PaymentStateService.PopcornOrders
+            : null;
 
-PaymentStateService.SetPrice(TotalPriceCents);
-var movieTitleParam = !string.IsNullOrEmpty(_selectedMovieTitle) ? $"/{Uri.EscapeDataString(_selectedMovieTitle)}" : "";
-NavigationManager.NavigateTo($"/pin{movieTitleParam}");
-}
+        CheckoutStateService.SetCheckout(
+            SelectedShowtime.Id,
+            SelectedSeatIds.ToList(),
+            _selectedMovieTitle,
+            _selectedShowtimeDisplay,
+            popcornOrders,
+            TotalPriceCents);
 
-string GetSeatClass(SeatInfoDto? seat, bool selected)
-{
-if (seat == null) return "";
-if (selected) return "selected";
-return seat.IsAvailable ? "available" : "occupied";
-}
+        ShowSeatsModal = false;
+
+        var movieTitleParam = !string.IsNullOrEmpty(_selectedMovieTitle)
+            ? $"/{Uri.EscapeDataString(_selectedMovieTitle)}"
+            : "";
+
+        NavigationManager.NavigateTo($"/payment{movieTitleParam}");
+        return Task.CompletedTask;
+    }
+
+
+    string GetSeatClass(SeatInfoDto? seat, bool selected)
+    {
+        if (seat == null) return "";
+        if (selected) return "selected";
+        return seat.IsAvailable ? "available" : "occupied";
+    }
 
 }

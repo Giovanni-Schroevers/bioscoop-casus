@@ -73,22 +73,4 @@ public class SeatSelectionService(HttpClient httpClient)
         }
         return null;
     }
-
-    public async Task<ReservationConfirmResponseDto?> ConfirmReservationAsync(int showtimeId, List<int> seatIds, List<PopcornOrderDto>? popcornOrders = null)
-    {
-        try
-        {
-            var request = new ReservationConfirmRequestDto(seatIds, popcornOrders);
-            var response = await httpClient.PostAsJsonAsync($"api/seat-selection/{showtimeId}/reserve", request);
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<ReservationConfirmResponseDto>();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error confirming reservation: {ex.Message}");
-        }
-        return null;
-    }
 }

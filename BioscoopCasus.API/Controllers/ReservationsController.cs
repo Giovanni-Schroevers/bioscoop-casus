@@ -1,4 +1,6 @@
 using BioscoopCasus.API.Data;
+using BioscoopCasus.API.Entities;
+using BioscoopCasus.API.Services;
 using BioscoopCasus.Models.DTOs;
 using BioscoopCasus.Models.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -118,5 +120,92 @@ public class ReservationsController(BioscoopDbContext context, QrCodeHelper qrCo
             return Ok(new QrCodeValidationResponseDto(false, null, "This ticket can no longer be viewed because the movie has already started."));
 
         return Ok(new QrCodeValidationResponseDto(true, reservation.Id, null));
+    }
+    
+    // POST /api/reservations/{showtimeId:int}/reserve
+    [HttpPost("{showtimeId:int}/reserve")]
+    public async Task<ActionResult<ReservationConfirmResponseDto>> ConfirmReservation(
+        int showtimeId,
+        [FromBody] ReservationConfirmRequestDto request)
+    {
+        switch (request.SeatIds.Count)
+        {
+            case 0:
+                return BadRequest("No seats selected");
+            case > 20:
+                return BadRequest("Maximum 20 seats per reservation");
+        }
+
+        var showtime = await context.Showtimes
+            .Include(s => s.Room)
+            .ThenInclude(r => r.Rows)
+            .FirstOrDefaultAsync(s => s.Id == showtimeId);
+
+        if (showtime == null)
+            return NotFound("Showtime not found");
+
+        var seats = await context.Seats
+            .Where(s => request.SeatIds.Contains(s.Id) && s.RoomId == showtime.RoomId)
+            .ToListAsync();
+
+        if (seats.Count != request.SeatIds.Count)
+            return BadRequest("One or more selected seats do not exist or belong to a different room");
+
+        var existingReservations = await context.ShowtimeSeats
+            .Where(ss => ss.ShowtimeId == showtimeId && request.SeatIds.Contains(ss.SeatId) && ss.ReservationId.HasValue)
+            .ToListAsync();
+
+        if (existingReservations.Any())
+            return BadRequest("One or more selected seats are already reserved");
+
+        var reservation = new Reservation
+        {
+            ShowtimeId = showtimeId
+        };
+
+        if (request.PopcornOrders is { Count: > 0 })
+        {
+            foreach (var popcorn in request.PopcornOrders)
+            {
+                reservation.PopcornOrders.Add(new PopcornOrder
+                {
+                    Size = popcorn.Size,
+                    Flavor = popcorn.Flavor,
+                    AddDrink = popcorn.AddDrink,
+                    AddRefill = popcorn.AddRefill
+                });
+            }
+        }
+
+        context.Reservations.Add(reservation);
+        await context.SaveChangesAsync();
+        
+        var existingShowtimeSeats = await context.ShowtimeSeats
+            .Where(ss => ss.ShowtimeId == showtimeId && request.SeatIds.Contains(ss.SeatId))
+            .ToListAsync();
+
+        foreach (var showtimeSeat in existingShowtimeSeats)
+        {
+            showtimeSeat.ReservationId = reservation.Id;
+        }
+
+        await context.SaveChangesAsync();
+
+        var reservedSeatInfos = seats.Select(seat => new SeatInfoDto(
+            seat.Id,
+            seat.Row,
+            seat.SeatNumber,
+            false,
+            SeatSelectionService.CalculateSeatScore(seat.Row, seat.SeatNumber,
+                showtime.Room.Rows.Count, showtime.Room.Rows.Max(r => r.SeatCount))
+        )).ToList();
+
+        var response = new ReservationConfirmResponseDto(
+            reservation.Id,
+            reservedSeatInfos,
+            $"Successfully reserved {request.SeatIds.Count} seat(s) for showtime {showtimeId}"
+        );
+
+        return Ok(response);
     }
 }

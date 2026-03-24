@@ -813,4 +813,22 @@
   <data name="ShowtimeUpdatedSuccess" xml:space="preserve">
     <value>Showtime updated successfully!</value>
   </data>
+  <data name="EmptySeatPart1" xml:space="preserve">
+    <value>It seems there is a </value>
+  </data>
+  <data name="EmptySeatPart2" xml:space="preserve">
+    <value>lone chair</value>
+  </data>
+  <data name="EmptySeatPart3" xml:space="preserve">
+    <value>selected</value>
+  </data>
+  <data name="EmptySeatPart4" xml:space="preserve">
+    <value>Are you sure that you want to sit alone?</value>
+  </data>
+  <data name="YesConfirm" xml:space="preserve">
+    <value>Yes, confirm</value>
+  </data>
+  <data name="SitAlone" xml:space="preserve">
+    <value>Sitting alone?</value>
+  </data>
 </root>

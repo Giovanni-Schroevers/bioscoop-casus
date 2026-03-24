@@ -22,21 +22,12 @@ public class MailingController(BioscoopDbContext context, MailingService mailing
         if (string.IsNullOrWhiteSpace(dto.Email))
             return BadRequest("Email is required");
 
-        if (string.IsNullOrWhiteSpace(dto.TicketCode))
-            return BadRequest("Ticket code is required");
+        if (dto.ReservationId == 0)
+            return BadRequest("Reservation ID is required");
+        
+        var reservationId = dto.ReservationId;
 
-        var qrCodeData = _qrCodeHelper.ParseQrCode(dto.TicketCode);
-        if (qrCodeData is null)
-            return BadRequest("Invalid ticket code format");
-
-        if (!_qrCodeHelper.VerifyChecksum(dto.TicketCode))
-            return BadRequest("Invalid ticket code checksum");
-
-        var reservationId = qrCodeData.ReservationId;
-        if (reservationId is null)
-            return BadRequest("Invalid ticket code format");
-
-            var reservation = await context.Reservations
+        var reservation = await context.Reservations
             .Include(r => r.Showtime)
                 .ThenInclude(s => s.Movie)
             .Include(r => r.Showtime)

@@ -43,6 +43,7 @@ builder.Services.AddSingleton<QrCodeHelper>();
 builder.Services.AddScoped<PaymentStateService>();
 builder.Services.AddScoped<MysteryShowtimeService>();
 builder.Services.AddScoped<MysteryMovieStateService>();
+builder.Services.AddScoped<CheckoutStateService>();
 
 // JWT handler
 builder.Services.AddTransient<JwtAuthorizationMessageHandler>();
