@@ -185,10 +185,10 @@ else
 <div class="modal-overlay" style="z-index:1100">
     <div class="modal" style="max-width:420px;text-align:center;">
         <div style="font-size:2.4rem;margin-bottom:8px;">🪑</div>
-        <h2 style="margin-bottom:12px;">Alleen zitten?</h2>
+        <h2 style="margin-bottom:12px;">Iemand zit alleen</h2>
         <p style="color:#ccc;margin-bottom:8px;">
-            Je hebt <strong>1 losse stoel</strong> geselecteerd.<br/>
-            Weet je zeker dat je alleen wil zitten?
+            In je stoelkeuze zit <strong>1 persoon los van de rest</strong>.<br/>
+            Wil je hiermee doorgaan?
         </p>
         <div class="modal-actions" style="justify-content:center;margin-top:24px;">
             <button class="cancel-button" @onclick="CancelLonelyWarning">
@@ -584,60 +584,40 @@ SelectedSeatIds.Add(seat.Id);
 }
 }
 
-// Check if selection is a lone isolated seat
-bool IsLonelySeat()
+// Warn when a multi-ticket selection contains a selected seat with no selected neighbour
+bool HasLonelyPersonInSelection()
 {
-    if (AllSeats == null || SelectedSeatIds.Count != 1) return false;
-
-    var selectedId = SelectedSeatIds.First();
-    var seat = AllSeats.FirstOrDefault(s => s.Id == selectedId);
-    if (seat == null) return false;
-
-    // A seat is "lonely" when it has no available unselected neighbour in the same row
-    var leftNeighbour  = AllSeats.FirstOrDefault(s => s.Row == seat.Row && s.SeatNumber == seat.SeatNumber - 1);
-    var rightNeighbour = AllSeats.FirstOrDefault(s => s.Row == seat.Row && s.SeatNumber == seat.SeatNumber + 1);
-
-    bool leftFree  = leftNeighbour  != null && leftNeighbour.IsAvailable  && !SelectedSeatIds.Contains(leftNeighbour.Id);
-    bool rightFree = rightNeighbour != null && rightNeighbour.IsAvailable && !SelectedSeatIds.Contains(rightNeighbour.Id);
-
-    // Lonely = no free neighbour on either side
-    return !leftFree && !rightFree;
-}
-
-// Also warn when the selection would leave a single gap in the row
-bool CreatesIsolatedGap()
-{
-    if (AllSeats == null) return false;
-
-    // Group all seats by row
-    var rows = AllSeats.GroupBy(s => s.Row);
-    foreach (var row in rows)
+    if (AllSeats == null || SelectedSeatIds.Count <= 1)
     {
-        var sorted = row.OrderBy(s => s.SeatNumber).ToList();
-        for (int i = 0; i < sorted.Count; i++)
+        return false;
+    }
+
+    var selectedByRow = AllSeats
+        .Where(s => SelectedSeatIds.Contains(s.Id))
+        .GroupBy(s => s.Row);
+
+    foreach (var row in selectedByRow)
+    {
+        var selectedSeatNumbers = row.Select(s => s.SeatNumber).ToHashSet();
+
+        foreach (var selectedSeat in row)
         {
-            var s = sorted[i];
-            // Skip selected, occupied, or already-unavailable seats
-            if (SelectedSeatIds.Contains(s.Id) || !s.IsAvailable) continue;
+            var hasLeftSelected = selectedSeatNumbers.Contains(selectedSeat.SeatNumber - 1);
+            var hasRightSelected = selectedSeatNumbers.Contains(selectedSeat.SeatNumber + 1);
 
-            // Check neighbours
-            bool leftBlocked  = i == 0
-                || !sorted[i - 1].IsAvailable
-                || SelectedSeatIds.Contains(sorted[i - 1].Id);
-            bool rightBlocked = i == sorted.Count - 1
-                || !sorted[i + 1].IsAvailable
-                || SelectedSeatIds.Contains(sorted[i + 1].Id);
-
-            if (leftBlocked && rightBlocked)
-                return true; // this unselected seat would be isolated
+            if (!hasLeftSelected && !hasRightSelected)
+            {
+                return true;
+            }
         }
     }
+
     return false;
 }
 
 void TryConfirmReservation()
 {
-    if (IsLonelySeat() || CreatesIsolatedGap())
+    if (HasLonelyPersonInSelection())
     {
         _showLonelyWarning = true;
     }
