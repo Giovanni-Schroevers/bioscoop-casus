@@ -121,7 +121,7 @@ public class BioscoopDbContext : DbContext
         
         // Email templates for the emails
         modelBuilder.Entity<EmailTemplates>()
-            .HasIndex(r => r.Id)
+            .HasIndex(emailTemplate => emailTemplate.Name)
             .IsUnique();
     }
 }
