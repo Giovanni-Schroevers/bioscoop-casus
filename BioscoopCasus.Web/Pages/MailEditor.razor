@@ -1,0 +1,247 @@
+@page "/management/email-editor"
+@attribute [Authorize]
+@inject IStringLocalizer<SharedResource> L;
+@inject NavigationManager NavigationManager
+
+<PageTitle>E-mail @L["Editor"].Value.ToLower()</PageTitle>
+
+<div class="mail-template-page-shell">
+    <button class="return-button" @onclick="@(() => NavigationManager.NavigateTo("/management"))">
+        <span class="return-button-icon">&larr;</span>
+        <span>@L["Back"]</span>
+    </button>
+    <div class="mail-template-page-toolbar">
+        <div class="mail-template-page-toolbar-group">
+            <select class="mail-template-page-select"
+                    value="@GetSelectedTemplateIdValue()"
+                    @onchange="HandleSelectedTemplateChanged">
+                <option value="">@L["SelectTemplate"]</option>
+
+                @foreach (var emailTemplate in _emailTemplates)
+                {
+                    <option value="@emailTemplate.Id">@emailTemplate.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="mail-template-page-actions">
+            <button type="button"
+                    class="mail-template-page-button mail-template-page-button-secondary"
+                    @onclick="CreateNewTemplateAsync">
+                @L["NewTemplate"]
+            </button>
+
+            <button type="button"
+                    class="mail-template-page-button mail-template-page-button-primary"
+                    @onclick="SaveSelectedTemplateAsync"
+                    disabled="@(_selectedEmailTemplate is null)">
+                @L["Save"]
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_statusMessage))
+    {
+        <div class="mail-template-page-status">
+            @_statusMessage
+        </div>
+    }
+
+    <MailTemplateEditor Value="@_mailHtml"
+                        ValueChanged="HandleMailHtmlChanged"
+                        AvailableVariables="@_availableVariables" />
+</div>
+
+@code {
+    [Inject]
+    private HttpClient HttpClientInstance { get; set; } = null!;
+
+    [Inject]
+    private IJSRuntime JavaScriptRuntime { get; set; } = null!;
+
+    private string _mailHtml = string.Empty;
+
+    private List<MailHelper.MailVariableDefinition> _availableVariables = [];
+    private List<EmailTemplateDto> _emailTemplates = [];
+
+    private EmailTemplateDto? _selectedEmailTemplate;
+    private string _statusMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _availableVariables =
+        [
+            new MailHelper.MailVariableDefinition { Key = "Name", Label = L["NameLabel"] },
+            new MailHelper.MailVariableDefinition { Key = "ReservationId", Label = L["ReservationId"] },
+            new MailHelper.MailVariableDefinition { Key = "MovieTitle", Label = L["MovieTitle"] },
+            new MailHelper.MailVariableDefinition { Key = "RoomName", Label = L["RoomName"] },
+            new MailHelper.MailVariableDefinition { Key = "Showtime", Label = L["ShowTitleFallback"] },
+            new MailHelper.MailVariableDefinition { Key = "Seats", Label = L["Seats"] },
+            new MailHelper.MailVariableDefinition { Key = "QrCodeContentId", Label = L["QrCodeContentId"] },
+            new MailHelper.MailVariableDefinition { Key = "TicketPrintUrl", Label = L["TicketPrintUrl"] }
+        ];
+
+        await LoadEmailTemplatesAsync();
+    }
+
+    private async Task LoadEmailTemplatesAsync()
+    {
+        _statusMessage = string.Empty;
+
+        try
+        {
+            var emailTemplates = await HttpClientInstance.GetFromJsonAsync<List<EmailTemplateDto>>("api/mailing/email-template");
+            _emailTemplates = emailTemplates ?? [];
+        }
+        catch
+        {
+            _statusMessage = L["CouldNotLoadTemplates"];
+        }
+    }
+
+    private Task HandleMailHtmlChanged(string newHtml)
+    {
+        _mailHtml = newHtml;
+
+        _selectedEmailTemplate?.Body = newHtml;
+
+        return Task.CompletedTask;
+    }
+
+    private string GetSelectedTemplateIdValue()
+        => _selectedEmailTemplate?.Id.ToString() ?? string.Empty;
+
+    private void HandleSelectedTemplateChanged(ChangeEventArgs changeEventArgs)
+    {
+        var selectedValue = changeEventArgs.Value?.ToString();
+
+        if (!int.TryParse(selectedValue, out var selectedTemplateId))
+        {
+            _selectedEmailTemplate = null;
+            _mailHtml = string.Empty;
+            return;
+        }
+
+        var selectedTemplate = _emailTemplates
+            .FirstOrDefault(emailTemplate => emailTemplate.Id == selectedTemplateId);
+
+        if (selectedTemplate is null)
+        {
+            _selectedEmailTemplate = null;
+            _mailHtml = string.Empty;
+            return;
+        }
+
+        _selectedEmailTemplate = new EmailTemplateDto
+        {
+            Id = selectedTemplate.Id,
+            Name = selectedTemplate.Name,
+            Subject = selectedTemplate.Subject,
+            Body = selectedTemplate.Body
+        };
+
+        _mailHtml = _selectedEmailTemplate.Body;
+        _statusMessage = string.Empty;
+    }
+
+    private async Task CreateNewTemplateAsync()
+    {
+        _statusMessage = string.Empty;
+
+        var templateName = await JavaScriptRuntime.InvokeAsync<string?>("prompt", L["EnterTemplateName"].Value);
+
+        if (string.IsNullOrWhiteSpace(templateName))
+            return;
+
+        var createDto = new EmailTemplateDto
+        {
+            Name = templateName.Trim(),
+            Subject = null,
+            Body = "<p></p>"
+        };
+
+        var response = await HttpClientInstance.PostAsJsonAsync("api/mailing/email-template", createDto);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _statusMessage = await response.Content.ReadAsStringAsync();
+            return;
+        }
+
+        var createdTemplate = await response.Content.ReadFromJsonAsync<EmailTemplateDto>();
+
+        if (createdTemplate is null)
+        {
+            _statusMessage = L["NoDataWasReturned"];
+            return;
+        }
+
+        _emailTemplates.Add(createdTemplate);
+        _emailTemplates = _emailTemplates
+            .OrderBy(emailTemplate => emailTemplate.Name)
+            .ToList();
+
+        _selectedEmailTemplate = new EmailTemplateDto
+        {
+            Id = createdTemplate.Id,
+            Name = createdTemplate.Name,
+            Subject = createdTemplate.Subject,
+            Body = createdTemplate.Body
+        };
+
+        _mailHtml = _selectedEmailTemplate.Body;
+        _statusMessage = L["TemplateCreated"];
+    }
+
+    private async Task SaveSelectedTemplateAsync()
+    {
+        if (_selectedEmailTemplate is null)
+        {
+            _statusMessage = L["NoTemplateSelected"];
+            return;
+        }
+
+        _statusMessage = string.Empty;
+
+        _selectedEmailTemplate.Body = _mailHtml;
+
+        var response = await HttpClientInstance.PutAsJsonAsync(
+            $"api/mailing/email-template/{_selectedEmailTemplate.Id}",
+            _selectedEmailTemplate);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _statusMessage = await response.Content.ReadAsStringAsync();
+            return;
+        }
+
+        var updatedTemplate = await response.Content.ReadFromJsonAsync<EmailTemplateDto>();
+
+        if (updatedTemplate is null)
+        {
+            _statusMessage = L["NoDataWasReturned"];
+            return;
+        }
+
+        var existingTemplateIndex = _emailTemplates.FindIndex(emailTemplate => emailTemplate.Id == updatedTemplate.Id);
+
+        if (existingTemplateIndex >= 0)
+        {
+            _emailTemplates[existingTemplateIndex] = updatedTemplate;
+            _emailTemplates = _emailTemplates
+                .OrderBy(emailTemplate => emailTemplate.Name)
+                .ToList();
+        }
+
+        _selectedEmailTemplate = new EmailTemplateDto
+        {
+            Id = updatedTemplate.Id,
+            Name = updatedTemplate.Name,
+            Subject = updatedTemplate.Subject,
+            Body = updatedTemplate.Body
+        };
+
+        _mailHtml = updatedTemplate.Body;
+        _statusMessage = L["TemplateSaved"];
+    }
+}

@@ -20,6 +20,7 @@ public class BioscoopDbContext : DbContext
     public DbSet<ShowtimeSeat> ShowtimeSeats { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<PopcornOrder> PopcornOrders { get; set; }
+    public DbSet<EmailTemplates> EmailTemplates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -117,5 +118,10 @@ public class BioscoopDbContext : DbContext
             .WithMany(r => r.PopcornOrders)
             .HasForeignKey(p => p.ReservationId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        // Email templates for the emails
+        modelBuilder.Entity<EmailTemplates>()
+            .HasIndex(emailTemplate => emailTemplate.Name)
+            .IsUnique();
     }
 }
