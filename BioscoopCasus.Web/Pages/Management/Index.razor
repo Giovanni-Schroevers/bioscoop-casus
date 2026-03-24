@@ -37,6 +37,17 @@
         </a>
     </div>
 
+    @if (!string.IsNullOrEmpty(_successMessage))
+    {
+        <div class="global-success-message">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>@_successMessage</span>
+        </div>
+    }
+
     <div class="timeline-section">
         <div class="section-header">
             <h2>@L["DaySchedule"]</h2>
@@ -102,7 +113,7 @@
                                             var width = CalculateWidth(movie.DurationMinutes);
                                             var isFuture = show.StartTime > DateTime.Now;
                                             <div class="show-slot @(show.StartTime < DateTime.Now ? "past" : "") @(isFuture ? "clickable" : "")"
-                                                style="left: @left%; width: @width%;"
+                                                style="left: @left.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%; width: @width.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%;"
                                                 title="@movie.Title (@show.StartTime.ToString("HH:mm"))" 
                                                 @onclick="() => OnShowClick(show)"
                                                 @onclick:stopPropagation="true">
@@ -124,6 +135,12 @@
         var movie = Movies.FirstOrDefault(m => m.Id == (_isCreating ? _selectedMovieId : (_selectedShowtime?.MovieId ?? 0)));
         <TerminalModal Visible="_showModal" Title="@(_isCreating ? L["NewShowTitle"] : (movie?.Title ?? L["ShowTitleFallback"]))" OnClose="CloseModal">
             <ChildContent>
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="error-message-box">
+                        @_errorMessage
+                    </div>
+                }
                 @if (_showConfirmation)
                 {
                     <div class="confirmation-view">
@@ -194,7 +211,7 @@
                             CssClass="delete-btn" />
                     }
                     <div style="flex-grow: 1"></div>
-                    <FormButton IsPrimary="true" Text="@(_isCreating ? L["Add"] : L["Save"])" OnClick="() => HandleSaveClick()" />
+                    <FormButton IsPrimary="true" Text="@(_isCreating ? L["Add"] : L["Save"])" OnClick="HandleSaveClick" />
                 }
             </Footer>
         </TerminalModal>
@@ -611,6 +628,42 @@
         background: rgba(225, 29, 72, 0.15) !important;
         border-color: var(--primary-rose) !important;
     }
+
+    .global-success-message {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        color: #4ade80;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .error-message-box {
+        background: rgba(225, 29, 72, 0.1);
+        border: 1px solid var(--primary-rose);
+        border-radius: 8px;
+        padding: 1rem;
+        color: var(--primary-rose);
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+        text-align: center;
+    }
 </style>
 
 @code {
@@ -623,6 +676,8 @@
     private bool IsLoading { get; set; } = true;
 
     // Modal state
+    private string? _errorMessage;
+    private string? _successMessage;
     private ShowtimeResponseDto? _selectedShowtime;
     private int _selectedRoomId;
     private int _selectedMovieId;
@@ -691,6 +746,7 @@
     {
         if (show.StartTime < DateTime.Now) return;
 
+        _errorMessage = null;
         _selectedShowtime = show;
         _selectedRoomId = show.RoomId;
         _selectedMovieId = show.MovieId;
@@ -703,6 +759,7 @@
 
     private void OnAddShowClick()
     {
+        _errorMessage = null;
         _selectedShowtime = null;
         _selectedRoomId = Rooms.FirstOrDefault()?.Id ?? 0;
         _selectedMovieId = Movies.FirstOrDefault()?.Id ?? 0;
@@ -727,6 +784,7 @@
         // In a real app we'd use getBoundingClientRect, but here let's just 
         // set it to a reasonable default based on where they click.
         
+        _errorMessage = null;
         _selectedShowtime = null;
         _selectedRoomId = room.Id;
         _selectedMovieId = Movies.FirstOrDefault()?.Id ?? 0;
@@ -742,15 +800,30 @@
 
     private void CloseModal()
     {
+        _errorMessage = null;
         _showModal = false;
         _selectedShowtime = null;
     }
 
-    private void HandleSaveClick()
+    private async Task ShowSuccessMessageAsync(string message)
+    {
+        _successMessage = message;
+        StateHasChanged();
+
+        await Task.Delay(4000);
+
+        if (_successMessage == message)
+        {
+            _successMessage = null;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSaveClick()
     {
         if (_isCreating)
         {
-            _ = ExecuteConfirmedAction();
+            await ExecuteConfirmedAction();
         }
         else
         {
@@ -766,7 +839,12 @@
 
     private async Task ExecuteConfirmedAction()
     {
-        bool success;
+        _errorMessage = null;
+        StateHasChanged();
+
+        bool success = false;
+        string? errorMessage = null;
+
         if (_isDeleting && _selectedShowtime != null)
         {
             success = await ShowtimeService.DeleteShowtimeAsync(_selectedShowtime.Id);
@@ -779,7 +857,9 @@
                 _selectedRoomId,
                 _editStartTime
             );
-            success = await ShowtimeService.CreateShowtimeAsync(createDto);
+            var result = await ShowtimeService.CreateShowtimeAsync(createDto);
+            success = result.Success;
+            errorMessage = result.ErrorMessage;
         }
         else if (_selectedShowtime != null)
         {
@@ -788,14 +868,21 @@
                 _selectedRoomId,
                 _editStartTime
             );
-            success = await ShowtimeService.UpdateShowtimeAsync(_selectedShowtime.Id, updateDto);
+            var result = await ShowtimeService.UpdateShowtimeAsync(_selectedShowtime.Id, updateDto);
+            success = result.Success;
+            errorMessage = result.ErrorMessage;
         }
-        else success = false;
 
         if (success)
         {
             await LoadInitialData();
             CloseModal();
+            _ = ShowSuccessMessageAsync(_isCreating ? L["ShowtimeAddedSuccess"] : (_isDeleting ? L["ShowtimeDeletedSuccess"] : L["ShowtimeUpdatedSuccess"]));
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            _errorMessage = errorMessage;
+            _showConfirmation = false;
         }
     }
 

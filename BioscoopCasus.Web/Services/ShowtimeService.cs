@@ -31,16 +31,26 @@ public class ShowtimeService(HttpClient http)
         return result ?? Enumerable.Empty<ShowtimeResponseDto>();
     }
 
-    public async Task<bool> CreateShowtimeAsync(ShowtimeCreateDto dto)
+    public async Task<(bool Success, string? ErrorMessage)> CreateShowtimeAsync(ShowtimeCreateDto dto)
     {
         var response = await _http.PostAsJsonAsync("api/showtimes", dto);
-        return response.IsSuccessStatusCode;
+        if (response.IsSuccessStatusCode)
+        {
+            return (true, null);
+        }
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, error);
     }
 
-    public async Task<bool> UpdateShowtimeAsync(int id, ShowtimeCreateDto dto)
+    public async Task<(bool Success, string? ErrorMessage)> UpdateShowtimeAsync(int id, ShowtimeCreateDto dto)
     {
         var response = await _http.PutAsJsonAsync($"api/showtimes/{id}", dto);
-        return response.IsSuccessStatusCode;
+        if (response.IsSuccessStatusCode)
+        {
+            return (true, null);
+        }
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, error);
     }
 
     public async Task<bool> DeleteShowtimeAsync(int id)

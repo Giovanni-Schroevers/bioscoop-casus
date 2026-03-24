@@ -624,4 +624,13 @@
   <data name="EmailRequired" xml:space="preserve">
     <value>Please enter a valid email address.</value>
   </data>
+  <data name="ShowtimeAddedSuccess" xml:space="preserve">
+    <value>Showtime added successfully!</value>
+  </data>
+  <data name="ShowtimeDeletedSuccess" xml:space="preserve">
+    <value>Showtime deleted successfully!</value>
+  </data>
+  <data name="ShowtimeUpdatedSuccess" xml:space="preserve">
+    <value>Showtime updated successfully!</value>
+  </data>
 </root>

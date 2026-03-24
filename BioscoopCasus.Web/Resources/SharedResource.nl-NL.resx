@@ -624,4 +624,13 @@
   <data name="EmailRequired" xml:space="preserve">
     <value>Vul een geldig e-mailadres in.</value>
   </data>
+  <data name="ShowtimeAddedSuccess" xml:space="preserve">
+    <value>Voorstelling succesvol toegevoegd!</value>
+  </data>
+  <data name="ShowtimeDeletedSuccess" xml:space="preserve">
+    <value>Voorstelling succesvol verwijderd!</value>
+  </data>
+  <data name="ShowtimeUpdatedSuccess" xml:space="preserve">
+    <value>Voorstelling succesvol bijgewerkt!</value>
+  </data>
 </root>
