@@ -1,0 +1,369 @@
+@inject IStringLocalizer<SharedResource> L;
+
+<div class="mail-template-editor-shell">
+    <div class="mail-template-editor-toolbar">
+        <div class="mail-template-editor-toolbar-group mail-template-editor-toolbar-group-inline">
+            <button type="button"
+                    title="@L["UndoTooltip"]"
+                    class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon"
+                    @onmousedown:preventDefault="true"
+                    @onclick="UndoAsync">
+                <span class="mail-template-editor-toolbar-button-glyph">↶</span>
+            </button>
+
+            <button type="button"
+                    title="@L["RedoTooltip"]"
+                    class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon"
+                    @onmousedown:preventDefault="true"
+                    @onclick="RedoAsync">
+                <span class="mail-template-editor-toolbar-button-glyph">↷</span>
+            </button>
+        </div>
+
+        <div class="mail-template-editor-toolbar-group mail-template-editor-toolbar-group-inline">
+            <button type="button"
+                    title="@L["BoldTooltip"]"
+                    class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon @GetToolbarButtonClass(_isBoldActive)"
+                    @onmousedown:preventDefault="true"
+                    @onclick="WrapSelectionStrongAsync">
+                <span class="mail-template-editor-toolbar-button-glyph mail-template-editor-toolbar-button-glyph-bold">B</span>
+            </button>
+
+            <button type="button"
+                    title="@L["ItalicTooltip"]"
+                    class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon @GetToolbarButtonClass(_isItalicActive)"
+                    @onmousedown:preventDefault="true"
+                    @onclick="WrapSelectionEmphasisAsync">
+                <span class="mail-template-editor-toolbar-button-glyph mail-template-editor-toolbar-button-glyph-italic">I</span>
+            </button>
+
+            <button type="button"
+                    title="@L["UnderlineTooltip"]"
+                    class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon @GetToolbarButtonClass(_isUnderlineActive)"
+                    @onmousedown:preventDefault="true"
+                    @onclick="WrapSelectionUnderlineAsync">
+                <span class="mail-template-editor-toolbar-button-glyph mail-template-editor-toolbar-button-glyph-underline">U</span>
+            </button>
+
+            <button type="button"
+                    title="@L["ClearFormattingTooltip"]"
+                    class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon"
+                    @onmousedown:preventDefault="true"
+                    @onclick="ClearFormattingAsync">
+                <span class="mail-template-editor-toolbar-button-glyph">Tx</span>
+            </button>
+        </div>
+
+        <div class="mail-template-editor-toolbar-group">
+            <div class="mail-template-editor-style-picker">
+                <button type="button"
+                        class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-style"
+                        @onmousedown:preventDefault="true"
+                        @onclick="ToggleBlockStyleMenu">
+                    <span class="mail-template-editor-style-picker-label">@_currentBlockStyleLabel</span>
+                    <span class="mail-template-editor-style-picker-chevron">▾</span>
+                </button>
+
+                @if (_showBlockStyleMenu)
+                {
+                    <div class="mail-template-editor-style-menu">
+                        <button type="button"
+                                class="mail-template-editor-style-menu-item"
+                                @onmousedown:preventDefault="true"
+                                @onclick='() => ApplyBlockStyleAsync("p", L["Paragraph"])'>
+                            <span class="mail-template-editor-style-menu-preview mail-template-editor-style-menu-preview-paragraph">@L["Paragraph"]</span>
+                        </button>
+
+                        <button type="button"
+                                class="mail-template-editor-style-menu-item"
+                                @onmousedown:preventDefault="true"
+                                @onclick='() => ApplyBlockStyleAsync("h1", L["Heading1"])'>
+                            <span class="mail-template-editor-style-menu-preview mail-template-editor-style-menu-preview-h1">@L["Heading1"]</span>
+                        </button>
+
+                        <button type="button"
+                                class="mail-template-editor-style-menu-item"
+                                @onmousedown:preventDefault="true"
+                                @onclick='() => ApplyBlockStyleAsync("h2", L["Heading2"])'>
+                            <span class="mail-template-editor-style-menu-preview mail-template-editor-style-menu-preview-h2">@L["Heading2"]</span>
+                        </button>
+
+                        <button type="button"
+                                class="mail-template-editor-style-menu-item"
+                                @onmousedown:preventDefault="true"
+                                @onclick='() => ApplyBlockStyleAsync("h3", L["Heading3"])'>
+                            <span class="mail-template-editor-style-menu-preview mail-template-editor-style-menu-preview-h3">@L["Heading3"]</span>
+                        </button>
+
+                        <button type="button"
+                                class="mail-template-editor-style-menu-item"
+                                @onmousedown:preventDefault="true"
+                                @onclick='() => ApplyBlockStyleAsync("blockquote", L["Quote"])'>
+                            <span class="mail-template-editor-style-menu-preview mail-template-editor-style-menu-preview-quote">@L["Quote"]</span>
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="mail-template-editor-toolbar-group mail-template-editor-toolbar-group-inline">
+            <button type="button"
+                    title="@L["BulletedListTooltip"]"
+                    class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon @GetToolbarButtonClass(_isUnorderedListActive)"
+                    @onmousedown:preventDefault="true"
+                    @onclick="ToggleUnorderedListAsync">
+                <span class="mail-template-editor-toolbar-list-icon">•≡</span>
+            </button>
+
+            <button type="button"
+                    title="@L["NumberedListTooltip"]"
+                    class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon @GetToolbarButtonClass(_isOrderedListActive)"
+                    @onmousedown:preventDefault="true"
+                    @onclick="ToggleOrderedListAsync">
+                <span class="mail-template-editor-toolbar-list-icon">1≡</span>
+            </button>
+        </div>
+
+        <div class="mail-template-editor-toolbar-group mail-template-editor-toolbar-group-inline">
+            <div class="mail-template-editor-popover-wrap">
+                <button type="button"
+                        title="@L["InsertOrEditLinkTooltip"]"
+                        class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon @GetToolbarButtonClass(_isLinkActive)"
+                        @onmousedown:preventDefault="true"
+                        @onclick="ToggleLinkPanel">
+                    <span class="mail-template-editor-toolbar-button-glyph">🔗</span>
+                </button>
+
+                @if (_showLinkPanel)
+                {
+                    <div class="mail-template-editor-toolbar-popover">
+                        <div class="mail-template-editor-toolbar-popover-title">
+                            @(_isLinkActive ? L["EditLink"] : L["InsertLink"])
+                        </div>
+
+                        <input class="mail-template-editor-toolbar-input"
+                               type="text"
+                               placeholder="@L["LinkUrlPlaceholder"]"
+                               @bind="_linkUrl"
+                               @bind:event="oninput" />
+
+                        <input class="mail-template-editor-toolbar-input"
+                               type="text"
+                               placeholder="@L["OptionalLinkText"]"
+                               @bind="_linkText"
+                               @bind:event="oninput" />
+
+                        <div class="mail-template-editor-toolbar-popover-actions">
+                            <button type="button"
+                                    class="mail-template-editor-toolbar-button"
+                                    @onclick="InsertOrUpdateLinkAsync">
+                                @(_isLinkActive ? L["Update"] : L["Insert"])
+                            </button>
+
+                            <button type="button"
+                                    class="mail-template-editor-toolbar-button"
+                                    @onclick="RemoveLinkAsync">
+                                @L["Remove"]
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="mail-template-editor-popover-wrap">
+                <button type="button"
+                        title="@L["InsertImageTooltip"]"
+                        class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon"
+                        @onmousedown:preventDefault="true"
+                        @onclick="ToggleImagePanel">
+                    <span class="mail-template-editor-toolbar-button-glyph">🖼</span>
+                </button>
+
+                @if (_showImagePanel)
+                {
+                    <div class="mail-template-editor-toolbar-popover">
+                        <div class="mail-template-editor-toolbar-popover-title">@L["InsertImage"]</div>
+
+                        <input class="mail-template-editor-toolbar-input"
+                               type="text"
+                               placeholder="@L["ImageUrlPlaceholder"]"
+                               @bind="_imageUrl"
+                               @bind:event="oninput" />
+
+                        <input class="mail-template-editor-toolbar-input"
+                               type="text"
+                               placeholder="@L["AltTextPlaceholder"]"
+                               @bind="_imageAltText"
+                               @bind:event="oninput" />
+
+                        <div class="mail-template-editor-toolbar-popover-actions">
+                            <button type="button"
+                                    class="mail-template-editor-toolbar-button"
+                                    @onclick="InsertImageAsync">
+                                @L["Insert"]
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="mail-template-editor-popover-wrap">
+                <button type="button"
+                        title="@L["TextColorTooltip"]"
+                        class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-icon"
+                        @onmousedown:preventDefault="true"
+                        @onclick="ToggleTextColorPanel">
+                    <span class="mail-template-editor-toolbar-color-preview" style="background-color: @_selectedTextColor;"></span>
+                </button>
+
+                @if (_showTextColorPanel)
+                {
+                    <div class="mail-template-editor-toolbar-popover">
+                        <div class="mail-template-editor-toolbar-popover-title">@L["TextColor"]</div>
+
+                        <input class="mail-template-editor-toolbar-color-input"
+                               type="color"
+                               @bind="_selectedTextColor"
+                               @bind:event="oninput" />
+
+                        <div class="mail-template-editor-toolbar-popover-actions">
+                            <button type="button"
+                                    class="mail-template-editor-toolbar-button"
+                                    @onclick="ApplyTextColorAsync">
+                                @L["Apply"]
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="mail-template-editor-toolbar-group">
+            <button type="button"
+                    class="mail-template-editor-toolbar-button mail-template-editor-toolbar-button-variable"
+                    @onmousedown:preventDefault="true"
+                    @onclick="OpenVariablePicker">
+                @L["InsertVariable"]
+            </button>
+        </div>
+
+        <div class="mail-template-editor-toolbar-group mail-template-editor-toolbar-group-inline">
+            <button type="button"
+                    class="mail-template-editor-toolbar-button"
+                    @onmousedown:preventDefault="true"
+                    @onclick="ToggleSourceViewAsync">
+                @(_isSourceView ? L["Visual"] : L["Html"])
+            </button>
+        </div>
+
+        <div class="mail-template-editor-toolbar-group mail-template-editor-toolbar-group-inline">
+            <button type="button"
+                    class="mail-template-editor-toolbar-button @GetPreviewModeButtonClass("desktop")"
+                    @onclick='() => SetPreviewMode("desktop")'>
+                @L["Desktop"]
+            </button>
+
+            <button type="button"
+                    class="mail-template-editor-toolbar-button @GetPreviewModeButtonClass("mobile")"
+                    @onclick='() => SetPreviewMode("mobile")'>
+                @L["Mobile"]
+            </button>
+        </div>
+
+        <div class="mail-template-editor-toolbar-status">
+            @_editorSaveStatusLabel
+        </div>
+    </div>
+
+    <div class="mail-template-editor-content">
+        <div class="mail-template-editor-pane">
+            <div class="mail-template-editor-pane-header">
+                @L["Editor"]
+                @if (_isSourceView)
+                {
+                    <span class="mail-template-editor-pane-mode-badge">@L["HtmlMode"]</span>
+                }
+            </div>
+
+            @if (_isSourceView)
+            {
+                <textarea class="mail-template-editor-source-surface"
+                          value="@_sourceHtml"
+                          @oninput="HandleSourceHtmlChanged"></textarea>
+            }
+            else
+            {
+                <div class="mail-template-editor-surface"
+                     @ref="_editorElementReference"
+                     contenteditable="true"
+                     tabindex="0">
+                </div>
+            }
+        </div>
+
+        <div class="mail-template-editor-pane">
+            <div class="mail-template-editor-pane-header">@L["LivePreview"]</div>
+
+            <div class="mail-template-editor-preview-host @GetPreviewModeClass()">
+                <div class="mail-template-editor-preview">
+                    @((MarkupString)_renderedPreviewHtml)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (_showVariablePicker)
+{
+    <div class="mail-template-editor-modal-backdrop"
+         tabindex="0"
+         @onclick="CloseVariablePicker"
+         @onkeydown="HandleVariablePickerKeyDown">
+        <div class="mail-template-editor-modal"
+             @onclick:stopPropagation="true"
+             @onkeydown="HandleVariablePickerKeyDown">
+            <div class="mail-template-editor-modal-header">
+                <div>
+                    <div class="mail-template-editor-modal-title">@L["InsertVariable"]</div>
+                    <div class="mail-template-editor-modal-subtitle">@L["ChooseVariableAtCursor"]</div>
+                </div>
+
+                <button type="button"
+                        class="mail-template-editor-modal-close"
+                        title="@L["Close"]"
+                        @onclick="CloseVariablePicker">
+                    ✕
+                </button>
+            </div>
+
+            <div class="mail-template-editor-modal-search-wrap">
+                <input class="mail-template-editor-modal-search"
+                       @ref="_variableSearchInputReference"
+                       type="text"
+                       placeholder="@L["SearchVariablesPlaceholder"]"
+                       value="@_variableSearchTerm"
+                       @oninput="HandleVariableSearchChanged"
+                       @onkeydown="HandleVariablePickerKeyDown" />
+            </div>
+
+            <div class="mail-template-editor-modal-list">
+                @if (FilteredVariables.Count == 0)
+                {
+                    <div class="mail-template-editor-modal-empty">@L["NoVariablesFound"]</div>
+                }
+                else
+                {
+                    @foreach (var variable in FilteredVariables)
+                    {
+                        <button type="button"
+                                class="mail-template-editor-modal-list-item"
+                                @onclick='() => SelectVariableAsync(variable.Key)'>
+                            <div class="mail-template-editor-modal-list-item-title">@variable.Label</div>
+                            <div class="mail-template-editor-modal-list-item-key">@variable.Key</div>
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
