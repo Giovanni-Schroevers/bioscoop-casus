@@ -16,4 +16,19 @@
   <data name="MovieNotFound" xml:space="preserve">
     <value>Film kon niet worden gevonden.</value>
   </data>
+  <data name="InvalidMovieId" xml:space="preserve">
+    <value>Ongeldig film-ID.</value>
+  </data>
+  <data name="InvalidRoomId" xml:space="preserve">
+    <value>Ongeldig zaal-ID.</value>
+  </data>
+  <data name="ShowtimeInPast" xml:space="preserve">
+    <value>Voorstellingstijd kan niet in het verleden liggen.</value>
+  </data>
+  <data name="RoomAlreadyBooked" xml:space="preserve">
+    <value>De zaal is al geboekt tijdens dit tijdslot (inclusief 30 min. schoonmaakbuffer).</value>
+  </data>
+  <data name="RoomSchedulingConflict" xml:space="preserve">
+    <value>Planningsconflict gedetecteerd voor zaal {0} om {1}.</value>
+  </data>
 </root>

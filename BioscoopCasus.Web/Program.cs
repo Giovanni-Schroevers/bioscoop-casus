@@ -41,6 +41,8 @@ builder.Services.AddScoped<MovieInformationService>();
 builder.Services.AddScoped<TicketPricingService>();
 builder.Services.AddSingleton<QrCodeHelper>();
 builder.Services.AddScoped<PaymentStateService>();
+builder.Services.AddScoped<MysteryShowtimeService>();
+builder.Services.AddScoped<MysteryMovieStateService>();
 
 // JWT handler
 builder.Services.AddTransient<JwtAuthorizationMessageHandler>();

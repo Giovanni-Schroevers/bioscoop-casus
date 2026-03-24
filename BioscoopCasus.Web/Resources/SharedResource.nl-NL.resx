@@ -804,4 +804,13 @@
   <data name="SelectTemplate" xml:space="preserve">
     <value>Selecteer een sjabloon</value>
   </data>
+  <data name="ShowtimeAddedSuccess" xml:space="preserve">
+    <value>Voorstelling succesvol toegevoegd!</value>
+  </data>
+  <data name="ShowtimeDeletedSuccess" xml:space="preserve">
+    <value>Voorstelling succesvol verwijderd!</value>
+  </data>
+  <data name="ShowtimeUpdatedSuccess" xml:space="preserve">
+    <value>Voorstelling succesvol bijgewerkt!</value>
+  </data>
 </root>

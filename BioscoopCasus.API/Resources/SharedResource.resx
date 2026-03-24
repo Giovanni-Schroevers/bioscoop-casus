@@ -16,4 +16,19 @@
   <data name="MovieNotFound" xml:space="preserve">
     <value>Movie could not be found.</value>
   </data>
+  <data name="InvalidMovieId" xml:space="preserve">
+    <value>Invalid movie ID.</value>
+  </data>
+  <data name="InvalidRoomId" xml:space="preserve">
+    <value>Invalid room ID.</value>
+  </data>
+  <data name="ShowtimeInPast" xml:space="preserve">
+    <value>Showtime cannot be in the past.</value>
+  </data>
+  <data name="RoomAlreadyBooked" xml:space="preserve">
+    <value>Room is already booked during this time slot (includes 30 min. cleaning buffer).</value>
+  </data>
+  <data name="RoomSchedulingConflict" xml:space="preserve">
+    <value>Scheduling conflict detected for room {0} at {1}.</value>
+  </data>
 </root>

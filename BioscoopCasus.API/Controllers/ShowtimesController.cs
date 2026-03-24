@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using BioscoopCasus.API.Data;
 using BioscoopCasus.Models.DTOs;
 using BioscoopCasus.API.Entities;
+using BioscoopCasus.API.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace BioscoopCasus.API.Controllers;
 
@@ -16,10 +18,12 @@ namespace BioscoopCasus.API.Controllers;
 public class ShowtimesController : ControllerBase
 {
     private readonly BioscoopDbContext _context;
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
-    public ShowtimesController(BioscoopDbContext context)
+    public ShowtimesController(BioscoopDbContext context, IStringLocalizer<SharedResource> localizer)
     {
         _context = context;
+        _localizer = localizer;
     }
 
     // GET /api/showtimes
@@ -62,17 +66,17 @@ public class ShowtimesController : ControllerBase
     public async Task<ActionResult<ShowtimeResponseDto>> CreateShowtime(ShowtimeCreateDto dto)
     {
         if (!await _context.Movies.AnyAsync(m => m.Id == dto.MovieId))
-            return BadRequest("Invalid MovieId");
+            return BadRequest(_localizer["InvalidMovieId"].Value);
 
         var movie = await _context.Movies.FindAsync(dto.MovieId);
         if (movie == null)
-            return BadRequest("Invalid MovieId");
+            return BadRequest(_localizer["InvalidMovieId"].Value);
 
         if (!await _context.Rooms.AnyAsync(r => r.Id == dto.RoomId))
-            return BadRequest("Invalid RoomId");
+            return BadRequest(_localizer["InvalidRoomId"].Value);
 
         if (dto.StartTime < DateTime.Now)
-            return BadRequest("Showtime cannot be in the past");
+            return BadRequest(_localizer["ShowtimeInPast"].Value);
 
         // Calculate end time (duration + 30 min cleaning buffer)
         var newEndTime = dto.StartTime.AddMinutes(movie.DurationMinutes + 30);
@@ -87,7 +91,7 @@ public class ShowtimesController : ControllerBase
 
         if (hasConflict)
         {
-            return BadRequest($"Room is already booked during this time slot (includes 30m cleaning buffer).");
+            return BadRequest(_localizer["RoomAlreadyBooked"].Value);
         }
 
         var showtime = new Showtime
@@ -140,7 +144,7 @@ public class ShowtimesController : ControllerBase
         foreach (var dto in bulkDto.Showtimes)
         {
             if (!movies.TryGetValue(dto.MovieId, out var movie))
-                return BadRequest($"Invalid MovieId: {dto.MovieId}");
+                return BadRequest(_localizer["InvalidMovieId"].Value);
 
             var newEndTime = dto.StartTime.AddMinutes(movie.DurationMinutes + 30); // 30 min cleaning
 
@@ -164,12 +168,12 @@ public class ShowtimesController : ControllerBase
 
             if (dto.StartTime < DateTime.Now)
             {
-                return BadRequest($"StartTime for RoomId {dto.RoomId} cannot be in the past.");
+                return BadRequest(_localizer["ShowtimeInPast"].Value);
             }
 
             if (dbConflict || inMemoryConflict)
             {
-                return BadRequest($"Scheduling conflict detected for RoomId {dto.RoomId} at {dto.StartTime}.");
+                return BadRequest(_localizer["RoomSchedulingConflict", dto.RoomId, dto.StartTime].Value);
             }
 
             var showtime = new Showtime
@@ -209,13 +213,13 @@ public class ShowtimesController : ControllerBase
         
         var movie = await _context.Movies.FindAsync(dto.MovieId);
         if (movie == null)
-            return BadRequest("Invalid MovieId");
+            return BadRequest(_localizer["InvalidMovieId"].Value);
 
         if (!await _context.Rooms.AnyAsync(r => r.Id == dto.RoomId))
-            return BadRequest("Invalid RoomId");
+            return BadRequest(_localizer["InvalidRoomId"].Value);
 
         if (dto.StartTime < DateTime.Now)
-            return BadRequest("Showtime cannot be in the past");
+            return BadRequest(_localizer["ShowtimeInPast"].Value);
 
         // Calculate end time (duration + 30 min cleaning buffer)
         var newEndTime = dto.StartTime.AddMinutes(movie.DurationMinutes + 30);
@@ -230,7 +234,7 @@ public class ShowtimesController : ControllerBase
 
         if (hasConflict)
         {
-            return BadRequest($"Room is already booked during this time slot.");
+            return BadRequest(_localizer["RoomAlreadyBooked"].Value);
         }
 
         showtime.MovieId = dto.MovieId;
