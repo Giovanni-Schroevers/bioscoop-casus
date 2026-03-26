@@ -1,0 +1,126 @@
+@page "/management/analytics/revenue"
+@attribute [Authorize]
+@inject RevenueAnalyticsService RevenueAnalyticsService
+
+<PageTitle>Omzetanalyse</PageTitle>
+
+<div class="analytics-container">
+    <div class="header-section">
+        <a href="/management" class="back-link">Terug naar dashboard</a>
+        <h1>Omzetanalyse</h1>
+        <p class="subtitle">Basispagina voor omzetcijfers per film in een gekozen periode.</p>
+    </div>
+
+    <div class="filters-grid">
+        <div class="filter-item">
+            <label>Vanaf</label>
+            <input class="terminal-input" type="date" @bind="StartDate" @bind:format="yyyy-MM-dd" />
+        </div>
+        <div class="filter-item">
+            <label>Tot en met</label>
+            <input class="terminal-input" type="date" @bind="EndDate" @bind:format="yyyy-MM-dd" />
+        </div>
+        <div class="filter-item">
+            <label>Weergave</label>
+            <select class="terminal-input" @bind="SelectedGroupType">
+                <option value="movie">Per film</option>
+                <option value="day">Per dag</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="placeholder-note">
+        <strong>Basisstatus:</strong> geen grafieken of berekeningen ingebouwd. Deze pagina is alleen de start voor verdere omzetstatistieken.
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Totale omzet</h3>
+            <p class="stat-value">EUR --,--</p>
+        </div>
+        <div class="stat-card">
+            <h3>Film met hoogste omzet</h3>
+            <p class="stat-value">Nog niet gekoppeld</p>
+        </div>
+        <div class="stat-card">
+            <h3>Gemiddelde omzet per dag</h3>
+            <p class="stat-value">EUR --,--</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .analytics-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .header-section {
+        margin-bottom: 2rem;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 1rem;
+        color: var(--text-muted);
+        text-decoration: none;
+    }
+
+    .subtitle {
+        color: var(--text-muted);
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .placeholder-note {
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-muted);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-card {
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+    .stat-value {
+        margin-top: 0.5rem;
+        font-weight: 700;
+        color: var(--text-high);
+    }
+</style>
+
+@code {
+    private DateTime StartDate { get; set; } = DateTime.Today.AddDays(-30);
+    private DateTime EndDate { get; set; } = DateTime.Today;
+    private string SelectedGroupType { get; set; } = "movie";
+
+    protected override void OnInitialized()
+    {
+        _ = RevenueAnalyticsService;
+    }
+}
+
+

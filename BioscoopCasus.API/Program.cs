@@ -59,6 +59,8 @@ builder.Services.AddDbContext<BioscoopDbContext>(options =>
 
 builder.Services.AddScoped<BioscoopCasus.API.Services.MailingService>();
 builder.Services.AddScoped<BioscoopCasus.Models.Helpers.QrCodeHelper>();
+builder.Services.AddScoped<BioscoopCasus.API.Services.OccupancyAnalyticsService>();
+builder.Services.AddScoped<BioscoopCasus.API.Services.RevenueAnalyticsService>();
 
 var app = builder.Build();
 

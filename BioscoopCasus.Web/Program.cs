@@ -67,6 +67,18 @@ builder.Services.AddHttpClient<ShowtimeService>(client =>
 }).AddHttpMessageHandler<JwtAuthorizationMessageHandler>()
   .AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
 
+builder.Services.AddHttpClient<OccupancyAnalyticsService>(client =>
+{
+    client.BaseAddress = apiBase;
+}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>()
+  .AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
+
+builder.Services.AddHttpClient<RevenueAnalyticsService>(client =>
+{
+    client.BaseAddress = apiBase;
+}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>()
+  .AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
+
 // Seat selection uses another backend
 builder.Services.AddHttpClient<SeatSelectionService>(client =>
 {
