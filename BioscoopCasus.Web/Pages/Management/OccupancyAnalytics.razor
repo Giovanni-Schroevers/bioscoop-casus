@@ -48,7 +48,21 @@
             <p class="stat-value">Nog niet gekoppeld</p>
         </div>
     </div>
-</div>
+
+    <div class="chart-section">
+        <h2>Bezettingsgraaf</h2>
+        <MudCard>
+            <MudCardContent>
+                <MudChart ChartType="ChartType.Bar" 
+                          ChartSeries="@_series" 
+                          XAxisLabels="@_xAxisLabels" 
+                          Width="100%" 
+                          Height="400px">
+                </MudChart>
+            </MudCardContent>
+        </MudCard>
+    </div>
+
 
 <style>
     .analytics-container {
@@ -111,6 +125,16 @@
         font-weight: 700;
         color: var(--text-high);
     }
+
+    .chart-section {
+        margin-top: 3rem;
+    }
+
+    .chart-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-high);
+    }
 </style>
 
 @code {
@@ -118,10 +142,33 @@
     private DateTime EndDate { get; set; } = DateTime.Today;
     private string SelectedViewType { get; set; } = "both";
 
+    // Chart data
+    private List<ChartSeries> _series = new();
+    private string[] _xAxisLabels = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+
     protected override void OnInitialized()
     {
         _ = OccupancyAnalyticsService;
+        InitializeChartData();
+    }
+
+    private void InitializeChartData()
+    {
+        _series = new List<ChartSeries>
+        {
+            new ChartSeries { Name = "Room A", Data = new double[] { 65, 59, 80, 81, 56, 85, 72 } },
+            new ChartSeries { Name = "Room B", Data = new double[] { 28, 48, 40, 19, 86, 27, 90 } },
+            new ChartSeries { Name = "Room C", Data = new double[] { 45, 65, 52, 73, 38, 91, 64 } }
+        };
     }
 }
+
+</div>
+
+
+
+
+
+
 
 
