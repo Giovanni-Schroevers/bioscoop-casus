@@ -22,7 +22,8 @@ public record SeatSelectionResponseDto(
 
 public record ReservationConfirmRequestDto(
     List<int> SeatIds,
-    List<PopcornOrderDto>? PopcornOrders = null
+    List<PopcornOrderDto>? PopcornOrders = null,
+    decimal TotalPrice = 0m
 );
 
 public record ReservationConfirmResponseDto(

@@ -26,11 +26,11 @@ public class ReservationService(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<QrCodeValidationResponseDto>();
     }
     
-    public async Task<ReservationConfirmResponseDto?> ConfirmReservationAsync(int showtimeId, List<int> seatIds, List<PopcornOrderDto>? popcornOrders = null)
+    public async Task<ReservationConfirmResponseDto?> ConfirmReservationAsync(int showtimeId, List<int> seatIds, List<PopcornOrderDto>? popcornOrders = null, decimal totalPrice = 0m)
     {
         try
         {
-            var request = new ReservationConfirmRequestDto(seatIds, popcornOrders);
+            var request = new ReservationConfirmRequestDto(seatIds, popcornOrders, totalPrice);
             var response = await httpClient.PostAsJsonAsync($"api/reservations/{showtimeId}/reserve", request);
             if (response.IsSuccessStatusCode)
             {

@@ -46,7 +46,7 @@ namespace BioscoopCasus.API.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("EmailTemplates");
+                    b.ToTable("EmailTemplates", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Movie", b =>
@@ -84,7 +84,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Movies");
+                    b.ToTable("Movies", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.MovieTranslation", b =>
@@ -116,7 +116,7 @@ namespace BioscoopCasus.API.Migrations
                     b.HasIndex("MovieId", "LanguageCode")
                         .IsUnique();
 
-                    b.ToTable("MovieTranslations");
+                    b.ToTable("MovieTranslations", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.PinCard", b =>
@@ -133,7 +133,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PinCards");
+                    b.ToTable("PinCards", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.PopcornOrder", b =>
@@ -165,7 +165,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("ReservationId");
 
-                    b.ToTable("PopcornOrders");
+                    b.ToTable("PopcornOrders", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Reservation", b =>
@@ -183,7 +183,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("ShowtimeId");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Room", b =>
@@ -212,7 +212,7 @@ namespace BioscoopCasus.API.Migrations
                     b.HasIndex("Number")
                         .IsUnique();
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Row", b =>
@@ -236,7 +236,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Rows");
+                    b.ToTable("Rows", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Seat", b =>
@@ -262,7 +262,7 @@ namespace BioscoopCasus.API.Migrations
                     b.HasIndex("RoomId", "Row", "SeatNumber")
                         .IsUnique();
 
-                    b.ToTable("Seats");
+                    b.ToTable("Seats", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.Showtime", b =>
@@ -288,7 +288,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Showtimes");
+                    b.ToTable("Showtimes", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.ShowtimeSeat", b =>
@@ -308,7 +308,7 @@ namespace BioscoopCasus.API.Migrations
 
                     b.HasIndex("SeatId");
 
-                    b.ToTable("ShowtimeSeats");
+                    b.ToTable("ShowtimeSeats", (string)null);
                 });
 
             modelBuilder.Entity("BioscoopCasus.API.Entities.MovieTranslation", b =>

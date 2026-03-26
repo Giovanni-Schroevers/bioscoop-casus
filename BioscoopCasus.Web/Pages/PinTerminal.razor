@@ -350,7 +350,8 @@
             await ReservationService.ConfirmReservationAsync(
                 CheckoutStateService.ShowtimeId.Value,
                 CheckoutStateService.SelectedSeatIds,
-                CheckoutStateService.PopcornOrders);
+                CheckoutStateService.PopcornOrders,
+                CheckoutStateService.TotalPriceCents / 100m);
 
         if (confirmationResult != null)
         {
