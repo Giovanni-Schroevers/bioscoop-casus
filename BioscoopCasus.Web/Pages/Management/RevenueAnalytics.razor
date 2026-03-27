@@ -1,14 +1,18 @@
 @page "/management/analytics/revenue"
 @attribute [Authorize]
 @inject RevenueAnalyticsService RevenueAnalyticsService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Omzetanalyse</PageTitle>
 
 <div class="analytics-container">
     <div class="header-section">
-        <a href="/management" class="back-link">Terug naar dashboard</a>
+        <button class="return-button" @onclick="@(() => NavigationManager.NavigateTo("/management"))">
+            <span class="return-button-icon">&larr;</span>
+            <span>Terug naar beheerdashboard</span>
+        </button>
         <h1>Omzetanalyse</h1>
-        <p class="subtitle">Basispagina voor omzetcijfers per film in een gekozen periode.</p>
+        <p class="subtitle">Totaaloverzicht van alle omzetcijfers.</p>
     </div>
 
 
@@ -36,22 +40,37 @@
             </div>
         </div>
 
-        @if (_series.Count > 0)
-        {
-            <div class="chart-section">
-                <h2>Omzet over tijd</h2>
-                <MudCard>
-                    <MudCardContent>
+        <div class="charts-grid">
+            @if (_series.Count > 0)
+            {
+                <div class="chart-section">
+                    <h2>Omzet over tijd</h2>
+                    <div class="chart-card">
                         <MudChart ChartType="ChartType.Line"
                                   ChartSeries="@_series"
                                   XAxisLabels="@_xAxisLabels"
                                   Width="100%"
-                                  Height="400px">
+                                  Height="350px">
                         </MudChart>
-                    </MudCardContent>
-                </MudCard>
-            </div>
-        }
+                    </div>
+                </div>
+            }
+
+            @if (_movieSeries.Count > 0)
+            {
+                <div class="chart-section">
+                    <h2>Top 5 films op omzet</h2>
+                    <div class="chart-card">
+                        <MudChart ChartType="ChartType.Bar"
+                                  ChartSeries="@_movieSeries"
+                                  XAxisLabels="@_movieLabels"
+                                  Width="100%"
+                                  Height="350px">
+                        </MudChart>
+                    </div>
+                </div>
+            }
+        </div>
     }
     else
     {
@@ -63,7 +82,7 @@
 
 <style>
     .analytics-container {
-        max-width: 1000px;
+        max-width: 1400px;
         margin: 2rem auto;
         padding: 0 1.5rem;
     }
@@ -72,11 +91,37 @@
         margin-bottom: 2rem;
     }
 
-    .back-link {
-        display: inline-block;
-        margin-bottom: 1rem;
-        color: var(--text-muted);
-        text-decoration: none;
+    .return-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text-high);
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 999px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .return-button:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(225, 29, 72, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .return-button:focus {
+        outline: none;
+        border-color: var(--primary-rose);
+        box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.12);
+    }
+
+    .return-button-icon {
+        font-size: 1rem;
+        line-height: 1;
     }
 
     .subtitle {
@@ -125,14 +170,34 @@
         to { transform: rotate(360deg); }
     }
 
-    .chart-section {
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
         margin-top: 2rem;
+    }
+
+    @@media (max-width: 900px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-section {
     }
 
     .chart-section h2 {
         font-size: 1.4rem;
         margin-bottom: 1rem;
         color: var(--text-high);
+    }
+
+    .chart-card {
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
     }
 
     .empty-state {
@@ -150,6 +215,8 @@
     private RevenueAnalyticsResponseDto? _data;
     private List<ChartSeries> _series = new();
     private string[] _xAxisLabels = Array.Empty<string>();
+    private List<ChartSeries> _movieSeries = new();
+    private string[] _movieLabels = Array.Empty<string>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -178,22 +245,41 @@
 
     private void BuildChart()
     {
-        if (_data?.Items is not { Count: > 0 })
+        if (_data?.Items is { Count: > 0 })
+        {
+            _xAxisLabels = _data.Items.Select(i => i.Label).ToArray();
+            _series = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "Omzet",
+                    Data = _data.Items.Select(i => (double)i.Revenue).ToArray()
+                }
+            };
+        }
+        else
         {
             _series = new();
             _xAxisLabels = Array.Empty<string>();
-            return;
         }
 
-        _xAxisLabels = _data.Items.Select(i => i.Label).ToArray();
-        _series = new List<ChartSeries>
+        if (_data?.TopMovies is { Count: > 0 })
         {
-            new ChartSeries
+            _movieLabels = _data.TopMovies.Select(m => m.Label).ToArray();
+            _movieSeries = new List<ChartSeries>
             {
-                Name = "Omzet",
-                Data = _data.Items.Select(i => (double)i.Revenue).ToArray()
-            }
-        };
+                new ChartSeries
+                {
+                    Name = "Omzet",
+                    Data = _data.TopMovies.Select(m => (double)m.Revenue).ToArray()
+                }
+            };
+        }
+        else
+        {
+            _movieSeries = new();
+            _movieLabels = Array.Empty<string>();
+        }
     }
 
     private static string FormatCurrency(decimal amount)

@@ -59,12 +59,24 @@ public class RevenueAnalyticsService
                 .ToList()
         };
 
+        var topMovies = reservations
+            .GroupBy(r => r.Showtime.Movie.Title)
+            .Select(g => new RevenueItem
+            {
+                Label = g.Key,
+                Revenue = g.Sum(r => r.TotalPrice)
+            })
+            .OrderByDescending(i => i.Revenue)
+            .Take(5)
+            .ToList();
+
         return new RevenueAnalyticsSummary
         {
             TotalRevenue = totalRevenue,
             TopMovieTitle = topMovie?.Key,
             AverageRevenuePerDay = days > 0 ? totalRevenue / days : 0m,
-            Items = items
+            Items = items,
+            TopMovies = topMovies
         };
     }
 }
@@ -75,6 +87,7 @@ public class RevenueAnalyticsSummary
     public string? TopMovieTitle { get; set; }
     public decimal AverageRevenuePerDay { get; set; }
     public List<RevenueItem> Items { get; set; } = new();
+    public List<RevenueItem> TopMovies { get; set; } = new();
 }
 
 public class RevenueItem
