@@ -70,6 +70,21 @@
                     </div>
                 </div>
             }
+
+            @if (_roomSeries.Count > 0)
+            {
+                <div class="chart-section">
+                    <h2>Omzet per zaal</h2>
+                    <div class="chart-card">
+                        <MudChart ChartType="ChartType.Bar"
+                                  ChartSeries="@_roomSeries"
+                                  XAxisLabels="@_roomLabels"
+                                  Width="100%"
+                                  Height="350px">
+                        </MudChart>
+                    </div>
+                </div>
+            }
         </div>
     }
     else
@@ -217,6 +232,8 @@
     private string[] _xAxisLabels = Array.Empty<string>();
     private List<ChartSeries> _movieSeries = new();
     private string[] _movieLabels = Array.Empty<string>();
+    private List<ChartSeries> _roomSeries = new();
+    private string[] _roomLabels = Array.Empty<string>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -279,6 +296,24 @@
         {
             _movieSeries = new();
             _movieLabels = Array.Empty<string>();
+        }
+
+        if (_data?.RevenuePerRoom is { Count: > 0 })
+        {
+            _roomLabels = _data.RevenuePerRoom.Select(r => r.Label).ToArray();
+            _roomSeries = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "Omzet",
+                    Data = _data.RevenuePerRoom.Select(r => (double)r.Revenue).ToArray()
+                }
+            };
+        }
+        else
+        {
+            _roomSeries = new();
+            _roomLabels = Array.Empty<string>();
         }
     }
 

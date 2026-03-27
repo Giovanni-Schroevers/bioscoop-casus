@@ -17,6 +17,8 @@ public class RevenueAnalyticsService
         var reservations = await _dbContext.Reservations
             .Include(r => r.Showtime)
                 .ThenInclude(s => s.Movie)
+            .Include(r => r.Showtime)
+                .ThenInclude(s => s.Room)
             .Where(r => r.Showtime.StartTime >= startDate && r.Showtime.StartTime <= endDate)
             .ToListAsync();
 
@@ -70,13 +72,24 @@ public class RevenueAnalyticsService
             .Take(5)
             .ToList();
 
+        var revenuePerRoom = reservations
+            .GroupBy(r => $"Zaal {r.Showtime.Room.Number}")
+            .Select(g => new RevenueItem
+            {
+                Label = g.Key,
+                Revenue = g.Sum(r => r.TotalPrice)
+            })
+            .OrderBy(i => i.Label)
+            .ToList();
+
         return new RevenueAnalyticsSummary
         {
             TotalRevenue = totalRevenue,
             TopMovieTitle = topMovie?.Key,
             AverageRevenuePerDay = days > 0 ? totalRevenue / days : 0m,
             Items = items,
-            TopMovies = topMovies
+            TopMovies = topMovies,
+            RevenuePerRoom = revenuePerRoom
         };
     }
 }
@@ -88,6 +101,7 @@ public class RevenueAnalyticsSummary
     public decimal AverageRevenuePerDay { get; set; }
     public List<RevenueItem> Items { get; set; } = new();
     public List<RevenueItem> TopMovies { get; set; } = new();
+    public List<RevenueItem> RevenuePerRoom { get; set; } = new();
 }
 
 public class RevenueItem

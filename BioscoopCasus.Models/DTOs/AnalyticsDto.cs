@@ -23,7 +23,10 @@ public record RevenueAnalyticsResponseDto(
     string? TopMovieTitle,
     decimal AverageRevenuePerDay,
     List<RevenueAnalyticsItemDto>? Items = null,
-    List<RevenueAnalyticsItemDto>? TopMovies = null
+    List<RevenueAnalyticsItemDto>? TopMovies = null,
+    List<RevenueAnalyticsItemDto>? RevenuePerRoom = null,
+    decimal TicketRevenue = 0m,
+    decimal PopcornRevenue = 0m
 );
 
 public record RevenueAnalyticsItemDto(
