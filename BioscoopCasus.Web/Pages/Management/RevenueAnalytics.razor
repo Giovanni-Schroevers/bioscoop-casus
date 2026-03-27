@@ -48,6 +48,7 @@
                     <MudChart ChartType="ChartType.Line"
                               ChartSeries="@_series"
                               XAxisLabels="@_xAxisLabels"
+                              ChartOptions="@_chartOptions"
                               Width="100%"
                               Height="350px">
                     </MudChart>
@@ -57,10 +58,11 @@
             @if (_revenueSplitData.Length > 0)
             {
                 <div class="chart-card">
-                    <h2 class="chart-title">Ticket- en horeca-omzet</h2>
+                    <h2 class="chart-title">Ticket en horeca omzet</h2>
                     <MudChart ChartType="ChartType.Pie"
                               InputData="@_revenueSplitData"
                               InputLabels="@_revenueSplitLabels"
+                              ChartOptions="@_pieOptions"
                               Width="100%"
                               Height="350px">
                     </MudChart>
@@ -76,6 +78,7 @@
                     <MudChart ChartType="ChartType.Bar"
                               ChartSeries="@_roomSeries"
                               XAxisLabels="@_roomLabels"
+                              ChartOptions="@_chartOptions"
                               Width="100%"
                               Height="300px">
                     </MudChart>
@@ -89,6 +92,7 @@
                     <MudChart ChartType="ChartType.Bar"
                               ChartSeries="@_movieSeries"
                               XAxisLabels="@_movieLabels"
+                              ChartOptions="@_chartOptions"
                               Width="100%"
                               Height="300px">
                     </MudChart>
@@ -250,6 +254,17 @@
     private string[] _roomLabels = Array.Empty<string>();
     private double[] _revenueSplitData = Array.Empty<double>();
     private string[] _revenueSplitLabels = Array.Empty<string>();
+
+    private ChartOptions _chartOptions = new()
+    {
+        ChartPalette = new[] { "#e11d48", "#f43f5e", "#fb7185", "#fda4af", "#fecdd3" },
+        YAxisFormat = "€0"
+    };
+
+    private ChartOptions _pieOptions = new()
+    {
+        ChartPalette = new[] { "#be123c", "#bd2f50" }
+    };
 
     protected override async Task OnInitializedAsync()
     {
