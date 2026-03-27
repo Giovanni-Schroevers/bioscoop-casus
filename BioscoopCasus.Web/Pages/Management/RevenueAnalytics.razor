@@ -85,6 +85,21 @@
                     </div>
                 </div>
             }
+
+            @if (_revenueSplitData.Length > 0)
+            {
+                <div class="chart-section">
+                    <h2>Tickets vs. popcorn</h2>
+                    <div class="chart-card">
+                        <MudChart ChartType="ChartType.Pie"
+                                  InputData="@_revenueSplitData"
+                                  InputLabels="@_revenueSplitLabels"
+                                  Width="100%"
+                                  Height="350px">
+                        </MudChart>
+                    </div>
+                </div>
+            }
         </div>
     }
     else
@@ -234,6 +249,8 @@
     private string[] _movieLabels = Array.Empty<string>();
     private List<ChartSeries> _roomSeries = new();
     private string[] _roomLabels = Array.Empty<string>();
+    private double[] _revenueSplitData = Array.Empty<double>();
+    private string[] _revenueSplitLabels = Array.Empty<string>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -314,6 +331,17 @@
         {
             _roomSeries = new();
             _roomLabels = Array.Empty<string>();
+        }
+
+        if (_data is not null && (_data.TicketRevenue > 0 || _data.PopcornRevenue > 0))
+        {
+            _revenueSplitData = new[] { (double)_data.TicketRevenue, (double)_data.PopcornRevenue };
+            _revenueSplitLabels = new[] { $"Tickets ({FormatCurrency(_data.TicketRevenue)})", $"Popcorn ({FormatCurrency(_data.PopcornRevenue)})" };
+        }
+        else
+        {
+            _revenueSplitData = Array.Empty<double>();
+            _revenueSplitLabels = Array.Empty<string>();
         }
     }
 

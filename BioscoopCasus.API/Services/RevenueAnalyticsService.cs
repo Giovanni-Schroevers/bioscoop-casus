@@ -1,4 +1,5 @@
 using BioscoopCasus.API.Data;
+using BioscoopCasus.Models.DataModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace BioscoopCasus.API.Services;
@@ -6,6 +7,7 @@ namespace BioscoopCasus.API.Services;
 public class RevenueAnalyticsService
 {
     private readonly BioscoopDbContext _dbContext;
+    private readonly PopcornConfig _popcornConfig = new();
 
     public RevenueAnalyticsService(BioscoopDbContext dbContext)
     {
@@ -19,6 +21,7 @@ public class RevenueAnalyticsService
                 .ThenInclude(s => s.Movie)
             .Include(r => r.Showtime)
                 .ThenInclude(s => s.Room)
+            .Include(r => r.PopcornOrders)
             .Where(r => r.Showtime.StartTime >= startDate && r.Showtime.StartTime <= endDate)
             .ToListAsync();
 
@@ -28,6 +31,24 @@ public class RevenueAnalyticsService
         }
 
         var totalRevenue = reservations.Sum(r => r.TotalPrice);
+
+        var popcornRevenue = reservations
+            .SelectMany(r => r.PopcornOrders)
+            .Sum(p =>
+            {
+                var price = p.Size.ToLower() switch
+                {
+                    "small" => _popcornConfig.Small,
+                    "medium" => _popcornConfig.Medium,
+                    "large" => _popcornConfig.Large,
+                    _ => 0m
+                };
+                if (p.AddDrink) price += _popcornConfig.Drink;
+                if (p.AddRefill) price += _popcornConfig.Refill;
+                return price;
+            });
+
+        var ticketRevenue = totalRevenue - popcornRevenue;
 
         var topMovie = reservations
             .GroupBy(r => r.Showtime.Movie.Title)
@@ -89,7 +110,9 @@ public class RevenueAnalyticsService
             AverageRevenuePerDay = days > 0 ? totalRevenue / days : 0m,
             Items = items,
             TopMovies = topMovies,
-            RevenuePerRoom = revenuePerRoom
+            RevenuePerRoom = revenuePerRoom,
+            TicketRevenue = ticketRevenue,
+            PopcornRevenue = popcornRevenue
         };
     }
 }
@@ -102,6 +125,8 @@ public class RevenueAnalyticsSummary
     public List<RevenueItem> Items { get; set; } = new();
     public List<RevenueItem> TopMovies { get; set; } = new();
     public List<RevenueItem> RevenuePerRoom { get; set; } = new();
+    public decimal TicketRevenue { get; set; }
+    public decimal PopcornRevenue { get; set; }
 }
 
 public class RevenueItem
