@@ -40,64 +40,58 @@
             </div>
         </div>
 
-        <div class="charts-grid">
+        <div class="charts-row-top">
             @if (_series.Count > 0)
             {
-                <div class="chart-section">
-                    <h2>Omzet over tijd</h2>
-                    <div class="chart-card">
-                        <MudChart ChartType="ChartType.Line"
-                                  ChartSeries="@_series"
-                                  XAxisLabels="@_xAxisLabels"
-                                  Width="100%"
-                                  Height="350px">
-                        </MudChart>
-                    </div>
-                </div>
-            }
-
-            @if (_movieSeries.Count > 0)
-            {
-                <div class="chart-section">
-                    <h2>Top 5 films op omzet</h2>
-                    <div class="chart-card">
-                        <MudChart ChartType="ChartType.Bar"
-                                  ChartSeries="@_movieSeries"
-                                  XAxisLabels="@_movieLabels"
-                                  Width="100%"
-                                  Height="350px">
-                        </MudChart>
-                    </div>
-                </div>
-            }
-
-            @if (_roomSeries.Count > 0)
-            {
-                <div class="chart-section">
-                    <h2>Omzet per zaal</h2>
-                    <div class="chart-card">
-                        <MudChart ChartType="ChartType.Bar"
-                                  ChartSeries="@_roomSeries"
-                                  XAxisLabels="@_roomLabels"
-                                  Width="100%"
-                                  Height="350px">
-                        </MudChart>
-                    </div>
+                <div class="chart-card">
+                    <h2 class="chart-title">Omzet over tijd</h2>
+                    <MudChart ChartType="ChartType.Line"
+                              ChartSeries="@_series"
+                              XAxisLabels="@_xAxisLabels"
+                              Width="100%"
+                              Height="350px">
+                    </MudChart>
                 </div>
             }
 
             @if (_revenueSplitData.Length > 0)
             {
-                <div class="chart-section">
-                    <h2>Tickets vs. popcorn</h2>
-                    <div class="chart-card">
-                        <MudChart ChartType="ChartType.Pie"
-                                  InputData="@_revenueSplitData"
-                                  InputLabels="@_revenueSplitLabels"
-                                  Width="100%"
-                                  Height="350px">
-                        </MudChart>
-                    </div>
+                <div class="chart-card">
+                    <h2 class="chart-title">Ticket- en horeca-omzet</h2>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputData="@_revenueSplitData"
+                              InputLabels="@_revenueSplitLabels"
+                              Width="100%"
+                              Height="350px">
+                    </MudChart>
+                </div>
+            }
+        </div>
+
+        <div class="charts-row-bottom">
+            @if (_roomSeries.Count > 0)
+            {
+                <div class="chart-card">
+                    <h2 class="chart-title">Omzet per zaal</h2>
+                    <MudChart ChartType="ChartType.Bar"
+                              ChartSeries="@_roomSeries"
+                              XAxisLabels="@_roomLabels"
+                              Width="100%"
+                              Height="300px">
+                    </MudChart>
+                </div>
+            }
+
+            @if (_movieSeries.Count > 0)
+            {
+                <div class="chart-card">
+                    <h2 class="chart-title">Top 5 films omzet</h2>
+                    <MudChart ChartType="ChartType.Bar"
+                              ChartSeries="@_movieSeries"
+                              XAxisLabels="@_movieLabels"
+                              Width="100%"
+                              Height="300px">
+                    </MudChart>
                 </div>
             }
         </div>
@@ -200,25 +194,30 @@
         to { transform: rotate(360deg); }
     }
 
-    .charts-grid {
+    .charts-row-top {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 2fr 1fr;
         gap: 1.5rem;
         margin-top: 2rem;
     }
 
+    .charts-row-bottom {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
     @@media (max-width: 900px) {
-        .charts-grid {
+        .charts-row-top,
+        .charts-row-bottom {
             grid-template-columns: 1fr;
         }
     }
 
-    .chart-section {
-    }
-
-    .chart-section h2 {
-        font-size: 1.4rem;
-        margin-bottom: 1rem;
+    .chart-title {
+        font-size: 1.2rem;
+        margin: 0 0 1rem 0;
         color: var(--text-high);
     }
 
@@ -226,7 +225,7 @@
         background: var(--surface-glass);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
-        padding: 1.5rem;
+        padding: 1rem 1rem 0.5rem 1rem;
         backdrop-filter: blur(10px);
     }
 
@@ -286,7 +285,7 @@
             {
                 new ChartSeries
                 {
-                    Name = "Omzet",
+                    Name = "",
                     Data = _data.Items.Select(i => (double)i.Revenue).ToArray()
                 }
             };
@@ -304,7 +303,7 @@
             {
                 new ChartSeries
                 {
-                    Name = "Omzet",
+                    Name = "",
                     Data = _data.TopMovies.Select(m => (double)m.Revenue).ToArray()
                 }
             };
@@ -322,7 +321,7 @@
             {
                 new ChartSeries
                 {
-                    Name = "Omzet",
+                    Name = "",
                     Data = _data.RevenuePerRoom.Select(r => (double)r.Revenue).ToArray()
                 }
             };
@@ -336,7 +335,7 @@
         if (_data is not null && (_data.TicketRevenue > 0 || _data.PopcornRevenue > 0))
         {
             _revenueSplitData = new[] { (double)_data.TicketRevenue, (double)_data.PopcornRevenue };
-            _revenueSplitLabels = new[] { $"Tickets ({FormatCurrency(_data.TicketRevenue)})", $"Popcorn ({FormatCurrency(_data.PopcornRevenue)})" };
+            _revenueSplitLabels = new[] { $"Tickets ({FormatCurrency(_data.TicketRevenue)})", $"Horeca ({FormatCurrency(_data.PopcornRevenue)})" };
         }
         else
         {
