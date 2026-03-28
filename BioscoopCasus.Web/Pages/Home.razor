@@ -12,12 +12,6 @@
     </div>
 
     <div class="column">
-        <h3>@L["UpcomingShowings"]</h3>
-        <p class="placeholder-text">@L["NoShowsFound"]</p>
-        <TerminalButton Href="/films" Text="@L["AllShowings"]" IsPrimary="true" />
-    </div>
-
-    <div class="column">
         <h3>@L["LatestMovies"]</h3>
         @if (_movies == null)
         {
@@ -48,10 +42,14 @@
     </div>
 
     <div class="column">
+        <TerminalButton Href="/films" Text="@L["AllShowings"]" IsPrimary="true" />
+    </div>
+    
+    <div class="column">
         <h3>@L["PrintTicket"]</h3>
         <TerminalButton Href="/ticketprint" Text="@L["PrintYourTicket"]" IsPrimary="true" />
     </div>
-
+    
     <div class="column">
         <h3>@L["Location"]</h3>
         <p class="address-text">@L["CinemaAddress"]</p>
