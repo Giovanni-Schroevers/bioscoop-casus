@@ -3,7 +3,8 @@ namespace BioscoopCasus.Models.DTOs;
 public record AnalyticsPeriodRequestDto(
     DateTime StartDate,
     DateTime EndDate,
-    string Scope
+    string Scope,
+    List<int>? RoomIds = null
 );
 
 public record OccupancyAnalyticsResponseDto(

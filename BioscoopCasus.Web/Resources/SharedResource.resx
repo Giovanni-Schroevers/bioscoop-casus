@@ -831,4 +831,31 @@
   <data name="SitAlone" xml:space="preserve">
     <value>Sitting alone?</value>
   </data>
+  <data name="FilterPeriod" xml:space="preserve">
+    <value>Period</value>
+  </data>
+  <data name="FilterOneWeek" xml:space="preserve">
+    <value>1 week</value>
+  </data>
+  <data name="FilterOneMonth" xml:space="preserve">
+    <value>1 month</value>
+  </data>
+  <data name="FilterOneYear" xml:space="preserve">
+    <value>1 year</value>
+  </data>
+  <data name="FilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="FilterCustom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="FilterFrom" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="FilterTo" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="FilterRooms" xml:space="preserve">
+    <value>Rooms</value>
+  </data>
 </root>

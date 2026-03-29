@@ -14,16 +14,20 @@ public class RevenueAnalyticsService
         _dbContext = dbContext;
     }
 
-    public async Task<RevenueAnalyticsSummary> GetRevenueAsync(DateTime startDate, DateTime endDate, string scope)
+    public async Task<RevenueAnalyticsSummary> GetRevenueAsync(DateTime startDate, DateTime endDate, string scope, List<int>? roomIds = null)
     {
-        var reservations = await _dbContext.Reservations
+        var query = _dbContext.Reservations
             .Include(r => r.Showtime)
                 .ThenInclude(s => s.Movie)
             .Include(r => r.Showtime)
                 .ThenInclude(s => s.Room)
             .Include(r => r.PopcornOrders)
-            .Where(r => r.Showtime.StartTime >= startDate && r.Showtime.StartTime <= endDate)
-            .ToListAsync();
+            .Where(r => r.Showtime.StartTime >= startDate && r.Showtime.StartTime <= endDate);
+
+        if (roomIds is { Count: > 0 })
+            query = query.Where(r => roomIds.Contains(r.Showtime.RoomId));
+
+        var reservations = await query.ToListAsync();
 
         if (reservations.Count == 0)
         {

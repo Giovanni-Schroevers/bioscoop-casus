@@ -1,7 +1,9 @@
 @page "/management/analytics/revenue"
 @attribute [Authorize]
 @inject RevenueAnalyticsService RevenueAnalyticsService
+@inject RoomService RoomService
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 
 <PageTitle>Omzetanalyse</PageTitle>
 
@@ -15,6 +17,53 @@
         <p class="subtitle">Totaaloverzicht van alle omzetcijfers.</p>
     </div>
 
+    <div class="filter-section">
+        <div class="filter-group">
+            <h3 class="filter-label">@L["FilterPeriod"]</h3>
+            <div class="filter-buttons">
+                <button class="filter-btn @(_activePeriod == "week" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("week"))">@L["FilterOneWeek"]</button>
+                <button class="filter-btn @(_activePeriod == "month" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("month"))">@L["FilterOneMonth"]</button>
+                <button class="filter-btn @(_activePeriod == "year" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("year"))">@L["FilterOneYear"]</button>
+                <button class="filter-btn @(_activePeriod == "all" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("all"))">@L["FilterAll"]</button>
+                <button class="filter-btn @(_activePeriod == "custom" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("custom"))">@L["FilterCustom"]</button>
+            </div>
+            @if (_activePeriod == "custom")
+            {
+                <div class="custom-date-row">
+                    <div class="date-field">
+                        <label>@L["FilterFrom"]</label>
+                        <input type="date" value="@_customStart.ToString("yyyy-MM-dd")"
+                               @onchange="@(e => OnCustomStartChanged(e))" />
+                    </div>
+                    <div class="date-field">
+                        <label>@L["FilterTo"]</label>
+                        <input type="date" value="@_customEnd.ToString("yyyy-MM-dd")"
+                               @onchange="@(e => OnCustomEndChanged(e))" />
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="filter-group">
+            <h3 class="filter-label">@L["FilterRooms"]</h3>
+            <div class="room-checkboxes">
+                @foreach (var room in _rooms)
+                {
+                    <label class="room-checkbox">
+                        <input type="checkbox"
+                               checked="@_selectedRoomIds.Contains(room.Id)"
+                               @onchange="@(e => ToggleRoom(room.Id, (bool)(e.Value ?? false)))" />
+                        <span class="room-checkbox-label">@L["RoomNumber", room.Number]</span>
+                    </label>
+                }
+            </div>
+        </div>
+    </div>
 
     @if (_isLoading)
     {
@@ -156,6 +205,146 @@
         color: var(--text-muted);
     }
 
+    .filter-section {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .filter-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin: 0;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text-high);
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .filter-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(225, 29, 72, 0.35);
+    }
+
+    .filter-btn.active {
+        background: rgba(225, 29, 72, 0.15);
+        border-color: var(--primary-rose);
+        color: #fb7185;
+    }
+
+    .custom-date-row {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.25rem;
+    }
+
+    .date-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .date-field label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .date-field input[type="date"] {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: var(--text-high);
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+
+    .date-field input[type="date"]:focus {
+        border-color: var(--primary-rose);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+    }
+
+    .date-field input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.7);
+    }
+
+    .room-checkboxes {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .room-checkbox {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--text-high);
+    }
+
+    .room-checkbox input[type="checkbox"] {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 1.5px solid rgba(255, 255, 255, 0.25);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.04);
+        cursor: pointer;
+        position: relative;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .room-checkbox input[type="checkbox"]:checked {
+        background: var(--primary-rose);
+        border-color: var(--primary-rose);
+    }
+
+    .room-checkbox input[type="checkbox"]:checked::after {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 2px;
+        width: 5px;
+        height: 9px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .room-checkbox-label {
+        user-select: none;
+    }
 
     .stats-grid {
         display: grid;
@@ -255,6 +444,12 @@
     private double[] _revenueSplitData = Array.Empty<double>();
     private string[] _revenueSplitLabels = Array.Empty<string>();
 
+    private IEnumerable<RoomResponseDto> _rooms = Enumerable.Empty<RoomResponseDto>();
+    private HashSet<int> _selectedRoomIds = new();
+    private string _activePeriod = "all";
+    private DateTime _customStart = DateTime.Today.AddMonths(-1);
+    private DateTime _customEnd = DateTime.Today;
+
     private ChartOptions _chartOptions = new()
     {
         ChartPalette = new[] { "#e11d48", "#f43f5e", "#fb7185", "#fda4af", "#fecdd3" },
@@ -268,6 +463,50 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _rooms = await RoomService.GetRoomsAsync();
+        await LoadData();
+    }
+
+    private (DateTime start, DateTime end) GetDateRange() => _activePeriod switch
+    {
+        "week" => (DateTime.Today.AddDays(-7), DateTime.Today),
+        "month" => (DateTime.Today.AddMonths(-1), DateTime.Today),
+        "year" => (DateTime.Today.AddYears(-1), DateTime.Today),
+        "custom" => (_customStart, _customEnd),
+        _ => (DateTime.MinValue, DateTime.MaxValue)
+    };
+
+    private async Task SetPeriod(string period)
+    {
+        _activePeriod = period;
+        await LoadData();
+    }
+
+    private async Task OnCustomStartChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var date))
+        {
+            _customStart = date;
+            await LoadData();
+        }
+    }
+
+    private async Task OnCustomEndChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var date))
+        {
+            _customEnd = date;
+            await LoadData();
+        }
+    }
+
+    private async Task ToggleRoom(int roomId, bool isChecked)
+    {
+        if (isChecked)
+            _selectedRoomIds.Add(roomId);
+        else
+            _selectedRoomIds.Remove(roomId);
+
         await LoadData();
     }
 
@@ -277,7 +516,9 @@
 
         try
         {
-            var filter = new AnalyticsPeriodRequestDto(DateTime.MinValue, DateTime.MaxValue, "day");
+            var (start, end) = GetDateRange();
+            var roomIds = _selectedRoomIds.Count > 0 ? _selectedRoomIds.ToList() : null;
+            var filter = new AnalyticsPeriodRequestDto(start, end, "day", roomIds);
             _data = await RevenueAnalyticsService.GetRevenueAsync(filter);
             BuildChart();
         }
@@ -293,7 +534,7 @@
 
     private void BuildChart()
     {
-        if (_data?.Items is { Count: > 0 })
+        if (_data?.Items is { Count: > 0 } && _data.Items.Any(i => i.Revenue != 0))
         {
             _xAxisLabels = _data.Items.Select(i => i.Label).ToArray();
             _series = new List<ChartSeries>
@@ -311,7 +552,7 @@
             _xAxisLabels = Array.Empty<string>();
         }
 
-        if (_data?.TopMovies is { Count: > 0 })
+        if (_data?.TopMovies is { Count: > 0 } && _data.TopMovies.Any(m => m.Revenue != 0))
         {
             _movieLabels = _data.TopMovies.Select(m => m.Label).ToArray();
             _movieSeries = new List<ChartSeries>
@@ -329,7 +570,7 @@
             _movieLabels = Array.Empty<string>();
         }
 
-        if (_data?.RevenuePerRoom is { Count: > 0 })
+        if (_data?.RevenuePerRoom is { Count: > 0 } && _data.RevenuePerRoom.Any(r => r.Revenue != 0))
         {
             _roomLabels = _data.RevenuePerRoom.Select(r => r.Label).ToArray();
             _roomSeries = new List<ChartSeries>

@@ -33,9 +33,10 @@ public class AnalyticsController : ControllerBase
     public async Task<ActionResult<RevenueAnalyticsSummary>> GetRevenue(
         [FromQuery] DateTime startDate,
         [FromQuery] DateTime endDate,
-        [FromQuery] string scope = "movie")
+        [FromQuery] string scope = "movie",
+        [FromQuery] List<int>? roomIds = null)
     {
-        var result = await _revenueService.GetRevenueAsync(startDate, endDate, scope);
+        var result = await _revenueService.GetRevenueAsync(startDate, endDate, scope, roomIds);
         return Ok(result);
     }
 }
