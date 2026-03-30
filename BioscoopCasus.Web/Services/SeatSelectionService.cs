@@ -48,6 +48,9 @@ public class SeatSelectionService(HttpClient httpClient)
             {
                 return await response.Content.ReadFromJsonAsync<List<SeatInfoDto>>();
             }
+
+            var errorBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Error fetching available seats. Status: {(int)response.StatusCode} {response.StatusCode}. Body: {errorBody}");
         }
         catch (Exception ex)
         {
@@ -66,6 +69,9 @@ public class SeatSelectionService(HttpClient httpClient)
             {
                 return await response.Content.ReadFromJsonAsync<SeatSelectionResponseDto>();
             }
+
+            var errorBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Error suggesting seats. Status: {(int)response.StatusCode} {response.StatusCode}. Body: {errorBody}");
         }
         catch (Exception ex)
         {
