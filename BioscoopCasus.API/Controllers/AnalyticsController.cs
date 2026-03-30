@@ -23,9 +23,10 @@ public class AnalyticsController : ControllerBase
     public async Task<ActionResult<OccupancyAnalyticsSummary>> GetOccupancy(
         [FromQuery] DateTime startDate,
         [FromQuery] DateTime endDate,
-        [FromQuery] string scope = "both")
+        [FromQuery] string scope = "day",
+        [FromQuery] List<int>? roomIds = null)
     {
-        var result = await _occupancyService.GetOccupancyAsync(startDate, endDate, scope);
+        var result = await _occupancyService.GetOccupancyAsync(startDate, endDate, scope, roomIds);
         return Ok(result);
     }
 
@@ -40,5 +41,3 @@ public class AnalyticsController : ControllerBase
         return Ok(result);
     }
 }
-
-

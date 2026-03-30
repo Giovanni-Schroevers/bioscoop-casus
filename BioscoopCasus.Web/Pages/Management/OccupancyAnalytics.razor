@@ -1,72 +1,184 @@
 @page "/management/analytics/occupancy"
 @attribute [Authorize]
 @inject OccupancyAnalyticsService OccupancyAnalyticsService
+@inject RoomService RoomService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Bezettingsanalyse</PageTitle>
 
 <div class="analytics-container">
     <div class="header-section">
-        <a href="/management" class="back-link">Terug naar dashboard</a>
+        <button class="return-button" @onclick="@(() => NavigationManager.NavigateTo("/management"))">
+            <span class="return-button-icon">&larr;</span>
+            <span>Terug naar beheerdashboard</span>
+        </button>
         <h1>Bezettingsanalyse</h1>
-        <p class="subtitle">Basispagina voor zaal- en filmbelasting per gekozen periode.</p>
+        <p class="subtitle">Overzicht van verkochte en niet-verkochte stoelen per dag en per zaal.</p>
     </div>
 
-    <div class="filters-grid">
-        <div class="filter-item">
-            <label>Vanaf</label>
-            <input class="terminal-input" type="date" @bind="StartDate" @bind:format="yyyy-MM-dd" />
+    <div class="filter-section">
+        <div class="filter-group">
+            <h3 class="filter-label">Periode</h3>
+            <div class="filter-buttons">
+                <button class="filter-btn @(_activePeriod == "week" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("week"))">1 week</button>
+                <button class="filter-btn @(_activePeriod == "month" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("month"))">1 maand</button>
+                <button class="filter-btn @(_activePeriod == "year" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("year"))">1 jaar</button>
+                <button class="filter-btn @(_activePeriod == "all" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("all"))">Alles</button>
+                <button class="filter-btn @(_activePeriod == "custom" ? "active" : "")"
+                        @onclick="@(() => SetPeriod("custom"))">Aangepast</button>
+            </div>
+            @if (_activePeriod == "custom")
+            {
+                <div class="custom-date-row">
+                    <div class="date-field">
+                        <label>Vanaf</label>
+                        <input type="date" value="@_customStart.ToString("yyyy-MM-dd")"
+                               @onchange="@(e => OnCustomStartChanged(e))" />
+                    </div>
+                    <div class="date-field">
+                        <label>Tot en met</label>
+                        <input type="date" value="@_customEnd.ToString("yyyy-MM-dd")"
+                               @onchange="@(e => OnCustomEndChanged(e))" />
+                    </div>
+                </div>
+            }
         </div>
-        <div class="filter-item">
-            <label>Tot en met</label>
-            <input class="terminal-input" type="date" @bind="EndDate" @bind:format="yyyy-MM-dd" />
-        </div>
-        <div class="filter-item">
-            <label>Filtertype</label>
-            <select class="terminal-input" @bind="SelectedViewType">
-                <option value="rooms">Zalen</option>
-                <option value="movies">Films</option>
-                <option value="both">Zalen en films</option>
+
+        <div class="filter-group room-select-group">
+            <h3 class="filter-label">Zaal filter</h3>
+            <select class="room-select" value="@(_selectedRoomId?.ToString() ?? string.Empty)" @onchange="OnSelectedRoomChanged">
+                <option value="">Alle zalen</option>
+                @foreach (var room in _rooms)
+                {
+                    <option value="@room.Id">Zaal @room.Number - @room.Name</option>
+                }
             </select>
         </div>
     </div>
 
-    <div class="placeholder-note">
-        <strong>Basisstatus:</strong> deze pagina is bewust simpel gehouden. Volgende stap is data ophalen via de service en grafieken toevoegen met MudBlazor.
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Gemiddelde bezetting</h3>
-            <p class="stat-value">--%</p>
+    @if (_isLoading)
+    {
+        <div class="loading-state">
+            <span class="loading-spinner"></span>
+            <p>Gegevens laden...</p>
         </div>
-        <div class="stat-card">
-            <h3>Best bezochte zaal</h3>
-            <p class="stat-value">Nog niet gekoppeld</p>
+    }
+    else if (_data is not null)
+    {
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Gemiddelde bezetting</h3>
+                <p class="stat-value">@FormatPercentage(_data.AverageOccupancyPercentage)</p>
+            </div>
+            <div class="stat-card">
+                <h3>Beste zaal vandaag</h3>
+                <p class="stat-value">@FormatTopRoom(_data.BestRoomTodayName, _data.BestRoomTodayPercentage)</p>
+            </div>
+            <div class="stat-card">
+                <h3>Beste zaal deze week</h3>
+                <p class="stat-value">@FormatTopRoom(_data.BestRoomWeekName, _data.BestRoomWeekPercentage)</p>
+            </div>
+            <div class="stat-card">
+                <h3>Beste zaal deze maand</h3>
+                <p class="stat-value">@FormatTopRoom(_data.BestRoomMonthName, _data.BestRoomMonthPercentage)</p>
+            </div>
+            <div class="stat-card">
+                <h3>Beste stoel (geselecteerde zaal)</h3>
+                <p class="stat-value">@FormatBestSeat()</p>
+            </div>
         </div>
-        <div class="stat-card">
-            <h3>Best bezochte film</h3>
-            <p class="stat-value">Nog niet gekoppeld</p>
+
+        <div class="charts-row-top">
+            @if (_occupancySeries.Count > 0)
+            {
+                <div class="chart-card">
+                    <h2 class="chart-title">Bezetting over tijd</h2>
+                    <MudChart ChartType="ChartType.Line"
+                              ChartSeries="@_occupancySeries"
+                              XAxisLabels="@_xAxisLabels"
+                              ChartOptions="@_percentageChartOptions"
+                              Width="100%"
+                              Height="350px">
+                    </MudChart>
+                </div>
+            }
+
+            @if (_soldVsUnsoldPieData.Length > 0)
+            {
+                <div class="chart-card">
+                    <h2 class="chart-title">Verkocht vs niet verkocht</h2>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputData="@_soldVsUnsoldPieData"
+                              InputLabels="@_soldVsUnsoldPieLabels"
+                              ChartOptions="@_pieOptions"
+                              Width="100%"
+                              Height="350px">
+                    </MudChart>
+                </div>
+            }
         </div>
-    </div>
 
-    <div class="chart-section">
-        <h2>Bezettingsgraaf</h2>
-        <MudCard>
-            <MudCardContent>
-                <MudChart ChartType="ChartType.Bar" 
-                          ChartSeries="@_series" 
-                          XAxisLabels="@_xAxisLabels" 
-                          Width="100%" 
-                          Height="400px">
-                </MudChart>
-            </MudCardContent>
-        </MudCard>
-    </div>
+        <div class="charts-row-bottom">
+            @if (_soldUnsoldDailySeries.Count > 0)
+            {
+                <div class="chart-card">
+                    <h2 class="chart-title">Stoelen per dag</h2>
+                    <MudChart ChartType="ChartType.Bar"
+                              ChartSeries="@_soldUnsoldDailySeries"
+                              XAxisLabels="@_xAxisLabels"
+                              ChartOptions="@_seatCountChartOptions"
+                              Width="100%"
+                              Height="300px">
+                    </MudChart>
+                </div>
+            }
 
+            @if (_roomSeries.Count > 0)
+            {
+                <div class="chart-card">
+                    <h2 class="chart-title">Bezetting per zaal (%)</h2>
+                    <MudChart ChartType="ChartType.Bar"
+                              ChartSeries="@_roomSeries"
+                              XAxisLabels="@_roomLabels"
+                              ChartOptions="@_percentageChartOptions"
+                              Width="100%"
+                              Height="300px">
+                    </MudChart>
+                </div>
+            }
+        </div>
+
+        @if (_seatSeries.Count > 0)
+        {
+            <div class="charts-row-extra">
+                <div class="chart-card">
+                    <h2 class="chart-title">Top stoelen in @_data.SelectedRoomName</h2>
+                    <MudChart ChartType="ChartType.Bar"
+                              ChartSeries="@_seatSeries"
+                              XAxisLabels="@_seatLabels"
+                              ChartOptions="@_percentageChartOptions"
+                              Width="100%"
+                              Height="320px">
+                    </MudChart>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>Geen bezettingsgegevens gevonden.</p>
+        </div>
+    }
+</div>
 
 <style>
     .analytics-container {
-        max-width: 1000px;
+        max-width: 1400px;
         margin: 2rem auto;
         padding: 0 1.5rem;
     }
@@ -75,36 +187,140 @@
         margin-bottom: 2rem;
     }
 
-    .back-link {
-        display: inline-block;
-        margin-bottom: 1rem;
-        color: var(--text-muted);
-        text-decoration: none;
+    .return-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text-high);
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 999px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .return-button:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(225, 29, 72, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .return-button:focus {
+        outline: none;
+        border-color: var(--primary-rose);
+        box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.12);
+    }
+
+    .return-button-icon {
+        font-size: 1rem;
+        line-height: 1;
     }
 
     .subtitle {
         color: var(--text-muted);
     }
 
-    .filters-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1.5rem;
+    .filter-section {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
     }
 
-    .filter-item {
+    .filter-group {
         display: flex;
         flex-direction: column;
-        gap: 0.35rem;
+        gap: 0.6rem;
     }
 
-    .placeholder-note {
-        border: 1px dashed rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
+    .room-select-group {
+        min-width: 260px;
+    }
+
+    .filter-label {
+        font-size: 0.85rem;
+        font-weight: 600;
         color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin: 0;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text-high);
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .filter-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(225, 29, 72, 0.35);
+    }
+
+    .filter-btn.active {
+        background: rgba(225, 29, 72, 0.15);
+        border-color: var(--primary-rose);
+        color: #fb7185;
+    }
+
+    .custom-date-row {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.25rem;
+    }
+
+    .date-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .date-field label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .date-field input[type="date"],
+    .room-select {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: var(--text-high);
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+
+    .date-field input[type="date"]:focus,
+    .room-select:focus {
+        border-color: var(--primary-rose);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+    }
+
+    .date-field input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.7);
     }
 
     .stats-grid {
@@ -126,49 +342,322 @@
         color: var(--text-high);
     }
 
-    .chart-section {
-        margin-top: 3rem;
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 0;
+        gap: 1.5rem;
     }
 
-    .chart-section h2 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--primary-rose);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .charts-row-top {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .charts-row-bottom {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .charts-row-extra {
+        margin-top: 1.5rem;
+    }
+
+    @@media (max-width: 900px) {
+        .charts-row-top,
+        .charts-row-bottom {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-title {
+        font-size: 1.2rem;
+        margin: 0 0 1rem 0;
         color: var(--text-high);
+    }
+
+    .chart-card {
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem 1rem 0.5rem 1rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+        background: var(--surface-glass);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
     }
 </style>
 
 @code {
-    private DateTime StartDate { get; set; } = DateTime.Today.AddDays(-7);
-    private DateTime EndDate { get; set; } = DateTime.Today;
-    private string SelectedViewType { get; set; } = "both";
+    private bool _isLoading;
+    private OccupancyAnalyticsResponseDto? _data;
 
-    // Chart data
-    private List<ChartSeries> _series = new();
-    private string[] _xAxisLabels = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+    private IEnumerable<RoomResponseDto> _rooms = Enumerable.Empty<RoomResponseDto>();
+    private int? _selectedRoomId;
 
-    protected override void OnInitialized()
+    private string _activePeriod = "week";
+    private DateTime _customStart = DateTime.Today.AddMonths(-1);
+    private DateTime _customEnd = DateTime.Today;
+
+    private List<ChartSeries> _occupancySeries = new();
+    private List<ChartSeries> _soldUnsoldDailySeries = new();
+    private string[] _xAxisLabels = Array.Empty<string>();
+
+    private List<ChartSeries> _roomSeries = new();
+    private string[] _roomLabels = Array.Empty<string>();
+
+    private List<ChartSeries> _seatSeries = new();
+    private string[] _seatLabels = Array.Empty<string>();
+
+    private double[] _soldVsUnsoldPieData = Array.Empty<double>();
+    private string[] _soldVsUnsoldPieLabels = Array.Empty<string>();
+
+    private readonly ChartOptions _percentageChartOptions = new()
     {
-        _ = OccupancyAnalyticsService;
-        InitializeChartData();
+        ChartPalette = new[] { "#e11d48", "#f43f5e", "#fb7185", "#fda4af", "#fecdd3" },
+        YAxisFormat = "0%"
+    };
+
+    private readonly ChartOptions _seatCountChartOptions = new()
+    {
+        ChartPalette = new[] { "#e11d48", "#64748b" },
+        YAxisFormat = "0"
+    };
+
+    private readonly ChartOptions _pieOptions = new()
+    {
+        ChartPalette = new[] { "#e11d48", "#334155" }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _rooms = await RoomService.GetRoomsAsync();
+        await LoadData();
     }
 
-    private void InitializeChartData()
+    private (DateTime start, DateTime end) GetDateRange() => _activePeriod switch
     {
-        _series = new List<ChartSeries>
+        "week" => (DateTime.Today.AddDays(-7), DateTime.Today.AddDays(1).AddTicks(-1)),
+        "month" => (DateTime.Today.AddMonths(-1), DateTime.Today.AddDays(1).AddTicks(-1)),
+        "year" => (DateTime.Today.AddYears(-1), DateTime.Today.AddDays(1).AddTicks(-1)),
+        "custom" => (_customStart.Date, _customEnd.Date.AddDays(1).AddTicks(-1)),
+        _ => (DateTime.MinValue, DateTime.MaxValue)
+    };
+
+    private async Task SetPeriod(string period)
+    {
+        _activePeriod = period;
+        await LoadData();
+    }
+
+    private async Task OnCustomStartChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var date))
         {
-            new ChartSeries { Name = "Room A", Data = new double[] { 65, 59, 80, 81, 56, 85, 72 } },
-            new ChartSeries { Name = "Room B", Data = new double[] { 28, 48, 40, 19, 86, 27, 90 } },
-            new ChartSeries { Name = "Room C", Data = new double[] { 45, 65, 52, 73, 38, 91, 64 } }
-        };
+            _customStart = date;
+            await LoadData();
+        }
+    }
+
+    private async Task OnCustomEndChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var date))
+        {
+            _customEnd = date;
+            await LoadData();
+        }
+    }
+
+    private async Task OnSelectedRoomChanged(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        _selectedRoomId = int.TryParse(value, out var roomId) ? roomId : null;
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+
+        try
+        {
+            var (start, end) = GetDateRange();
+            var roomIds = _selectedRoomId.HasValue ? new List<int> { _selectedRoomId.Value } : null;
+            var filter = new AnalyticsPeriodRequestDto(start, end, "day", roomIds);
+            _data = await OccupancyAnalyticsService.GetOccupancyAsync(filter);
+            BuildCharts();
+        }
+        catch
+        {
+            _data = null;
+            ClearCharts();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void BuildCharts()
+    {
+        if (_data?.Items is { Count: > 0 })
+        {
+            _xAxisLabels = _data.Items.Select(i => i.Label).ToArray();
+
+            _occupancySeries = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "Bezetting",
+                    Data = _data.Items.Select(i => i.OccupancyPercentage).ToArray()
+                }
+            };
+
+            _soldUnsoldDailySeries = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "Verkocht",
+                    Data = _data.Items.Select(i => (double)i.SoldSeats).ToArray()
+                },
+                new ChartSeries
+                {
+                    Name = "Niet verkocht",
+                    Data = _data.Items.Select(i => (double)i.UnsoldSeats).ToArray()
+                }
+            };
+        }
+        else
+        {
+            _occupancySeries = new();
+            _soldUnsoldDailySeries = new();
+            _xAxisLabels = Array.Empty<string>();
+        }
+
+        if (_data?.OccupancyPerRoom is { Count: > 0 })
+        {
+            _roomLabels = _data.OccupancyPerRoom.Select(r => r.Label).ToArray();
+            _roomSeries = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "Bezetting",
+                    Data = _data.OccupancyPerRoom.Select(r => r.OccupancyPercentage).ToArray()
+                }
+            };
+        }
+        else
+        {
+            _roomSeries = new();
+            _roomLabels = Array.Empty<string>();
+        }
+
+        if (_data?.SeatOccupancy is { Count: > 0 })
+        {
+            var topSeatItems = _data.SeatOccupancy.Take(8).ToList();
+            _seatLabels = topSeatItems.Select(s => ToCompactSeatLabel(s.Label)).ToArray();
+            _seatSeries = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "Bezetting",
+                    Data = topSeatItems.Select(s => s.OccupancyPercentage).ToArray()
+                }
+            };
+        }
+        else
+        {
+            _seatSeries = new();
+            _seatLabels = Array.Empty<string>();
+        }
+
+        if (_data is not null && (_data.TotalSoldSeats > 0 || _data.TotalUnsoldSeats > 0))
+        {
+            _soldVsUnsoldPieData = new[] { (double)_data.TotalSoldSeats, (double)_data.TotalUnsoldSeats };
+            _soldVsUnsoldPieLabels = new[]
+            {
+                $"Verkocht ({_data.TotalSoldSeats})",
+                $"Niet verkocht ({_data.TotalUnsoldSeats})"
+            };
+        }
+        else
+        {
+            _soldVsUnsoldPieData = Array.Empty<double>();
+            _soldVsUnsoldPieLabels = Array.Empty<string>();
+        }
+    }
+
+    private void ClearCharts()
+    {
+        _occupancySeries = new();
+        _soldUnsoldDailySeries = new();
+        _roomSeries = new();
+        _seatSeries = new();
+        _xAxisLabels = Array.Empty<string>();
+        _roomLabels = Array.Empty<string>();
+        _seatLabels = Array.Empty<string>();
+        _soldVsUnsoldPieData = Array.Empty<double>();
+        _soldVsUnsoldPieLabels = Array.Empty<string>();
+    }
+
+    private static string FormatPercentage(double percentage)
+    {
+        return $"{percentage:N1}%";
+    }
+
+    private static string FormatTopRoom(string? roomName, double percentage)
+    {
+        if (string.IsNullOrWhiteSpace(roomName))
+            return "Geen data";
+
+        return $"{roomName} ({percentage:N1}%)";
+    }
+
+    private static string ToCompactSeatLabel(string label)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+            return string.Empty;
+
+        return label
+            .Replace("Rij ", "R")
+            .Replace("Stoel ", "S")
+            .Replace(" - ", "-")
+            .Replace(" ", string.Empty);
+    }
+
+    private string FormatBestSeat()
+    {
+        if (!_selectedRoomId.HasValue)
+            return "Selecteer eerst een zaal";
+
+        if (string.IsNullOrWhiteSpace(_data?.BestSeatLabel))
+            return "Geen data";
+
+        return $"{_data.BestSeatLabel} ({_data.BestSeatPercentage:N1}%)";
     }
 }
-
-</div>
-
-
-
-
-
-
-
-

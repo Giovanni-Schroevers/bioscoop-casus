@@ -9,13 +9,40 @@ public record AnalyticsPeriodRequestDto(
 
 public record OccupancyAnalyticsResponseDto(
     double AverageOccupancyPercentage,
-    string? TopRoomName,
-    string? TopMovieTitle,
-    List<OccupancyAnalyticsItemDto>? Items = null
+    int TotalSoldSeats,
+    int TotalUnsoldSeats,
+    string? BestRoomTodayName,
+    double BestRoomTodayPercentage,
+    string? BestRoomWeekName,
+    double BestRoomWeekPercentage,
+    string? BestRoomMonthName,
+    double BestRoomMonthPercentage,
+    string? SelectedRoomName,
+    string? BestSeatLabel,
+    double BestSeatPercentage,
+    List<OccupancyAnalyticsItemDto>? Items = null,
+    List<OccupancyRoomAnalyticsItemDto>? OccupancyPerRoom = null,
+    List<OccupancySeatAnalyticsItemDto>? SeatOccupancy = null
 );
 
 public record OccupancyAnalyticsItemDto(
     string Label,
+    int SoldSeats,
+    int UnsoldSeats,
+    double OccupancyPercentage
+);
+
+public record OccupancyRoomAnalyticsItemDto(
+    string Label,
+    int SoldSeats,
+    int UnsoldSeats,
+    double OccupancyPercentage
+);
+
+public record OccupancySeatAnalyticsItemDto(
+    string Label,
+    int SoldSeats,
+    int UnsoldSeats,
     double OccupancyPercentage
 );
 
@@ -34,5 +61,3 @@ public record RevenueAnalyticsItemDto(
     string Label,
     decimal Revenue
 );
-
-
