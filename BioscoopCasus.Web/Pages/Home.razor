@@ -150,6 +150,9 @@
 </TerminalShell>
 
 @code{
+    [Inject]
+    private HttpClient Http { get; set; } = null!;
+    
     private List<MoviesOverviewDto>? _movies;
 
     private bool _showNewsletterDialog;
@@ -197,14 +200,30 @@
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(_newsletterEmail) || !new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(_newsletterEmail))
+        if (string.IsNullOrWhiteSpace(_newsletterEmail))
+        {
+            _newsletterError = L["EmailIsRequired"];
+            return;
+        }
+
+        if (!new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(_newsletterEmail))
         {
             _newsletterError = L["EmailRequired"];
             return;
         }
 
-        // TODO: Replace with actual API call
-       
+        var response = await Http.PostAsJsonAsync("api/mailing/newsletter/subscribe", new NewsletterSubscriptionDto
+        {
+            Name = _newsletterName.Trim(),
+            Email = _newsletterEmail.Trim()
+        });
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _newsletterError = await response.Content.ReadAsStringAsync();
+            return;
+        }
+
         _showNewsletterDialog = false;
         _newsletterName = string.Empty;
         _newsletterEmail = string.Empty;

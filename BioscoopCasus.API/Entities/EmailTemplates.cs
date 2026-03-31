@@ -9,4 +9,8 @@ public class EmailTemplates
     public string? Subject { get; set; }
 
     public string Body { get; set; } = string.Empty;
+    
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? ChangedOn { get; set; }
 }

@@ -1035,4 +1035,7 @@
   <data name="EmailIsRequired" xml:space="preserve">
     <value>Vul uw e-mailadres in.</value>
   </data>
+  <data name="YourTicketFor" xml:space="preserve">
+    <value>Uw ticket voor</value>
+  </data>
 </root>

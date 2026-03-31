@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
+using BioscoopCasus.API.BackgroundServices;
+using BioscoopCasus.API.Services;
 using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +63,8 @@ builder.Services.AddScoped<BioscoopCasus.API.Services.MailingService>();
 builder.Services.AddScoped<BioscoopCasus.Models.Helpers.QrCodeHelper>();
 builder.Services.AddScoped<BioscoopCasus.API.Services.OccupancyAnalyticsService>();
 builder.Services.AddScoped<BioscoopCasus.API.Services.RevenueAnalyticsService>();
+builder.Services.AddScoped<MailingService>();
+builder.Services.AddHostedService<NewsletterBackgroundService>();
 
 var app = builder.Build();
 
