@@ -34,7 +34,7 @@
                     @if (MysteryMovieStateService.IsMystery)
                     {
                         <h2>🎭 Mystery Movie</h2>
-                        <p style="color:#e50914;font-size:.85rem;margin-top:2px;">€ 2,50 mystery korting + normale ticketkortingen</p>
+                        <p style="color:#e50914;font-size:.85rem;margin-top:2px;">@(2.50.ToString("C", CultureInfo.CurrentCulture)) @L["MysteryNormalDiscount"] </p>
                     }
                     else
                     {

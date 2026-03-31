@@ -1,6 +1,7 @@
 @using System.Globalization
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
 <div class="language-switcher">
     <button class="language-button" type="button" @onclick="Toggle">
@@ -12,7 +13,7 @@
         <div class="language-overlay" @onclick="Close">
             <div class="language-panel" @onclick:stopPropagation="true">
                 <div class="language-header">
-                    <span>Language</span>
+                    <span>@L["Language"]</span>
                     <button class="language-close" type="button" @onclick="Close" aria-label="Close">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                              stroke-linecap="round" stroke-linejoin="round">

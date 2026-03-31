@@ -858,4 +858,147 @@
   <data name="FilterRooms" xml:space="preserve">
     <value>Rooms</value>
   </data>
+  <data name="MysteryNormalDiscount" xml:space="preserve">
+    <value>mystery discount + normal ticket discount</value>
+  </data>
+  <data name="ManagerMode" xml:space="preserve">
+    <value>Manager mode</value>
+  </data>
+  <data name="ManagerModeOn" xml:space="preserve">
+    <value>Manager mode on</value>
+  </data>
+  <data name="Surprise" xml:space="preserve">
+    <value>Surprise</value>
+  </data>
+  <data name="SurpriseYourself" xml:space="preserve">
+    <value>Surprise yourself</value>
+  </data>
+  <data name="MarkAsMystery" xml:space="preserve">
+    <value>Mark as mystery</value>
+  </data>
+  <data name="TurnOffMystery" xml:space="preserve">
+    <value>Turn off mystery</value>
+  </data>
+  <data name="OccupancyAnalysis" xml:space="preserve">
+    <value>Occupancy analysis
+</value>
+  </data>
+  <data name="RevenueAnalysis" xml:space="preserve">
+    <value>Revenue analysis</value>
+  </data>
+  <data name="BaseOccupancy" xml:space="preserve">
+    <value>Basis for revenue figures per period.</value>
+  </data>
+  <data name="BaseRevenue" xml:space="preserve">
+    <value>Basis for occupancy per room and film.</value>
+  </data>
+  <data name="BackToDashboard" xml:space="preserve">
+    <value>Back to dashboard</value>
+  </data>
+  <data name="OverviewSoldUnsold" xml:space="preserve">
+    <value>Overview of sold and unsold seats per day and per hall.</value>
+  </data>
+  <data name="AllRooms" xml:space="preserve">
+    <value>All rooms</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Loading data...</value>
+  </data>
+  <data name="AverageOccupancy" xml:space="preserve">
+    <value>Average occupancy</value>
+  </data>
+  <data name="BestRoomToday" xml:space="preserve">
+    <value>Best room today</value>
+  </data>
+  <data name="BestRoomWeek" xml:space="preserve">
+    <value>Best room this week</value>
+  </data>
+  <data name="BestRoomMonth" xml:space="preserve">
+    <value>Best room this month</value>
+  </data>
+  <data name="BestChairSelectedRoom" xml:space="preserve">
+    <value>Best chair (selected room)</value>
+  </data>
+  <data name="OccupancyOverTime" xml:space="preserve">
+    <value>Occupancy over time</value>
+  </data>
+  <data name="SoldNotSold" xml:space="preserve">
+    <value>Sold vs not sold</value>
+  </data>
+  <data name="ChairsPerDay" xml:space="preserve">
+    <value>Chairs per day</value>
+  </data>
+  <data name="OccupancyPerRoom" xml:space="preserve">
+    <value>Occupancy per room</value>
+  </data>
+  <data name="TopChairsIn" xml:space="preserve">
+    <value>Top chairs in</value>
+  </data>
+  <data name="NoOccupancyData" xml:space="preserve">
+    <value>No occupancy data found.</value>
+  </data>
+  <data name="Occupancy" xml:space="preserve">
+    <value>Occupancy</value>
+  </data>
+  <data name="Sold" xml:space="preserve">
+    <value>Sold</value>
+  </data>
+  <data name="NotSold" xml:space="preserve">
+    <value>Not sold</value>
+  </data>
+  <data name="Row" xml:space="preserve">
+    <value>Row</value>
+  </data>
+  <data name="Chair" xml:space="preserve">
+    <value>Chair</value>
+  </data>
+  <data name="SelectARoom" xml:space="preserve">
+    <value>Select a room first</value>
+  </data>
+  <data name="OverviewRevenueFigures" xml:space="preserve">
+    <value>Completive overview of all revenue figures.
+</value>
+  </data>
+  <data name="TotalRevenue" xml:space="preserve">
+    <value>Total revenue</value>
+  </data>
+  <data name="FilmHighestRevenue" xml:space="preserve">
+    <value>Film with highest revenue</value>
+  </data>
+  <data name="AverageRevenueDay" xml:space="preserve">
+    <value>Average revenue each day</value>
+  </data>
+  <data name="RevenueOverTime" xml:space="preserve">
+    <value>Revenue over time</value>
+  </data>
+  <data name="TicketCateringRevenue" xml:space="preserve">
+    <value>Ticket and catering revenue</value>
+  </data>
+  <data name="RevenuePerRoom" xml:space="preserve">
+    <value>Revenue per room</value>
+  </data>
+  <data name="TopFilmsRevenue" xml:space="preserve">
+    <value>Top 5 films revenue</value>
+  </data>
+  <data name="NoRevenueData" xml:space="preserve">
+    <value>No revenue data found.</value>
+  </data>
+  <data name="Catering" xml:space="preserve">
+    <value>Catering</value>
+  </data>
+  <data name="Tickets" xml:space="preserve">
+    <value>Tickets</value>
+  </data>
+  <data name="ChooseThisTime" xml:space="preserve">
+    <value>Choose this time</value>
+  </data>
+  <data name="NoMysteryShowsDay" xml:space="preserve">
+    <value>No mystery shows available for this day</value>
+  </data>
+  <data name="WithChosenGenre" xml:space="preserve">
+    <value>with the chosen genres</value>
+  </data>
+  <data name="SurpriseYourselfText" xml:space="preserve">
+    <value>Let yourself be surprised – choose a time and only discover which film you are seeing in the theater.</value>
+  </data>
 </root>
