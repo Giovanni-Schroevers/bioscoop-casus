@@ -68,7 +68,7 @@ else
 
 <!-- GROUP SIZE POPUP -->
 
-@if (ShowGroupSizeModal)
+@if (ShowGroupSizeModal && !_cameFromTicketSale)
 {
 <div class="modal-overlay">
     <div class="modal">
@@ -162,7 +162,7 @@ else
         }
 
         <div class="modal-actions">
-            <button class="cancel-button" @onclick="() => ShowSeatsModal = false">
+            <button class="cancel-button" @onclick="CancelSeatReservation">
                 @L["Cancel"]
             </button>
             <button class="confirm-button"
@@ -448,6 +448,7 @@ else
 // Came from ticket sale: load showtimes for the given movie+showtime
 // so we can resolve the showtime object, then open group size modal.
             await LoadShowtimeFromParams();
+            await ConfirmGroupSize();
         }
         else
         {
@@ -508,6 +509,12 @@ else
         _selectedShowtimeDisplay = showtime.StartTime.ToString("dddd dd MMMM HH:mm");
         ShowShowtimeModal = false;
         ShowGroupSizeModal = true;
+    }
+
+    void CancelSeatReservation()
+    {
+        ShowSeatsModal = false;
+        NavigationManager.NavigateTo("/movies");
     }
 
 
