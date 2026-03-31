@@ -38,6 +38,7 @@ public class MoviesOverviewController : ControllerBase
                 m.Id,
                 m.Title,
                 t.Genres,
+                m.PosterUrl,
                 m.DurationMinutes,
                 m.Showtimes
                     .Where(s => s.StartTime.Date == filterDate)

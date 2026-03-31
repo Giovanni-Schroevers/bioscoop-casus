@@ -1001,4 +1001,46 @@
   <data name="SurpriseYourselfText" xml:space="preserve">
     <value>Let yourself be surprised – choose a time and only discover which film you are seeing in the theater.</value>
   </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
+  <data name="ChooseAnOption" xml:space="preserve">
+    <value>Choose an option</value>
+  </data>
+  <data name="ViewMovie" xml:space="preserve">
+    <value>View movie</value>
+  </data>
+  <data name="BrowseCurrentShowings" xml:space="preserve">
+    <value>Browse current showings</value>
+  </data>
+  <data name="PrintTicketDescription" xml:space="preserve">
+    <value>Print your ticket here</value>
+  </data>
+  <data name="Newsletter" xml:space="preserve">
+    <value>Newsletter</value>
+  </data>
+  <data name="NewsletterDescription" xml:space="preserve">
+    <value>Sign up for the newsletter</value>
+  </data>
+  <data name="SignUpForNewsletter" xml:space="preserve">
+    <value>Sign up for the newsletter</value>
+  </data>
+  <data name="NewsletterPromptText" xml:space="preserve">
+    <value>Enter your name and email address to subscribe to our newsletter.</value>
+  </data>
+  <data name="Subscribe" xml:space="preserve">
+    <value>Subscribe</value>
+  </data>
+  <data name="NameIsRequired" xml:space="preserve">
+    <value>Please enter your name.</value>
+  </data>
+  <data name="EmailIsRequired" xml:space="preserve">
+    <value>Please enter your email address.</value>
+  </data>
+  <data name="YourTicketFor" xml:space="preserve">
+    <value>Your ticket for</value>
+  </data>
+  <data name="EmailAddressInvalid" xml:space="preserve">
+    <value />
+  </data>
 </root>

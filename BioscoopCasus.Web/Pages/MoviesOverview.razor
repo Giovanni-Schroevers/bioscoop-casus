@@ -53,7 +53,7 @@
             @foreach (var movie in _movies)
             {
                 <div class="movie-card clickable-card" @onclick="@(() => OpenMovie(movie.Id))">
-                    <img src="https://placehold.co/200x250" alt="@movie.Title" />
+                    <img src="@GetPosterUrl(movie.PosterUrl)" alt="@movie.Title" />
                     <div class="movie-card-info">
                         <h3>@movie.Title</h3>
                         <p class="movie-genres">@movie.Genres</p>
@@ -175,5 +175,16 @@
     private void OpenTicketSale(int movieId, int showtimeId)
     {
         NavigationManager.NavigateTo($"/movies/{movieId.ToString()}/ticketsale/{showtimeId.ToString()}");
+    }
+    
+    private static string GetPosterUrl(string posterUrl)
+    {
+        if (string.IsNullOrWhiteSpace(posterUrl) ||
+            (Uri.TryCreate(posterUrl, UriKind.Absolute, out var uri) &&
+             uri.Host.Contains("example.com", StringComparison.OrdinalIgnoreCase)))
+        {
+            return "https://placehold.co/200x250";
+        }
+        return posterUrl;
     }
 }

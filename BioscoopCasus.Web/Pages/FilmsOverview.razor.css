@@ -67,6 +67,7 @@ h1 {
     width: 100%;
     height: auto;
     display: block;
+    max-height: 248px;
 }
 
 .film-card-info {

@@ -21,6 +21,7 @@ public class BioscoopDbContext : DbContext
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<PopcornOrder> PopcornOrders { get; set; }
     public DbSet<EmailTemplates> EmailTemplates { get; set; }
+    public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -119,9 +120,51 @@ public class BioscoopDbContext : DbContext
             .HasForeignKey(p => p.ReservationId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        // Email templates for the emails
-        modelBuilder.Entity<EmailTemplates>()
-            .HasIndex(emailTemplate => emailTemplate.Name)
-            .IsUnique();
+        modelBuilder.Entity<EmailTemplates>(entity =>
+        {
+            entity.ToTable("EmailTemplates");
+
+            entity.HasKey(emailTemplate => emailTemplate.Id);
+
+            entity.Property(emailTemplate => emailTemplate.Name)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(emailTemplate => emailTemplate.Subject)
+                .HasMaxLength(500);
+
+            entity.Property(emailTemplate => emailTemplate.Body)
+                .IsRequired();
+
+            entity.Property(emailTemplate => emailTemplate.CreatedAt)
+                .IsRequired();
+
+            entity.Property(emailTemplate => emailTemplate.ChangedOn);
+
+            entity.HasIndex(emailTemplate => emailTemplate.Name)
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<NewsletterSubscriber>(entity =>
+        {
+            entity.ToTable("NewsletterSubscribers");
+
+            entity.HasKey(newsletterSubscriber => newsletterSubscriber.Id);
+
+            entity.Property(newsletterSubscriber => newsletterSubscriber.Email)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(newsletterSubscriber => newsletterSubscriber.Name)
+                .HasMaxLength(255);
+
+            entity.Property(newsletterSubscriber => newsletterSubscriber.ConfirmationSent)
+                .IsRequired();
+
+            entity.Property(newsletterSubscriber => newsletterSubscriber.LatestReceivedEmail);
+
+            entity.HasIndex(newsletterSubscriber => newsletterSubscriber.Email)
+                .IsUnique();
+        });
     }
 }

@@ -999,4 +999,43 @@
   <data name="SurpriseYourselfText" xml:space="preserve">
     <value>Laat je verrassen - kies een tijd en ontdek pas in de zaal welke film je ziet.</value>
   </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Welkom</value>
+  </data>
+  <data name="ChooseAnOption" xml:space="preserve">
+    <value>Kies een optie</value>
+  </data>
+  <data name="ViewMovie" xml:space="preserve">
+    <value>Bekijk film</value>
+  </data>
+  <data name="BrowseCurrentShowings" xml:space="preserve">
+    <value>Bekijk de huidge voorstellingen</value>
+  </data>
+  <data name="PrintTicketDescription" xml:space="preserve">
+    <value>Hier je ticket afdrukken</value>
+  </data>
+  <data name="Newsletter" xml:space="preserve">
+    <value>Nieuwsbrief</value>
+  </data>
+  <data name="NewsletterDescription" xml:space="preserve">
+    <value>Aanmelden voor de nieuwsbrief</value>
+  </data>
+  <data name="SignUpForNewsletter" xml:space="preserve">
+    <value>Aanmelden voor de nieuwsbrief</value>
+  </data>
+  <data name="NewsletterPromptText" xml:space="preserve">
+    <value>Voer je naam en email address in om je in te schrijven voor onze nieuwsbrief.</value>
+  </data>
+  <data name="Subscribe" xml:space="preserve">
+    <value>Aanmelden</value>
+  </data>
+  <data name="NameIsRequired" xml:space="preserve">
+    <value>Vul uw naam in.</value>
+  </data>
+  <data name="EmailIsRequired" xml:space="preserve">
+    <value>Vul uw e-mailadres in.</value>
+  </data>
+  <data name="YourTicketFor" xml:space="preserve">
+    <value>Uw ticket voor</value>
+  </data>
 </root>

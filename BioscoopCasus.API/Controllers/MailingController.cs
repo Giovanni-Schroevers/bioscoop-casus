@@ -124,7 +124,8 @@ public class MailingController(BioscoopDbContext context, MailingService mailing
                 Id = highestId + 1,
                 Name = trimmedName,
                 Subject = emailTemplateDto.Subject,
-                Body = emailTemplateDto.Body
+                Body = emailTemplateDto.Body,
+                CreatedAt = DateTime.Now
             };
 
             context.EmailTemplates.Add(emailTemplate);
@@ -175,6 +176,7 @@ public class MailingController(BioscoopDbContext context, MailingService mailing
             emailTemplate.Name = trimmedName;
             emailTemplate.Subject = emailTemplateDto.Subject;
             emailTemplate.Body = emailTemplateDto.Body;
+            emailTemplate.ChangedOn = DateTime.Now;
 
             await context.SaveChangesAsync();
 
@@ -189,6 +191,52 @@ public class MailingController(BioscoopDbContext context, MailingService mailing
         catch (Exception)
         {
             return StatusCode(500, "Something went wrong while updating the email template");
+        }
+    }
+    
+    // POST /api/mailing/newsletter/subscribe
+    [HttpPost("newsletter/subscribe")]
+    public async Task<ActionResult> SubscribeToNewsletter([FromBody] NewsletterSubscriptionDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            return BadRequest("Name is required");
+
+        if (string.IsNullOrWhiteSpace(dto.Email))
+            return BadRequest("Email is required");
+
+        try
+        {
+            var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
+
+            var existingSubscriber = await context.NewsletterSubscribers
+                .FirstOrDefaultAsync(subscriber => subscriber.Email.ToLower() == normalizedEmail);
+
+            if (existingSubscriber is not null)
+                return BadRequest("This email address is already subscribed");
+
+            var newsletterSubscriber = new NewsletterSubscriber
+            {
+                Name = dto.Name.Trim(),
+                Email = normalizedEmail,
+                ConfirmationSent = false
+            };
+
+            await mailingService.SendNewsletterConfirmationEmailAsync(newsletterSubscriber);
+            
+            // If sending the email succeeded update confirmation sent and add them to the newsletter subscribers
+            context.NewsletterSubscribers.Add(newsletterSubscriber);
+            newsletterSubscriber.ConfirmationSent = true;
+            await context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Newsletter subscription created and confirmation email sent"
+            });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Something went wrong while subscribing to the newsletter");
         }
     }
 }
