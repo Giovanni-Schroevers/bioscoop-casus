@@ -7,65 +7,91 @@
 <PageTitle>@L["HomeTitle"]</PageTitle>
 
 <TerminalShell>
+    <div class="home-shell">
     <div class="terminal-header">
+        <p class="eyebrow">@L["Welcome"]</p>
         <h1>@L["AppTitle"]</h1>
+        <p class="header-subtitle">@L["ChooseAnOption"]</p>
     </div>
 
-    <div class="column">
-        <h3>@L["LatestMovies"]</h3>
-        @if (_movies == null)
-        {
-            <p class="empty-message">@L["Loading"]</p>
-        }
-        else if (!_movies.Any())
-        {
-            <p class="placeholder-text">@L["NoMoviesFound"]</p>
-        }
-        else
-        {
-            <div class="movie-grid">
-                @foreach (var movie in _movies)
-                {
-                    <div class="movie-card clickable-card" @onclick="@(() => OpenMovie(movie.Id))">
-                        <img src="https://placehold.co/200x250" alt="@movie.Title"/>
-                        <div class="movie-card-info">
-                            <h3>@movie.Title</h3>
-                            <p class="movie-genres">@movie.Genres</p>
-                            <p class="movie-duration">@movie.DurationMinutes @L["MinutesSuffix"]</p>
-                        </div>
-                    </div>
-                }
-
+    <div class="home-layout">
+        <section class="home-panel featured-panel">
+            <div class="panel-header">
+                <h2>@L["LatestMovies"]</h2>
+                <TerminalButton Href="/movies" Text="@L["AllMovies"]" IsPrimary="true" />
             </div>
-        }
-        <TerminalButton Href="/movies" Text="@L["AllMovies"]" IsPrimary="true" />
-    </div>
 
-    <div class="column">
-        <TerminalButton Href="/films" Text="@L["AllShowings"]" IsPrimary="true" />
-    </div>
-    
-    <div class="column">
-        <h3>@L["PrintTicket"]</h3>
-        <TerminalButton Href="/ticketprint" Text="@L["PrintYourTicket"]" IsPrimary="true" />
-    </div>
-    
-    <div class="column">
-        <h3>@L["Location"]</h3>
-        <p class="address-text">@L["CinemaAddress"]</p>
-        <TerminalButton Href="https://www.google.com/maps/dir/?api=1&destination=Hogeschoollaan+1+Breda"
-                        Target="_blank"
-                        Rel="noopener noreferrer"
-                        IsPrimary="true">
-            <ChildContent>
-                <div class="directions-btn-content">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
-                        <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
-                    </svg>
-                    <span>@L["Directions"]</span>
+            @if (_movies == null)
+            {
+                <p class="empty-message">@L["Loading"]</p>
+            }
+            else if (!_movies.Any())
+            {
+                <p class="placeholder-text">@L["NoMoviesFound"]</p>
+            }
+            else
+            {
+                <div class="movie-grid">
+                    @foreach (var movie in _movies)
+                    {
+                        <div class="movie-card clickable-card" @onclick="@(() => OpenMovie(movie.Id))">
+                            <div class="movie-poster-wrapper">
+                                <img src="@GetPosterUrl(movie.PosterUrl)" alt="@movie.Title" />
+                            </div>
+
+                            <div class="movie-card-info">
+                                <h3>@movie.Title</h3>
+                                <p class="movie-genres">@movie.Genres</p>
+                                <p class="movie-duration">@movie.DurationMinutes @L["MinutesSuffix"]</p>
+                                <span class="movie-link">@L["ViewMovie"]</span>
+                            </div>
+                        </div>
+                    }
                 </div>
-            </ChildContent>
-        </TerminalButton>
+            }
+        </section>
+
+        <section class="home-panel action-panel">
+            <div class="quick-actions-grid">
+                <div class="action-card">
+                    <h3>@L["AllShowings"]</h3>
+                    <p>@L["BrowseCurrentShowings"]</p>
+                    <TerminalButton Href="/films" Text="@L["AllShowings"]" IsPrimary="true" />
+                </div>
+
+                <div class="action-card">
+                    <h3>@L["PrintTicket"]</h3>
+                    <p>@L["PrintTicketDescription"]</p>
+                    <TerminalButton Href="/ticketprint" Text="@L["PrintYourTicket"]" IsPrimary="true" />
+                </div>
+
+                <div class="action-card">
+                    <h3>@L["Location"]</h3>
+                    <p class="address-text">@L["CinemaAddress"]</p>
+                    <TerminalButton Href="https://www.google.com/maps/dir/?api=1&destination=Hogeschoollaan+1+Breda"
+                                    Target="_blank"
+                                    Rel="noopener noreferrer"
+                                    IsPrimary="true">
+                        <ChildContent>
+                            <div class="directions-btn-content">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                                    <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                                </svg>
+                                <span>@L["Directions"]</span>
+                            </div>
+                        </ChildContent>
+                    </TerminalButton>
+                </div>
+
+                <div class="action-card newsletter-card">
+                    <h3>@L["Newsletter"]</h3>
+                    <p>@L["NewsletterDescription"]</p>
+                    <button type="button" class="newsletter-link-button" @onclick="OpenNewsletterDialog">
+                        @L["SignUpForNewsletter"]
+                    </button>
+                </div>
+            </div>
+        </section>
     </div>
 
     <div class="admin-login-wrapper">
@@ -80,10 +106,56 @@
             </ChildContent>
         </TerminalButton>
     </div>
+</div>
+
+@if (_showNewsletterDialog)
+{
+    <div class="modal-backdrop" @onclick="CloseNewsletterDialog">
+        <div class="newsletter-modal" @onclick:stopPropagation="true">
+            <div class="newsletter-modal-header">
+                <h3>@L["Newsletter"]</h3>
+                <button type="button" class="modal-close-button" @onclick="CloseNewsletterDialog">×</button>
+            </div>
+
+            <p class="newsletter-modal-text">@L["NewsletterPromptText"]</p>
+
+            <div class="newsletter-form">
+                <div class="form-group">
+                    <label for="newsletterName">@L["NameLabel"]</label>
+                    <input id="newsletterName" @bind="_newsletterName" class="form-input" />
+                </div>
+
+                <div class="form-group">
+                    <label for="newsletterEmail">@L["EmailLabel"]</label>
+                    <input id="newsletterEmail" @bind="_newsletterEmail" type="email" class="form-input" />
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(_newsletterError))
+                {
+                    <p class="form-error">@_newsletterError</p>
+                }
+
+                <div class="newsletter-actions">
+                    <button type="button" class="secondary-action-button" @onclick="CloseNewsletterDialog">
+                        @L["Cancel"]
+                    </button>
+                    <button type="button" class="primary-action-button" @onclick="SubmitNewsletterSignupAsync">
+                        @L["Subscribe"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 </TerminalShell>
 
 @code{
     private List<MoviesOverviewDto>? _movies;
+
+    private bool _showNewsletterDialog;
+    private string _newsletterName = string.Empty;
+    private string _newsletterEmail = string.Empty;
+    private string? _newsletterError;
     
     protected override async Task OnInitializedAsync()
     {
@@ -101,5 +173,51 @@
     private void OpenMovie(int movieId)
     {
         NavigationManager.NavigateTo($"/movies/{movieId}");
+    }
+    
+    private void OpenNewsletterDialog()
+    {
+        _newsletterError = null;
+        _showNewsletterDialog = true;
+    }
+
+    private void CloseNewsletterDialog()
+    {
+        _showNewsletterDialog = false;
+        _newsletterError = null;
+    }
+
+    private async Task SubmitNewsletterSignupAsync()
+    {
+        _newsletterError = null;
+
+        if (string.IsNullOrWhiteSpace(_newsletterName))
+        {
+            _newsletterError = L["NameIsRequired"];
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_newsletterEmail) || !new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(_newsletterEmail))
+        {
+            _newsletterError = L["EmailRequired"];
+            return;
+        }
+
+        // TODO: Replace with actual API call
+       
+        _showNewsletterDialog = false;
+        _newsletterName = string.Empty;
+        _newsletterEmail = string.Empty;
+    }
+    
+    private static string GetPosterUrl(string posterUrl)
+    {
+        if (string.IsNullOrWhiteSpace(posterUrl) ||
+            (Uri.TryCreate(posterUrl, UriKind.Absolute, out var uri) &&
+             uri.Host.Contains("example.com", StringComparison.OrdinalIgnoreCase)))
+        {
+            return "https://placehold.co/200x250";
+        }
+        return posterUrl;
     }
 }

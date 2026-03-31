@@ -6,6 +6,7 @@ public record MoviesOverviewDto(
     int Id,
     string Title,
     string Genres,
+    string PosterUrl,
     int DurationMinutes,
     List<MoviesOverviewShowtimeDto> Showtimes
 );
