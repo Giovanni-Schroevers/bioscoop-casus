@@ -94,7 +94,8 @@
     {
         _movies = await MoviesOverviewService.GetMoviesAsync(DateTime.Now);
         // Make sure to only show 3 movies to avoid clutter
-        _movies = _movies.Slice(1, 5);
+        if(_movies.Count > 0)
+            _movies = _movies.Slice(1, _movies.Count);
     }
     
     private void OpenMovie(int movieId)
