@@ -131,26 +131,22 @@ else
 
         <div class="seats-grid">
 
-            @for (int row = 1; row <= MaxRow; row++)
+            @foreach (var displayRow in _seatLayoutRows)
             {
             <div class="row">
 
-                <div class="row-label">@L["RowLabel", row]</div>
+                <div class="row-label">@L["RowLabel", displayRow.DisplayRowNumber]</div>
 
-                @for (int seat = 1; seat <= MaxSeat; seat++)
+                @foreach (var seatCell in displayRow.Seats)
                 {
-                var seatInfo = AllSeats.FirstOrDefault(
-                s => s.Row == row && s.SeatNumber == seat);
-
-                var isSelected =
-                SelectedSeatIds.Contains(seatInfo?.Id ?? 0);
-
+                var seatInfo = seatCell.Seat;
+                var isSelected = SelectedSeatIds.Contains(seatInfo.Id);
                 var seatClass = GetSeatClass(seatInfo, isSelected);
 
                 <div class="seat @seatClass"
-                     title="@L["SeatTitle", row, seat]"
+                     title="@L["SeatTitle", displayRow.DisplayRowNumber, seatCell.DisplaySeatNumber]"
                      @onclick="() => ToggleSeatSelection(seatInfo)">
-                    @seat
+                    @seatCell.DisplaySeatNumber
                 </div>
                 }
 
@@ -526,6 +522,8 @@ else
         await LoadSeats();
     }
 
+    List<SeatRowLayout> _seatLayoutRows = new();
+
     async Task LoadSeats()
     {
         if (SelectedShowtime == null) return;
@@ -549,19 +547,49 @@ else
                         new HashSet<int>(SeatSelectionResult.SuggestedSeats.Select(x => x.Id));
                 }
 
-                MaxRow = AllSeats.Max(x => x.Row);
-                MaxSeat = AllSeats.Max(x => x.SeatNumber);
+                BuildSeatLayoutFromDatabaseRows();
+            }
+            else
+            {
+                _seatLayoutRows.Clear();
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading seats: {ex.Message}");
             AllSeats = null;
+            _seatLayoutRows.Clear();
         }
         finally
         {
             IsLoadingSeats = false;
             StateHasChanged();
+        }
+    }
+
+    // Build visual rows exactly from database row/seat numbers.
+    void BuildSeatLayoutFromDatabaseRows()
+    {
+        _seatLayoutRows.Clear();
+
+        if (AllSeats == null || AllSeats.Count == 0)
+            return;
+
+        var rows = AllSeats
+            .OrderBy(s => s.Row)
+            .ThenBy(s => s.SeatNumber)
+            .GroupBy(s => s.Row);
+
+        foreach (var rowGroup in rows)
+        {
+            var rowLayout = new SeatRowLayout(rowGroup.Key);
+
+            foreach (var seat in rowGroup)
+            {
+                rowLayout.Seats.Add(new SeatCellLayout(seat, seat.SeatNumber));
+            }
+
+            _seatLayoutRows.Add(rowLayout);
         }
     }
 
@@ -677,4 +705,11 @@ void TryConfirmReservation()
         return seat.IsAvailable ? "available" : "occupied";
     }
 
+    private sealed class SeatRowLayout(int displayRowNumber)
+    {
+        public int DisplayRowNumber { get; } = displayRowNumber;
+        public List<SeatCellLayout> Seats { get; } = new();
+    }
+
+    private sealed record SeatCellLayout(SeatInfoDto Seat, int DisplaySeatNumber);
 }

@@ -1,4 +1,3 @@
-using System;
 using System.Globalization;
 using System.Net.Http;
 using BioscoopCasus.Models.Helpers;
@@ -9,6 +8,7 @@ using BioscoopCasus.Web.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using BioscoopCasus.Web.Handlers;
+using MudBlazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -67,6 +67,18 @@ builder.Services.AddHttpClient<ShowtimeService>(client =>
 }).AddHttpMessageHandler<JwtAuthorizationMessageHandler>()
   .AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
 
+builder.Services.AddHttpClient<OccupancyAnalyticsService>(client =>
+{
+    client.BaseAddress = apiBase;
+}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>()
+  .AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
+
+builder.Services.AddHttpClient<RevenueAnalyticsService>(client =>
+{
+    client.BaseAddress = apiBase;
+}).AddHttpMessageHandler<JwtAuthorizationMessageHandler>()
+  .AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
+
 // Seat selection uses another backend
 builder.Services.AddHttpClient<SeatSelectionService>(client =>
 {
@@ -79,6 +91,8 @@ builder.Services.AddHttpClient<PaymentService>(client =>
 }).AddHttpMessageHandler<AcceptLanguageHeaderHandler>();
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+builder.Services.AddMudServices();
 
 var host = builder.Build();
 

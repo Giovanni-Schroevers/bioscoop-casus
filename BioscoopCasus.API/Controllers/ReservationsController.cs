@@ -160,7 +160,8 @@ public class ReservationsController(BioscoopDbContext context, QrCodeHelper qrCo
 
         var reservation = new Reservation
         {
-            ShowtimeId = showtimeId
+            ShowtimeId = showtimeId,
+            TotalPrice = request.TotalPrice
         };
 
         if (request.PopcornOrders is { Count: > 0 })

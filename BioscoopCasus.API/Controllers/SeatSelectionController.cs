@@ -28,6 +28,8 @@ public class SeatSelectionController : ControllerBase
         var showtime = await _context.Showtimes
             .Include(s => s.Room)
             .ThenInclude(r => r.Rows)
+            .Include(s => s.Room)
+            .ThenInclude(r => r.Seats)
             .FirstOrDefaultAsync(s => s.Id == showtimeId);
 
         if (showtime == null)
@@ -46,8 +48,12 @@ public class SeatSelectionController : ControllerBase
             .ThenBy(s => s.SeatNumber)
             .ToListAsync();
 
-        int totalRows = showtime.Room.Rows.Count;
-        int maxSeatsPerRow = showtime.Room.Rows.Max(r => r.SeatCount);
+        var totalRows = showtime.Room.Rows.Any()
+            ? showtime.Room.Rows.Count
+            : seats.Select(s => s.Row).Distinct().Count();
+        var maxSeatsPerRow = showtime.Room.Rows.Any()
+            ? showtime.Room.Rows.Max(r => r.SeatCount)
+            : seats.GroupBy(s => s.Row).Select(g => g.Count()).DefaultIfEmpty(0).Max();
 
         var seatInfos = seats.Select(seat => new SeatInfoDto(
             seat.Id,
@@ -194,10 +200,32 @@ public class SeatSelectionController : ControllerBase
         if (existingShowtimeSeatsCount > 0)
             return;
 
-        var roomSeats = showtime.Room.Seats.ToList();
+        var roomSeats = await _context.Seats
+            .Where(s => s.RoomId == showtime.RoomId)
+            .ToListAsync();
 
         if (!roomSeats.Any())
-            throw new InvalidOperationException($"No seats found for room {showtime.RoomId}");
+        {
+            var roomRows = await _context.Rows
+                .Where(r => r.RoomId == showtime.RoomId)
+                .OrderBy(r => r.RowNumber)
+                .ToListAsync();
+
+            if (!roomRows.Any())
+                throw new InvalidOperationException($"No rows found for room {showtime.RoomId}");
+
+            roomSeats = roomRows
+                .SelectMany(row => Enumerable.Range(1, row.SeatCount).Select(seatNumber => new Seat
+                {
+                    RoomId = showtime.RoomId,
+                    Row = row.RowNumber,
+                    SeatNumber = seatNumber
+                }))
+                .ToList();
+
+            _context.Seats.AddRange(roomSeats);
+            await _context.SaveChangesAsync();
+        }
 
         var showtimeSeats = roomSeats.Select(seat => new ShowtimeSeat
         {

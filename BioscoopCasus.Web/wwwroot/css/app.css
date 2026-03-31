@@ -142,6 +142,19 @@ code {
   color: #c02d76;
 }
 
+/* MudBlazor chart overrides for dark theme */
+.mud-chart text {
+    fill: var(--text-high) !important;
+}
+
+.mud-chart-legend-item {
+    color: var(--text-high) !important;
+}
+
+.mud-chart line {
+    stroke: rgba(255, 255, 255, 0.1) !important;
+}
+
 .form-floating > .form-control-plaintext::placeholder,
 .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);

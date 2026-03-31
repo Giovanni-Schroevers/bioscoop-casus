@@ -102,6 +102,8 @@ public class RoomsController : ControllerBase
             });
         }
 
+        AddSeatsForRoomLayout(room);
+
         _context.Rooms.Add(room);
         await _context.SaveChangesAsync();
 
@@ -128,6 +130,7 @@ public class RoomsController : ControllerBase
     {
         var room = await _context.Rooms
             .Include(r => r.Rows)
+            .Include(r => r.Seats)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (room == null)
@@ -137,6 +140,26 @@ public class RoomsController : ControllerBase
         if (room.Number != dto.Number && await _context.Rooms.AnyAsync(r => r.Number == dto.Number))
         {
             return BadRequest($"Room number {dto.Number} is already taken by another room.");
+        }
+
+        var existingSeatIds = room.Seats.Select(s => s.Id).ToList();
+        if (existingSeatIds.Count > 0)
+        {
+            var hasReservations = await _context.ShowtimeSeats
+                .AnyAsync(ss => existingSeatIds.Contains(ss.SeatId) && ss.ReservationId.HasValue);
+
+            if (hasReservations)
+            {
+                return BadRequest("Cannot change room layout because there are already reservations for this room.");
+            }
+
+            var showtimeSeatsToDelete = await _context.ShowtimeSeats
+                .Where(ss => existingSeatIds.Contains(ss.SeatId))
+                .ToListAsync();
+
+            _context.ShowtimeSeats.RemoveRange(showtimeSeatsToDelete);
+            _context.Seats.RemoveRange(room.Seats);
+            room.Seats.Clear();
         }
 
         room.Number = dto.Number;
@@ -158,6 +181,8 @@ public class RoomsController : ControllerBase
             });
         }
 
+        AddSeatsForRoomLayout(room);
+
         await _context.SaveChangesAsync();
 
         return NoContent();
@@ -176,5 +201,21 @@ public class RoomsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    private static void AddSeatsForRoomLayout(Room room)
+    {
+        foreach (var row in room.Rows.OrderBy(r => r.RowNumber))
+        {
+            for (var seatNumber = 1; seatNumber <= row.SeatCount; seatNumber++)
+            {
+                room.Seats.Add(new Seat
+                {
+                    Room = room,
+                    Row = row.RowNumber,
+                    SeatNumber = seatNumber
+                });
+            }
+        }
     }
 }

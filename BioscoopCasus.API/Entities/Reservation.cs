@@ -4,6 +4,7 @@ public class Reservation
 {
     public int Id { get; set; }
     public int ShowtimeId { get; set; }
+    public decimal TotalPrice { get; set; }
 
     // Navigation properties
     public Showtime Showtime { get; set; }
