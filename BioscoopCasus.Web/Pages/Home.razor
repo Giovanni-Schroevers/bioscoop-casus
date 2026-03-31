@@ -93,9 +93,9 @@
     private async Task LoadMovies()
     {
         _movies = await MoviesOverviewService.GetMoviesAsync(DateTime.Now);
-        // Make sure to only show 3 movies to avoid clutter
-        if(_movies.Count > 0)
-            _movies = _movies.Slice(1, _movies.Count);
+        // Make sure to only show 5 movies to avoid clutter
+        if (_movies.Count > 0)
+            _movies = _movies.Count < 5 ? _movies : _movies[..5];
     }
     
     private void OpenMovie(int movieId)
