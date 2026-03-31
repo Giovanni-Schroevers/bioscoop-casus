@@ -1,6 +1,7 @@
 @page "/movies"
 @inject MoviesOverviewService MoviesOverviewService
 @inject NavigationManager NavigationManager
+@using System.Globalization
 @using BioscoopCasus.Web.Layout
 @inject IStringLocalizer<SharedResource> L
 @inject MysteryShowtimeService MysteryShowtimeService
@@ -16,7 +17,7 @@
     <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
         <button class="manager-toggle @(_managerMode ? "active" : "")"
                 @onclick="() => _managerMode = !_managerMode">
-            🔧 @(_managerMode ? "Manager-modus aan" : "Manager-modus")
+            🔧 @(_managerMode ? L["ManagerModeOn"] : L["ManagerMode"])
         </button>
     </div>
 
@@ -43,9 +44,9 @@
                 <div class="mystery-poster">🎭</div>
                 <div class="movie-card-info">
                     <h3>Mystery Movie</h3>
-                    <p class="movie-genres">Verrassing</p>
-                    <p class="movie-duration" style="color:#e50914;font-weight:600;">EUR 2,50 mystery korting + kind/student/65+ korting</p>
-                    <p class="showtime-label">Laat je verrassen →</p>
+                    <p class="movie-genres">@L["Surprise"]</p>
+                    <p class="movie-duration" style="color:#e50914;font-weight:600;">@(2.50.ToString("C", CultureInfo.CurrentCulture)) @L["MysteryNormalDiscount"]</p>
+                    <p class="showtime-label">@L["SurpriseYourself"] →</p>
                 </div>
             </div>
 
@@ -71,7 +72,7 @@
                                 @if (_managerMode)
                                 {
                                     <button class="mystery-toggle-btn @(isMystery ? "on" : "")"
-                                            title="@(isMystery ? "Mystery uitzetten" : "Als mystery markeren")"
+                                            title="@(isMystery ? L["TurnOffMystery"] : L["MarkAsMystery"])"
                                             @onclick="() => MysteryShowtimeService.Toggle(showtime.Id)"
                                             @onclick:stopPropagation>
                                         @(isMystery ? "🔓" : "🔒")

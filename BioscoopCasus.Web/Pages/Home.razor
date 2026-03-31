@@ -12,12 +12,6 @@
     </div>
 
     <div class="column">
-        <h3>@L["UpcomingShowings"]</h3>
-        <p class="placeholder-text">@L["NoShowsFound"]</p>
-        <TerminalButton Href="/films" Text="@L["AllShowings"]" IsPrimary="true" />
-    </div>
-
-    <div class="column">
         <h3>@L["LatestMovies"]</h3>
         @if (_movies == null)
         {
@@ -48,10 +42,14 @@
     </div>
 
     <div class="column">
+        <TerminalButton Href="/films" Text="@L["AllShowings"]" IsPrimary="true" />
+    </div>
+    
+    <div class="column">
         <h3>@L["PrintTicket"]</h3>
         <TerminalButton Href="/ticketprint" Text="@L["PrintYourTicket"]" IsPrimary="true" />
     </div>
-
+    
     <div class="column">
         <h3>@L["Location"]</h3>
         <p class="address-text">@L["CinemaAddress"]</p>
@@ -95,8 +93,9 @@
     private async Task LoadMovies()
     {
         _movies = await MoviesOverviewService.GetMoviesAsync(DateTime.Now);
-        // Make sure to only show 3 movies to avoid clutter
-        _movies = _movies.Slice(1, 5);
+        // Make sure to only show 5 movies to avoid clutter
+        if (_movies.Count > 0)
+            _movies = _movies.Count < 5 ? _movies : _movies[..5];
     }
     
     private void OpenMovie(int movieId)

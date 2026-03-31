@@ -21,8 +21,8 @@
         <div class="mystery-icon">🎭</div>
         <h1>Mystery Movie</h1>
         <p class="mystery-subtitle">
-            Laat je verrassen - kies een tijd en ontdek pas in de zaal welke film je ziet.<br/>
-            <strong style="color:#e50914">EUR 2,50 mystery korting</strong> + extra korting voor kind, student en 65+.
+            @L["SurpriseYourselfText"]<br/>
+            @L["MysteryNormalDiscount"]
         </p>
     </div>
 
@@ -45,7 +45,7 @@
         @if (_allGenres.Any())
         {
             <div class="genre-filter">
-                <span class="genre-filter-label">Genres:</span>
+                <span class="genre-filter-label">@L["GenresLabel"]:</span>
                 @foreach (var genre in _allGenres)
                 {
                     var active = _selectedGenres.Contains(genre);
@@ -56,7 +56,7 @@
                 }
                 @if (_selectedGenres.Any())
                 {
-                    <button class="genre-chip clear-chip" @onclick="ClearGenres">✕ Alles</button>
+                    <button class="genre-chip clear-chip" @onclick="ClearGenres">✕ @L["FilterAll"]</button>
                 }
             </div>
         }
@@ -64,8 +64,8 @@
         @if (!_filteredSlots.Any())
         {
             <p class="empty-message">
-                Geen mystery voorstellingen beschikbaar op deze dag
-                @if (_selectedGenres.Any()) { <span> met de gekozen genres</span>  }
+               @L["NoMysteryShowsDay"]
+                @if (_selectedGenres.Any()) { <span> @L["WithChosenGenre"]</span>  }
                 .
             </p>
         }
@@ -76,9 +76,9 @@
                 {
                     <div class="mystery-card" @onclick="() => SelectSlot(slot)">
                         <div class="mystery-time">@slot.Time.ToString("HH:mm")</div>
-                        <div class="mystery-duration">± @RoundToFive(slot.AverageDuration) min</div>
+                        <div class="mystery-duration">± @RoundToFive(slot.AverageDuration) @L["MinutesSuffixShort"]</div>
                         <div class="mystery-genres">@string.Join(" · ", slot.Genres)</div>
-                        <div class="mystery-cta">Kies deze tijd →</div>
+                        <div class="mystery-cta">@L["ChooseThisTime"] →</div>
                     </div>
                 }
             </div>
@@ -159,6 +159,59 @@
     color: #e50914;
     font-size: .85rem;
     font-weight: 600;
+}
+
+/* RETURN BUTTON */
+
+.return-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+    padding: 0.75rem 1rem;
+    margin: 0 auto 1.5rem auto;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.return-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(225, 29, 72, 0.35);
+    transform: translateY(-1px);
+}
+
+.return-button:focus {
+    outline: none;
+    border-color: #e11d48;
+    box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.12);
+}
+
+.return-button-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.day-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #f8fafc;
+    padding: 0.75rem 1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    cursor: pointer;
+}
+
+.day-select:focus {
+    outline: none;
+    border-color: #e11d48;
+    box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1);
 }
 </style>
 

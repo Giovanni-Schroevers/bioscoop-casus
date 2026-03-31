@@ -858,4 +858,145 @@
   <data name="FilterRooms" xml:space="preserve">
     <value>Zalen</value>
   </data>
+  <data name="MysteryNormalDiscount" xml:space="preserve">
+    <value>mystery korting + normale ticketkortingen</value>
+  </data>
+  <data name="ManagerMode" xml:space="preserve">
+    <value>Manager-modus</value>
+  </data>
+  <data name="ManagerModeOn" xml:space="preserve">
+    <value>Manager-modus aan</value>
+  </data>
+  <data name="Surprise" xml:space="preserve">
+    <value>Verrasing</value>
+  </data>
+  <data name="SurpriseYourself" xml:space="preserve">
+    <value>Laat je verassen</value>
+  </data>
+  <data name="MarkAsMystery" xml:space="preserve">
+    <value>Als mystery markeren</value>
+  </data>
+  <data name="TurnOffMystery" xml:space="preserve">
+    <value>Mystery uitzetten</value>
+  </data>
+  <data name="OccupancyAnalysis" xml:space="preserve">
+    <value>Bezettings analyse</value>
+  </data>
+  <data name="RevenueAnalysis" xml:space="preserve">
+    <value>Omzet analyse</value>
+  </data>
+  <data name="BaseOccupancy" xml:space="preserve">
+    <value>Basis voor bezetting per zaal en film.</value>
+  </data>
+  <data name="BaseRevenue" xml:space="preserve">
+    <value>Basis voor omzetcijfers per periode.</value>
+  </data>
+  <data name="BackToDashboard" xml:space="preserve">
+    <value>Terug naar dashboard</value>
+  </data>
+  <data name="OverviewSoldUnsold" xml:space="preserve">
+    <value>Overzicht van verkochte en niet-verkochte stoelen per dag en per zaal.</value>
+  </data>
+  <data name="AllRooms" xml:space="preserve">
+    <value>Alle zalen</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Gegevens laden...</value>
+  </data>
+  <data name="AverageOccupancy" xml:space="preserve">
+    <value>Gemiddelde bezetting</value>
+  </data>
+  <data name="BestRoomToday" xml:space="preserve">
+    <value>Beste zaal vandaag</value>
+  </data>
+  <data name="BestRoomWeek" xml:space="preserve">
+    <value>Beste zaal deze week</value>
+  </data>
+  <data name="BestRoomMonth" xml:space="preserve">
+    <value>Beste zaal deze maand</value>
+  </data>
+  <data name="BestChairSelectedRoom" xml:space="preserve">
+    <value>Beste stoel (geselecteerde zaal)</value>
+  </data>
+  <data name="SoldNotSold" xml:space="preserve">
+    <value>Verkocht vs niet verkocht</value>
+  </data>
+  <data name="ChairsPerDay" xml:space="preserve">
+    <value>Stoelen per dag</value>
+  </data>
+  <data name="OccupancyPerRoom" xml:space="preserve">
+    <value>Bezetting per zaal</value>
+  </data>
+  <data name="TopChairsIn" xml:space="preserve">
+    <value>Top stoelen in</value>
+  </data>
+  <data name="NoOccupancyData" xml:space="preserve">
+    <value>Geen bezettingsgegevens gegevonden.</value>
+  </data>
+  <data name="Occupancy" xml:space="preserve">
+    <value>Bezetting</value>
+  </data>
+  <data name="Sold" xml:space="preserve">
+    <value>Verkocht</value>
+  </data>
+  <data name="OccupancyOverTime" xml:space="preserve">
+    <value>Bezetting over tijd</value>
+  </data>
+  <data name="NotSold" xml:space="preserve">
+    <value>Niet verkocht</value>
+  </data>
+  <data name="Row" xml:space="preserve">
+    <value>Rij</value>
+  </data>
+  <data name="Chair" xml:space="preserve">
+    <value>Stoel</value>
+  </data>
+  <data name="SelectARoom" xml:space="preserve">
+    <value>Selecteer eerst een zaal</value>
+  </data>
+  <data name="OverviewRevenueFigures" xml:space="preserve">
+    <value>Totaaloverzicht van alle omzetcijfers.</value>
+  </data>
+  <data name="TotalRevenue" xml:space="preserve">
+    <value>Totale omzet</value>
+  </data>
+  <data name="FilmHighestRevenue" xml:space="preserve">
+    <value>Film met hoogste omzet</value>
+  </data>
+  <data name="AverageRevenueDay" xml:space="preserve">
+    <value>Gemiddelde omzet per dag</value>
+  </data>
+  <data name="RevenueOverTime" xml:space="preserve">
+    <value>Omzet over tijd</value>
+  </data>
+  <data name="TicketCateringRevenue" xml:space="preserve">
+    <value>Ticket en horeca omzet</value>
+  </data>
+  <data name="RevenuePerRoom" xml:space="preserve">
+    <value>Omzet per zaal</value>
+  </data>
+  <data name="TopFilmsRevenue" xml:space="preserve">
+    <value>Top 5 films revenue</value>
+  </data>
+  <data name="NoRevenueData" xml:space="preserve">
+    <value>Geen omzetgegevens gevonden.</value>
+  </data>
+  <data name="Catering" xml:space="preserve">
+    <value>Horeca</value>
+  </data>
+  <data name="Tickets" xml:space="preserve">
+    <value>Tickets</value>
+  </data>
+  <data name="ChooseThisTime" xml:space="preserve">
+    <value>Kies deze tijd</value>
+  </data>
+  <data name="NoMysteryShowsDay" xml:space="preserve">
+    <value>Geen mystery voorstellingen beschikbaar op deze dag</value>
+  </data>
+  <data name="WithChosenGenre" xml:space="preserve">
+    <value>met de gekozen genres</value>
+  </data>
+  <data name="SurpriseYourselfText" xml:space="preserve">
+    <value>Laat je verrassen - kies een tijd en ontdek pas in de zaal welke film je ziet.</value>
+  </data>
 </root>

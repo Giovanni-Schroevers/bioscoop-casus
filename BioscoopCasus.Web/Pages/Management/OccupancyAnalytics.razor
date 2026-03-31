@@ -3,44 +3,45 @@
 @inject OccupancyAnalyticsService OccupancyAnalyticsService
 @inject RoomService RoomService
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Bezettingsanalyse</PageTitle>
+<PageTitle>@L["OccupancyAnalysis"]</PageTitle>
 
 <div class="analytics-container">
     <div class="header-section">
         <button class="return-button" @onclick="@(() => NavigationManager.NavigateTo("/management"))">
             <span class="return-button-icon">&larr;</span>
-            <span>Terug naar beheerdashboard</span>
+            <span>@L["BackToDashboard"]</span>
         </button>
-        <h1>Bezettingsanalyse</h1>
-        <p class="subtitle">Overzicht van verkochte en niet-verkochte stoelen per dag en per zaal.</p>
+        <h1>@L["OccupancyAnalysis"]</h1>
+        <p class="subtitle">@L["OverviewSoldUnsold"]</p>
     </div>
 
     <div class="filter-section">
         <div class="filter-group">
-            <h3 class="filter-label">Periode</h3>
+            <h3 class="filter-label">@L["FilterPeriod"]</h3>
             <div class="filter-buttons">
                 <button class="filter-btn @(_activePeriod == "week" ? "active" : "")"
-                        @onclick="@(() => SetPeriod("week"))">1 week</button>
+                        @onclick="@(() => SetPeriod("week"))">@L["FilterOneWeek"]</button>
                 <button class="filter-btn @(_activePeriod == "month" ? "active" : "")"
-                        @onclick="@(() => SetPeriod("month"))">1 maand</button>
+                        @onclick="@(() => SetPeriod("month"))">@L["FilterOneMonth"]</button>
                 <button class="filter-btn @(_activePeriod == "year" ? "active" : "")"
-                        @onclick="@(() => SetPeriod("year"))">1 jaar</button>
+                        @onclick="@(() => SetPeriod("year"))">@L["FilterOneYear"]</button>
                 <button class="filter-btn @(_activePeriod == "all" ? "active" : "")"
-                        @onclick="@(() => SetPeriod("all"))">Alles</button>
+                        @onclick="@(() => SetPeriod("all"))">@L["FilterAll"]</button>
                 <button class="filter-btn @(_activePeriod == "custom" ? "active" : "")"
-                        @onclick="@(() => SetPeriod("custom"))">Aangepast</button>
+                        @onclick="@(() => SetPeriod("custom"))">@L["FilterCustom"]</button>
             </div>
             @if (_activePeriod == "custom")
             {
                 <div class="custom-date-row">
                     <div class="date-field">
-                        <label>Vanaf</label>
+                        <label>@L["FilterFrom"]</label>
                         <input type="date" value="@_customStart.ToString("yyyy-MM-dd")"
                                @onchange="@(e => OnCustomStartChanged(e))" />
                     </div>
                     <div class="date-field">
-                        <label>Tot en met</label>
+                        <label>@L["FilterTo"]</label>
                         <input type="date" value="@_customEnd.ToString("yyyy-MM-dd")"
                                @onchange="@(e => OnCustomEndChanged(e))" />
                     </div>
@@ -49,12 +50,12 @@
         </div>
 
         <div class="filter-group room-select-group">
-            <h3 class="filter-label">Zaal filter</h3>
+            <h3 class="filter-label">@L["FilterRooms"]</h3>
             <select class="room-select" value="@(_selectedRoomId?.ToString() ?? string.Empty)" @onchange="OnSelectedRoomChanged">
-                <option value="">Alle zalen</option>
+                <option value="">@L["AllRooms"]</option>
                 @foreach (var room in _rooms)
                 {
-                    <option value="@room.Id">Zaal @room.Number - @room.Name</option>
+                    <option value="@room.Id">@L["RoomNumber", room.Number]</option>
                 }
             </select>
         </div>
@@ -64,30 +65,30 @@
     {
         <div class="loading-state">
             <span class="loading-spinner"></span>
-            <p>Gegevens laden...</p>
+            <p>@L["LoadingData"]</p>
         </div>
     }
     else if (_data is not null)
     {
         <div class="stats-grid">
             <div class="stat-card">
-                <h3>Gemiddelde bezetting</h3>
+                <h3>@L["AverageOccupancy"]</h3>
                 <p class="stat-value">@FormatPercentage(_data.AverageOccupancyPercentage)</p>
             </div>
             <div class="stat-card">
-                <h3>Beste zaal vandaag</h3>
+                <h3>@L["BestRoomToday"]</h3>
                 <p class="stat-value">@FormatTopRoom(_data.BestRoomTodayName, _data.BestRoomTodayPercentage)</p>
             </div>
             <div class="stat-card">
-                <h3>Beste zaal deze week</h3>
+                <h3>@L["BestRoomWeek"]</h3>
                 <p class="stat-value">@FormatTopRoom(_data.BestRoomWeekName, _data.BestRoomWeekPercentage)</p>
             </div>
             <div class="stat-card">
-                <h3>Beste zaal deze maand</h3>
+                <h3>@L["BestRoomMonth"]</h3>
                 <p class="stat-value">@FormatTopRoom(_data.BestRoomMonthName, _data.BestRoomMonthPercentage)</p>
             </div>
             <div class="stat-card">
-                <h3>Beste stoel (geselecteerde zaal)</h3>
+                <h3>@L["BestChairSelectedRoom"]</h3>
                 <p class="stat-value">@FormatBestSeat()</p>
             </div>
         </div>
@@ -96,7 +97,7 @@
             @if (_occupancySeries.Count > 0)
             {
                 <div class="chart-card">
-                    <h2 class="chart-title">Bezetting over tijd</h2>
+                    <h2 class="chart-title">@L["OccupancyOverTime"]</h2>
                     <MudChart ChartType="ChartType.Line"
                               ChartSeries="@_occupancySeries"
                               XAxisLabels="@_xAxisLabels"
@@ -110,7 +111,7 @@
             @if (_soldVsUnsoldPieData.Length > 0)
             {
                 <div class="chart-card">
-                    <h2 class="chart-title">Verkocht vs niet verkocht</h2>
+                    <h2 class="chart-title">@L["SoldNotSold"]</h2>
                     <MudChart ChartType="ChartType.Pie"
                               InputData="@_soldVsUnsoldPieData"
                               InputLabels="@_soldVsUnsoldPieLabels"
@@ -126,7 +127,7 @@
             @if (_soldUnsoldDailySeries.Count > 0)
             {
                 <div class="chart-card">
-                    <h2 class="chart-title">Stoelen per dag</h2>
+                    <h2 class="chart-title">@L["ChairsPerDay"]</h2>
                     <MudChart ChartType="ChartType.Bar"
                               ChartSeries="@_soldUnsoldDailySeries"
                               XAxisLabels="@_xAxisLabels"
@@ -140,7 +141,7 @@
             @if (_roomSeries.Count > 0)
             {
                 <div class="chart-card">
-                    <h2 class="chart-title">Bezetting per zaal (%)</h2>
+                    <h2 class="chart-title">@L["OccupancyPerRoom"] (%)</h2>
                     <MudChart ChartType="ChartType.Bar"
                               ChartSeries="@_roomSeries"
                               XAxisLabels="@_roomLabels"
@@ -156,7 +157,7 @@
         {
             <div class="charts-row-extra">
                 <div class="chart-card">
-                    <h2 class="chart-title">Top stoelen in @_data.SelectedRoomName</h2>
+                    <h2 class="chart-title">@L["TopChairsIn"] @_data.SelectedRoomName</h2>
                     <MudChart ChartType="ChartType.Bar"
                               ChartSeries="@_seatSeries"
                               XAxisLabels="@_seatLabels"
@@ -171,7 +172,7 @@
     else
     {
         <div class="empty-state">
-            <p>Geen bezettingsgegevens gevonden.</p>
+            <p>@L["NoOccupancyData"]</p>
         </div>
     }
 </div>
@@ -533,7 +534,7 @@
             {
                 new ChartSeries
                 {
-                    Name = "Bezetting",
+                    Name = L["Occupancy"],
                     Data = _data.Items.Select(i => i.OccupancyPercentage).ToArray()
                 }
             };
@@ -542,12 +543,12 @@
             {
                 new ChartSeries
                 {
-                    Name = "Verkocht",
+                    Name = L["Sold"],
                     Data = _data.Items.Select(i => (double)i.SoldSeats).ToArray()
                 },
                 new ChartSeries
                 {
-                    Name = "Niet verkocht",
+                    Name = L["NotSold"],
                     Data = _data.Items.Select(i => (double)i.UnsoldSeats).ToArray()
                 }
             };
@@ -566,7 +567,7 @@
             {
                 new ChartSeries
                 {
-                    Name = "Bezetting",
+                    Name = L["Occupancy"],
                     Data = _data.OccupancyPerRoom.Select(r => r.OccupancyPercentage).ToArray()
                 }
             };
@@ -585,7 +586,7 @@
             {
                 new ChartSeries
                 {
-                    Name = "Bezetting",
+                    Name = L["Occupancy"],
                     Data = topSeatItems.Select(s => s.OccupancyPercentage).ToArray()
                 }
             };
@@ -601,8 +602,8 @@
             _soldVsUnsoldPieData = new[] { (double)_data.TotalSoldSeats, (double)_data.TotalUnsoldSeats };
             _soldVsUnsoldPieLabels = new[]
             {
-                $"Verkocht ({_data.TotalSoldSeats})",
-                $"Niet verkocht ({_data.TotalUnsoldSeats})"
+                $"{L["Sold"]} ({_data.TotalSoldSeats})",
+                $"{L["NotSold"]} ({_data.TotalUnsoldSeats})"
             };
         }
         else
@@ -630,22 +631,17 @@
         return $"{percentage:N1}%";
     }
 
-    private static string FormatTopRoom(string? roomName, double percentage)
-    {
-        if (string.IsNullOrWhiteSpace(roomName))
-            return "Geen data";
-
-        return $"{roomName} ({percentage:N1}%)";
-    }
-
-    private static string ToCompactSeatLabel(string label)
+    private string FormatTopRoom(string? roomName, double percentage) => string.IsNullOrWhiteSpace(roomName) ? 
+        L["NoDataWasReturned"] : $"{roomName} ({percentage:N1}%)";
+    
+    private string ToCompactSeatLabel(string label)
     {
         if (string.IsNullOrWhiteSpace(label))
             return string.Empty;
 
         return label
-            .Replace("Rij ", "R")
-            .Replace("Stoel ", "S")
+            .Replace($"{L["Row"]} ", "R")
+            .Replace($"{L["Chair"]} ", "S")
             .Replace(" - ", "-")
             .Replace(" ", string.Empty);
     }
@@ -653,11 +649,10 @@
     private string FormatBestSeat()
     {
         if (!_selectedRoomId.HasValue)
-            return "Selecteer eerst een zaal";
+            return L["SelectARoom"];
 
-        if (string.IsNullOrWhiteSpace(_data?.BestSeatLabel))
-            return "Geen data";
-
-        return $"{_data.BestSeatLabel} ({_data.BestSeatPercentage:N1}%)";
+        return string.IsNullOrWhiteSpace(_data?.BestSeatLabel) ? 
+            L["NoDataWasReturned"] : 
+            $"{_data.BestSeatLabel} ({_data.BestSeatPercentage:N1}%)";
     }
 }
